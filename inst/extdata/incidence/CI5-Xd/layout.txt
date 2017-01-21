@@ -1,0 +1,11 @@
+File layout
+
+First column is sex (1 male/2 female)  
+Second column is the cancer site number (1 to 244, see "cancer.txt") 
+Third column is age-group, 0-4,5-9,10-14,...,80-84,85+,age unknown (1 to 19)  
+Fourth column is number of cases  
+Fifth column is person-years at risk
+
+Each file has 2x244x19=9272 records
+
+

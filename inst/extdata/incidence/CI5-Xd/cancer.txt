@@ -1,0 +1,248 @@
+001 All sites (C00-96)
+002 All sites but skin (C00-96 but C44)
+003 Oral cavity and pharynx (C00-14)
+004 Lip (C00)
+005 Tongue (C01-02)
+006 Base of tongue (C01)
+007 Tongue, other and unspecified parts (C02)
+008 Mouth (C03-06)
+009 Mouth, gum (C03)
+010 Mouth, floor of (C04)
+011 Mouth, palate (C05)
+012 Mouth, other and unspecified parts (C06)
+013 Salivary glands (C07-08)
+014 Parotid gland (C07)
+015 Salivary glands, other and unspecified (C08)
+016 Tonsil (C09)
+017 Oropharynx (C10)
+018 Nasopharynx (C11)
+019 Pyriform sinus (C12)
+020 Hypopharynx (C13)
+021 Pharynx unspecified (C14)
+022 Digestive organs (C15-26)
+023 Oesophagus (C15)
+024 	Squamous cell carcinoma
+025 	Adenocarcinoma
+026 	Other specified carcinoma
+027 	Unspecified carcinoma
+028 	Sarcoma
+029 	Other specified morphology
+030 	Unspecified morphology
+031 	Upper third (C15.0,3)
+032 	Middle third (C15.1,4)
+033 	Lower third (C15.2,5)
+034 	Other and unspecified parts (C15.8-9)
+035 Stomach (C16)
+036 	Cardia (C16.0)
+037 	Fundus (C16.1)
+038 	Body (C16.2)
+039 	Pylorus and antrum (C16.3-4)
+040 	Other and unspecified parts (C16.5-9)
+041 Small intestine (C17)
+042 Colon (C18)
+043 	Right (C18.0-2)
+044 	Transverse and flexures (C18.3-5)
+045 	Descending (C18.6)
+046 	Sigmoid (C18.7)
+047 	Other and unspecified parts (C18.8-9)
+048 Rectosigmoid junction (C19)
+049 Rectum (C20)
+050 Anus (C21) 
+051 	Squamous cell carcinoma
+052 	Adenocarcinoma
+053 	Other specified carcinoma
+054 	Unspecified carcinoma
+055 	Melanoma
+056 	Other morphology
+057 	Unspecified morphology
+058 Liver (C22)
+059 	Hepatocellular carcinoma
+060 	Cholangiocarcinoma
+061 	Other specified carcinoma
+062 	Unspecified carcinoma
+063 	Hepatoblastoma
+064 	Haemagiosarcoma
+065 	Other specified sarcoma
+066 	Other morphology
+067 	Unspecified morphology
+068 Gallbladder (C23)
+069 Other and unspecified parts of biliary tract (C24)
+070 Pancreas (C25)
+071 Other and ill-defined digestive organs (C26)
+072 Respiratory organs (C30-39)
+073 Nasal cavity and middle ear (C30)
+074 Accessory sinuses (C31)
+075 Larynx (C32)
+076 Trachea (C33)
+077 Lung (C34)
+078 	Squamous cell carcinoma
+079 	Adenocarcinoma
+080 	Small cell carcinoma
+081 	Large cell carcinoma
+082 	Other specified carcinoma
+083 	Sarcoma
+084 	Other morphology
+085 	Unspecified morphology
+086 Thymus (C37)
+087 Heart, mediastinum and pleura (C38)
+088 Other and unspecified respiratory and intrathoracic organs (C39)
+089 Bone (C40-41)
+090 	Osteosarcoma
+091 	Chondrosarcoma
+092 	Ewing sarcoma
+093 	Other specified sarcomas
+094 	Unspecified sarcoma
+095 	Other specified morphology
+096 	Unspecified morphology
+097 Bone of limbs (C40)
+098 Other bones (C41)
+099 Skin (C43-44)
+100 Melanoma of skin (C43)
+101 	Head (C43.0-4)
+102 	Trunk (C43.5)
+103 	Upper limb (C43.6)
+104 	Lower limb (C43.7)
+105 	Other and unspecified (C43.8-9)
+106 Other skin (C44)
+107 Mesothelial and soft tissues (C45-49)
+108 Mesothelioma (C45)
+109 Kaposi sarcoma (C46)
+110 Peripheral nerves (C47)
+111 Peritoneum and retroperitoneum (C48)
+112 Connective and soft tissue (C49)
+113 Breast (C50)
+114 Female genital organs (C51-58)
+115 Vulva (C51)
+116 Vagina (C52)
+117 Cervix uteri (C53)
+118 	Squamous cell carcinoma
+119 	Adenocarcinoma
+120 	Other specified carcinoma
+121 	Unspecified carcinoma
+122 	Sarcoma
+123 	Other morphology
+124 	Unspecified morphology
+125 Corpus uteri (C54)
+126 	Adenocarcinoma
+127 	Other specified carcinoma
+128 	Unspecified carcinoma
+129 	Sarcoma
+130 	Other morphology
+131 	Unspecified morphology
+132 Uterus unspecified (C55)
+133 Ovary (C56)
+134 	Serous carcinoma
+135 	Mucinous carcinoma
+136 	Endometrioid carcinoma
+137 	Clear cell carcinoma
+138 	Adenocarcinoma
+139 	Other specified carcinoma
+140 	Unspecified carcinoma
+141 	Sex cord-stromal tumour
+142 	Germ cell tumour
+143 	Other morphology
+144 	Unspecified morphology
+145 Other female genital organs (C57)
+146 	Fallopian tube (C57.0)
+147 	Other and unspecified female genital organs (C57.1-9)
+148 Placenta (C58)
+149 Male genital organs (C60-63)
+150 Penis (C60)
+151 Prostate (C61)
+152 Testis (C62)
+153 	Seminoma
+154 	Spermatocytic seminoma
+155 	Non-seminomatous germ cell tumours
+156 	Other specified morphology
+157 	Unspecified morphology
+158 Other male genital organs (C63)
+159 Urinary tract (C64-68)
+160 Kidney (C64)
+161 Renal pelvis (C65)
+162 Ureter (C66)
+163 Bladder (C67)
+164 	Squamous cell carcinoma
+165 	Transitional cell carcinoma
+166 	Adenocarcinoma
+167 	Other specified carcinoma
+168 	Unspecified carcinoma
+169 	Sarcoma
+170 	Other morphology
+171 	Unspecified morphology
+172 Other urinary organs (C68)
+173 Eye, brain and central nervous system (C69-72)
+174 Eye (C69)
+175 	Retinoblastoma
+176 	Melanoma
+177 	Squamous cell carcinoma
+178 	Other specified carcinoma
+179 	Unspecified carcinoma
+180 	Sarcoma
+181 	Other morphology
+182 	Unspecified morphology
+183 Meninges (C70)
+184 Central nervous system (C71-72)
+185 	Astrocytic tumours
+186 	Oligodendroglial tumours and mixed gliomas
+187 	Ependymal tumours
+188 	Gliomas of uncertain origin
+189 	Medulloblastoma
+190 	Other embryonal tumours
+191 	Other neuroepithelial tumours
+192 	Other specified morphology
+193 	Unspecified morphology
+194 Brain (C71)
+195 Other parts of central nervous system (C72)
+196 	Spinal cord, cauda equina (C72.0,1)
+197 	Cranial nerves (C72.2-5)
+198 	Nervous system, NOS (C72.8-9)
+199 Thyroid and other endocrine glands (C73-75)
+200 Thyroid (C73)
+201	Follicular carcinoma
+202 	Papillary carcinoma
+203 	Medullary carcinoma
+204 	Anaplastic carcinoma
+205 	Other specified carcinoma
+206 	Unspecified carcinoma
+207 	Sarcoma
+208 	Other morphology
+209 	Unspecified morphology
+210 Adrenal gland (C74)
+211 Other endocrine (C75)
+212 Lymphoid tissues (C81-96)
+213 Non-Hodgkin lymphoma (C82-85,C96)
+214 	Burkitt lymphoma (C83.7)
+215 	Mycosis fungoides (C84.0)
+216 	Other and unspecified non-Hodgkin lymphoma
+217 Hodgkin disease (C81)
+218 	Nodular lymphocytic predominance
+219 	Classical lymphocyte-rich
+220 	Nodular sclerosis
+221 	Mixed cellularity
+222 	Lymphocytic depletion
+223 	Unspecified
+224 Immunoproliferative diseases (C88)
+225 Multiple myeloma (C90)
+226 Leukaemia (C91-95)
+227 Lymphoid leukaemia (C91)
+228 	Acute (C91.0)
+229 	Chronic (C91.1)
+230 	Other specified (C91.2-7)
+231 	Unspecified (C91.9)
+232 Myeloid leukaemia (C92-94)
+233 	Acute (C92.0, C93.0, C94.0,C94.2,C94.4-5)
+234 	Chronic (C92.1, C93.1, C94.1)
+235 	Other (C92.2-7, C93.2-7,C94.3,C94.7)
+236 	Unspecified (C92.9, C93.9)
+237 Leukaemia, cell unspecified (C95)
+238 	Acute (C95.0)
+239 	Chronic (C95.1)
+240 	Other (C95.2-7)
+241 	Unspecified (C95.9)
+242 Myeloproliferative disorders
+243 Myelodysplastic syndromes
+244 Other and unspecified cancers
+
+ 
+ 
+
