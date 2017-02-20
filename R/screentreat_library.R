@@ -43,35 +43,6 @@ sim_multinom <- function(
 }
 
 ############################################################
-## format_age
-############################################################
-# The gsize variable indicates the age group intervals
-
-format_age <- function(age_file, gsize=5, minAge=20, maxAge=85) {
-
-    grouped <- read.csv(age_file, header=TRUE)
-
-    if (!is.numeric(grouped$Population)) stop('Error in format_age: character pop sizes')
-
-    # Split into single-year age groups
-    split <- lapply(grouped$Age, function(a,data=grouped,g=gsize) {
-                        NewPop <- data[which(data$Age==a), 'Population']/g
-                        data.frame(age=a:(a+4), pop=rep(NewPop,g))
-                         })
-    split <- do.call('rbind', split)
-    
-    # Verify
-    if (sum(split$pop)!=sum(grouped$Population)) stop('Division error in format_age')
-
-    # Return proportions after limiting the minimum age
-    split <- subset(split, age>=minAge & age<=maxAge)
-    split <- transform(split, prop=pop/sum(pop))
-
-    return(split)
-
-}
-
-############################################################
 ## sim_clinical_incidence
 ############################################################
 
@@ -110,7 +81,6 @@ results_as_matrix=FALSE
             } else {
                 thisboot = popdata[bootrows[, y], 
                                    c("age",
-                                     "birth_year",
                                      "male")]
             }
             thisboot$tempid = 1:nrow(thisboot)
@@ -123,26 +93,22 @@ results_as_matrix=FALSE
                             Age = min(x$age)
 
                             # Nsims
-                            if (is.data.frame(x))
-                                nrow=nrow(x) else
-                                    nrow=1
+                            if (is.data.frame(x)) nrow=nrow(x) else nrow=1
 
                             # Max draw based on current age
                             maxu <- incidence[incidence$age==Age,
-                                              'incidencefree_survival']
-                            ageinc <- 
-                                with(incidence, 
-                                     sim_KM(incidencefree_survival,
-                                            age,
-                                            smalltimes=Age,
-                                            bigtimes=121,
-                                            nsims=nrow,
-                                            maxdraw=maxu))
-                            ageinc <- 
-                                data.frame(x, 
-                                           ageinc=matrix(ageinc,
-                                                         nrow=nrow,
-                                                         ncol=1))
+                                              'cumsurv']
+                            ageinc <- with(incidence, 
+                                           sim_KM(cumsurv, 
+                                                  age, 
+                                                  smalltimes=Age, 
+                                                  bigtimes=121, 
+                                                  nsims=nrow,
+                                                  maxdraw=maxu))
+                            if (sum(is.na(ageinc))!=0) browser()
+                            ageinc <- data.frame(x, ageinc=matrix(ageinc, 
+                                                                  nrow=nrow,
+                                                                  ncol=1))
                             return(ageinc)
                         })
             
@@ -168,48 +134,6 @@ results_as_matrix=FALSE
 ## sim_treatment_by_subgroup
 ############################################################
 
-sim_treatment_by_subgroup = function# Simulate treatment by subgroups
-
-##description<< Given the proportions of treatments by subgroups, 
-## simulate treatment
-
-(treat_chars,
-    ### Data frame indicating stage-subgroup #s in the SSno 
-    ### variable and stage-subgroup-treatment #s in txSSno, and 
-    ### prop_* columns where * is the trial name. 
-stage_subgroup_rows,
-    ### Matrix indicating, for each person-sim, which stage-subgroup
-    ### they are in (using the SSid from treat_chars)
-thisprop,
-    ### Character indicating the prop_* column name from which
-    ### to take treatment proportions
-pop_size,
-    ### Population size
-nsim
-    ### Number of sims
-) {
-    
-    # Matrix for results
-    results <- matrix(NA, ncol=nsim, nrow=pop_size)
-
-    # Loop through stage-subgroups
-    for (g in sort(unique(treat_chars$SSno))) { 
-        # Subset to this stage-subgroup (SS)
-        tempid <- subset(treat_chars, SSno==g)        
-        # Simulate treatment for everyone
-        # using this group's probs
-        treat_choice <- 
-            sim_multinom(nsims=pop_size, 
-                         nreps=nsim,
-                         probs=tempid[,thisprop],
-                         names=tempid[,'txSSno'])
-        # Assign values to those in group g
-        results[stage_subgroup_rows==g] <-
-            treat_choice[stage_subgroup_rows==g]
-    }
-
-    return(results)
-}
 
 ############################################################
 ## return_value_from_id

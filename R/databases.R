@@ -25,6 +25,8 @@
 #'                     'incidence/SEER/bc_1975-1979_incidence.csv', 
 #'                      package='bcimodel'),
 #'         source='globocan')
+#'
+#' @export
 
 bcirates <- function(incfile, source='seer') {
     switch(source, 
@@ -97,6 +99,8 @@ bcirates <- function(incfile, source='seer') {
 #' @param lifefile Data frame with lifetable data
 #' @param source Data source, only 'ihme' supported right now
 #' @return Formatted all-cause mortality rates by age
+#'
+#' @export
 
 allmortrates <- function(lifefile, source='ihme') {
 
@@ -154,6 +158,8 @@ allmortrates <- function(lifefile, source='ihme') {
 #' df <- subset(allmortratesf, 
 #'                   Country=='United States' | Country=='Uganda')
 #' plot.rates(df$Age, df$Rate.Per.100K, psize=NULL, group=df$Country)
+#'
+#' @export
 
 plot.rates <- function(x, y, psize=NULL, group=NULL) {
     if (length(x)!=length(y)) stop('x and y must be same length')
@@ -178,6 +184,8 @@ plot.rates <- function(x, y, psize=NULL, group=NULL) {
 #' Return running product of a vector, for computing cumulative survival
 #' @param x Vector of conditional survival probabilities
 #' @return Vector of running products
+#'
+#' @export
 running_product <- function(x) sapply(1:length(x), FUN=function(y) prod(x[1:y]))
 
 #-------------------------------------------------------------------------------
@@ -186,6 +194,8 @@ running_product <- function(x) sapply(1:length(x), FUN=function(y) prod(x[1:y]))
 #' Given event rates, compute cumulative survival
 #' @param x Vector of event rates (interpreted as discrete rates, not instantaneous hazards)
 #' @return Vector of cumulative survivals
+#'
+#' @export
 rate_to_cumsurv <- function(x) {
     conditional_surv <- 1-x
     running_product(conditional_surv)
@@ -202,6 +212,8 @@ rate_to_cumsurv <- function(x) {
 #' @param binnedrates Data frame with Age for age groups 
 #' @param ratevar Name of rate variable
 #' @param country Country to select from the data frame
+#' @param maxage Maximum age desired. If data are incomplete, the 
+#' rate for the oldest age will be held constant until maxage
 #' @return Data frame of cumulative survival probability by single-year ages
 #' @examples
 #' data(incratesf)
@@ -213,8 +225,11 @@ rate_to_cumsurv <- function(x) {
 #' mort <- interpolate_cumsurv(allmortratesf, 
 #'                          ratevar='Rate.Per.100K',
 #'                          country='Uganda')
+#'
+#' @export
 
-interpolate_cumsurv <- function(binnedrates, ratevar, country=NULL) {
+interpolate_cumsurv <- function(binnedrates, ratevar, maxage=NULL,
+                                country=NULL) {
 
     if (!is.null(country)) binnedrates <- subset(binnedrates, 
                                                  Country==country)
@@ -226,10 +241,72 @@ interpolate_cumsurv <- function(binnedrates, ratevar, country=NULL) {
                    singleyears_rate = approx(binnedrates$Age, 
                                              binnedrates[,ratevar], 
                                                  xout=0:age_max)$y/100000)
+
+    if (!is.null(maxage)) {
+        # Hold oldest rate constant until max age
+        if (maxage>age_max) {
+            addyears <- data.frame(age=(age_max+1):maxage, 
+                                   singleyears_rate=
+                                       subset(singleyears, 
+                                              age==age_max)$singleyears_rate)
+            singleyears <- rbind(singleyears, addyears)
+        }
+    }
     
     singleyears <- transform(singleyears,
                            cumsurv=rate_to_cumsurv(singleyears_rate))
 
     return(singleyears)
 }
+
+
+#-------------------------------------------------------------------------------
+# format_age
+#-------------------------------------------------------------------------------
+#' Convert age-group population sizes to population proportions
+#' 
+#' Takes population counts by age group and returns the population proportions
+#' for single-year age groups
+#' 
+#' @param age_data Population age structure data frame OR file
+#' @param gsize Number of years covered by each age group
+#' @param minAge Optional lower age limit for the population
+#' @param maxAge Optional upper age limit for the population
+#' @param format Does the input need to be formatted? If so, 
+#' age_data can be a .csv file
+#' @note See data-raw/agestructure.R
+#' 
+#' @export
+
+format_age <- function(age_data, gsize=5, minAge=20, maxAge=85, 
+                       format=FALSE) {
+
+    if (format) {
+        grouped <- read.csv(age_data, header=TRUE)
+
+        if (!is.numeric(grouped$Population)) {
+            stop('Error in format_age: character pop sizes')
+        }
+
+        # Split into single-year age groups
+        split <- lapply(grouped$Age, function(a,data=grouped,g=gsize) {
+                            NewPop <- data[which(data$Age==a), 'Population']/g
+                            data.frame(age=a:(a+4), pop=rep(NewPop,g))
+                             })
+        age_data <- do.call('rbind', split)
+        
+        # Verify
+        if (sum(age_data$pop)!=sum(grouped$Population)) {
+            stop('Division error in format_age')
+        }
+    }
+
+    # Return proportions after limiting the minimum age
+    age_data <- subset(age_data, age>=minAge & age<=maxAge)
+    age_data <- transform(age_data, prop=pop/sum(pop))
+
+    return(age_data)
+
+}
+
 
