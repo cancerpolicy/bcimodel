@@ -104,4 +104,5 @@ eafr$tx <- data.frame(eafr$tx, stringsAsFactors=FALSE)
 uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
 
 
-manuscript_eastafrica <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
+# manuscript_eastafrica <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
+

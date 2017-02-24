@@ -6,13 +6,19 @@ context('Modeling mortality outcomes')
 
 test_that('rexp_matrix produces expected means',
           {
+              # Set up a large and small rate, each twice
               smallrate <- .01
               bigrate <- .5
               means <- c(c(1,1)/smallrate, c(1,1)/bigrate)
-              rows <- 10000
+
+              # Sim 100,000 draws for each rate using matrix input
+              rows <- 100000
               m <- cbind(matrix(smallrate, nrow=rows, ncol=2),
                          matrix(bigrate, nrow=rows, ncol=2))
+              set.seed(98103)
               rmeans <- colMeans(rexp_matrix(m))
+            
+              # Check relative error
               error <- abs(rmeans-means)/means
               expect_equal(sum(error>.01), 0)
           }
@@ -162,4 +168,11 @@ test_that('Mortality sim works',
         }
 )
 
+
+test_that('compile_outcomes works with only 2 policies',
+          { 
+            uganda_stdpop <- simpolicies(ex1$pol[1:2,], ex1$nh, ex1$tx,
+                                         sims=2, popsize=100)
+
+})
 

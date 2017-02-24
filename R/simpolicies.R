@@ -4,6 +4,28 @@
 # of incident cases
 ################################################################################
 
+#-------------------------------------------------------------------------------
+# simpolicies
+#-------------------------------------------------------------------------------
+#' Run the model for a series of policies and compare outcomes to the base case
+#' 
+#' @param scenarios Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.
+#' @param naturalhist Data frame with natural history parameters (see compile_naturalhist)
+#' @param agesource Country to use for age structure (see data(agestructure) )
+#' @param minage Lower age limit for population at sim start
+#' @param maxage Upper age limit for population at sim start
+#' @param incsource Country to use for incidence rates (see data(incratesf) )
+#' @param mortsource Country to use for life table (see data(allmortratesf) )
+#' @param popsize Size of population to simulate 
+#' @param sims Number of simulations
+#' @param futimes Follow-up times at which to tally outcomes
+#' @param Denominator by which to report outcomes
+#' male=0, i.e. all female sex. 
+#' @examples
+#' # Use example input data
+#' uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
+#' 
+#' @export
 
 simpolicies <- function(scenarios, naturalhist, treatinfo, 
                         agesource='Standard', minage=0, maxage=100,
@@ -179,7 +201,7 @@ table <- compile_outcomes(list(
                     `MRR`=mrr, `ARR`=arr, 
                     `Years of Life Saved`=yearssaved),
                           futimes,
-                          policynames=ex1$pol$name,
+                          policynames=scenarios$name,
                           pop_size=popsize)
 
 
@@ -187,3 +209,4 @@ table <- compile_outcomes(list(
 return(table)
 
 } # end simpolicy
+

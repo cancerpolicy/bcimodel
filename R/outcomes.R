@@ -147,6 +147,7 @@ compile_outcomes <- function(all, pop_size, futimes, policynames,
                         })
     condenseall <- do.call(rbind, condense1)
     byfu <- vector('list', length=length(futimes))
+
     for (i in 1:length(futimes)) {
         byfu[[i]] <- condenseall[which(rownames(condenseall)==
                                        as.character(futimes[i])),]
