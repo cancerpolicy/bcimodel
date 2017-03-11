@@ -19,11 +19,15 @@
 #' @param popsize Size of population to simulate 
 #' @param sims Number of simulations
 #' @param futimes Follow-up times at which to tally outcomes
+#' @param returnstats Defaults to means across sims, but you can also ask for c('mean', 'lower', upper')
 #' @param Denominator by which to report outcomes
 #' male=0, i.e. all female sex. 
 #' @examples
 #' # Use example input data
 #' uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
+#'
+#' @return
+#' Table if returnstats='mean', or list of tables of length(returnstats)
 #' 
 #' @export
 
@@ -31,6 +35,7 @@ simpolicies <- function(scenarios, naturalhist, treatinfo,
                         agesource='Standard', minage=0, maxage=100,
                         incsource='Uganda', mortsource='Uganda',
                         popsize=100000, sims=5, futimes=c(5,10), 
+                        returnstats=c('mean'),
                         denom=100000) {
 
 set.seed(98103)
@@ -188,21 +193,28 @@ cumulative_yearslived <- lapply(scenarios$num,
                                })
 mrr <- calcmrr(cumulative_mortality, 1)
 arr <- calcarr(cumulative_mortality, 1)
-survival <- calcmrr(cummortandinc, 
+percsurvival <- calcmrr(cummortandinc, 
                     length(cumulative_mortality)+1,
-                    reverse=TRUE)[1:length(cumulative_mortality)]
+                    reverse=TRUE, perc=TRUE)[1:length(cumulative_mortality)]
 yearssaved <- calcarr(cumulative_yearslived, 1, reverse=TRUE)
+
+# Have a scaled version of survival and mrr, so it comes out correctly 
+# after being run through compile_outcomes
+percsurvivalscaled <- lapply(percsurvival, 
+                             function(x) x*popsize/100000)
+mrrscaled <- lapply(mrr, function(x) x*popsize/100000)
 
 # Summarized!
 table <- compile_outcomes(list(
-                    `Cumulative Incidence`=cumulative_incidence,
-                    `Cumulative Mortality`=cumulative_mortality,
-                    `% Incident Surviving`=survival,
-                    `MRR`=mrr, `ARR`=arr, 
-                    `Years of Life Saved`=yearssaved),
+                            `Cumulative BC Incidence`=cumulative_incidence,
+                            `Cumulative BC Mortality`=cumulative_mortality,
+                            `% Incident Surviving`=percsurvivalscaled,
+                            `MRR`=mrrscaled, `ARR`=arr, 
+                            `Years of Life Saved`=yearssaved),
                           futimes,
                           policynames=scenarios$name,
-                          pop_size=popsize)
+                          pop_size=popsize,
+                          stats=returnstats)
 
 
 
