@@ -104,12 +104,13 @@ cumyears <- function(futimes, times) {
     sapply(futimes, function(x) colSums(ifelse(times<=x, times, x)))
 }
 
-calcmrr <- function(cummortlist, controlindex, reverse=FALSE) {
+calcmrr <- function(cummortlist, controlindex, reverse=FALSE, perc=FALSE) {
     return(
            lapply(1:length(cummortlist),
            function(x) {
                r <- cummortlist[[x]]/cummortlist[[controlindex]]
                if (reverse) r <- 1-r
+               if (perc) r <- 100*r
                return(r)
            })
     )
@@ -125,39 +126,119 @@ calcarr <- function(cummortlist, controlindex, reverse=FALSE) {
     )
 }
 
+# Small function to return mean, lower, or upper quantile
+# Default quantile type is 7, which gives a continuous result
+# Choose type
+returnstat4matrix <- function(matrix, stat, quanttype=7) {
+    if (!quanttype%in%c(1,7)) stop('Choose quantile type 1 or 7')
+    if (!stat%in%c('mean', 'lower', 'upper')) stop('stat not supported')
+    switch(stat, 
+           mean=colMeans(matrix),
+           lower=apply(matrix, 2, quantile, na.rm=TRUE, probs=0.025, type=quanttype),
+           upper=apply(matrix, 2, quantile, na.rm=TRUE, probs=0.975, type=quanttype))
+}
+
+# Create documentation using the test from test_outcomes.R
+# "all" is a list where each element besides Cumulative Incidence is also a list,
+# one element for each policy. Within each element, rows for sims and cols for futimes.
 compile_outcomes <- function(all, pop_size, futimes, policynames,
+                             stats=c('mean'), # can add 'lower' and 'upper'
                              per=100000) {
+
     # Each set of outcomes has to be summarized across sims and 
     # multipled by the "per" denominator
-    standardized <- lapply(all, function(x) { 
-                               if (is.list(x)) {
-                                lapply(x, function(y) { colMeans(y)*per/pop_size })
-                               } else return(colMeans(x)*per/pop_size)
-    })
-    condense1 <- lapply(standardized, function(x) {
-                            if (is.list(x)) {
-                                r <- t(do.call('rbind', x))
-                            } else {
-                                r <- cbind(matrix(x, nrow=length(x)), 
-                                      matrix(NA, nrow=length(x), 
-                                             ncol=length(standardized[[5]])-1))
-                            }
-                            rownames(r) <- futimes
-                            return(r)
-                        })
-    condenseall <- do.call(rbind, condense1)
-    byfu <- vector('list', length=length(futimes))
+    standardized <- sapply(stats, function(stat) {
+                                lapply(all, function(x, s=stat) { 
+                                           if (is.list(x)) {
+                                                lapply(x, function(y, ss=s) { 
+                                                    returnstat4matrix(y, ss)*per/pop_size 
+                                                })
+                                           } else return(returnstat4matrix(x, s)*per/pop_size)
+                                })
+                           }, USE.NAMES=TRUE, simplify=FALSE)
+    # Rbind futimes, separately for each stat. Columns are policies.
+    # This probably needs to be fiddled with for years of life saved, since
+    # the sign makes it confusing?
+    condensed <- sapply(stats, function(stat) {
+                                lapply(standardized[[stat]], function(x) {
+                                        if (is.list(x)) {
+                                            r <- t(do.call('rbind', x))
+                                        } else {
+                                            r <- cbind(matrix(x, nrow=length(x)), 
+                                                  matrix(NA, nrow=length(x), 
+                                                         ncol=length(policynames)-1))
+                                        }
+                                        rownames(r) <- futimes
+                                        return(r)
+                                })
+                           }, USE.NAMES=TRUE, simplify=FALSE)
+    condenseall <- sapply(stats, 
+                           function(stat) {
+                                do.call(rbind, condensed[[stat]])
+                           }, USE.NAMES=TRUE, simplify=FALSE)
 
-    for (i in 1:length(futimes)) {
-        byfu[[i]] <- condenseall[which(rownames(condenseall)==
-                                       as.character(futimes[i])),]
-        rownames(byfu[[i]]) <- names(all)
-        colnames(byfu[[i]]) <- policynames
-        byfu[[i]] <- round(byfu[[i]],2)
+    # Previously just means - can delete this later
+    if (1==0) {
+        standardized <- lapply(all, function(x) { 
+                                   if (is.list(x)) {
+                                    lapply(x, function(y) { colMeans(y)*per/pop_size })
+                                   } else return(colMeans(x)*per/pop_size)
+        })
+        condensed <- lapply(standardized, function(x) {
+                                if (is.list(x)) {
+                                    r <- t(do.call('rbind', x))
+                                } else {
+                                    r <- cbind(matrix(x, nrow=length(x)), 
+                                          matrix(NA, nrow=length(x), 
+                                                 ncol=length(standardized[[5]])-1))
+                                }
+                                rownames(r) <- futimes
+                                return(r)
+                            })
+        condenseall <- do.call(rbind, condense1)
     }
-    names(byfu) <- futimes
 
+    # Compile into tables separate for each follow-up time
+    byfu <- lapply(futimes, function(fu) {
+        sapply(stats, function(stat, i=fu) {
+                   table <- condenseall[[stat]][
+                                which(rownames(condenseall[[stat]])== 
+                                      as.character(i)),]
+                            rownames(table) <- names(all)
+                            colnames(table) <- policynames
+                            table <- round(table, 2)
+                            return(table)
+        }, USE.NAMES=TRUE, simplify=FALSE)
+    })
+    names(byfu) <- futimes
     return(byfu)
 
 }
+
+# Round a matrix, specifying digits per row
+round_matrix <- function(mat, digbyrow) {
+    newmat <- t(sapply(1:nrow(mat), function(x) {
+        as.character(round(mat[x,], digbyrow[x]))
+        }))
+    rownames(newmat) <- rownames(mat)
+    return(newmat)
+}
+
+# Lower and upper are tables of the same dimensions with rownames
+format_bounds <- function(lower, upper, digits=NULL) {
+    # If digits is not null, round
+    lower <- round_matrix(lower, digits)
+    upper <- round_matrix(upper, digits)
+    bounds <- sapply(1:ncol(lower), function(c) { 
+                paste(lower[,c], upper[,c], sep=', ') 
+              })
+    rownames(bounds) <- rownames(lower)
+    return(bounds)
+}
+
+# Return bounds for each element of the list
+format_bounds_list <- function(list, digits=NULL) {
+    lapply(list, function(l) format_bounds(l$lower, l$upper, digits))
+}
+
 

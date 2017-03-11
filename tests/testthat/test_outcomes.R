@@ -149,21 +149,41 @@ test_that('Mortality sim works',
                                                })
                 mrr <- calcmrr(cumulative_mortality, 1)
                 arr <- calcarr(cumulative_mortality, 1)
-                survival <- calcmrr(cummortandinc, 
+                percsurvival <- calcmrr(cummortandinc, 
                                     length(cumulative_mortality)+1,
-                                    reverse=TRUE)[1:length(cumulative_mortality)]
+                                    reverse=TRUE, perc=TRUE)[1:length(cumulative_mortality)]
                 yearssaved <- calcarr(cumulative_yearslived, 1, reverse=TRUE)
 
-                # Summarized!
+                # Have a scaled version of survival, so it comes out correctly 
+                # after being run through compile_outcomes
+                percsurvivalscaled <- lapply(percsurvival, 
+                                             function(x) x*popsize/100000)
+
+                # Summarized! - Mean only is the default
                 table <- compile_outcomes(list(
-                                    `Cumulative Incidence`=cumulative_incidence,
-                                    `Cumulative Mortality`=cumulative_mortality,
-                                    `% Incident Surviving`=survival,
-                                    `MRR`=mrr, `ARR`=arr, 
-                                    `Years of Life Saved`=yearssaved),
+                                            `Cumulative Incidence`=cumulative_incidence,
+                                            `Cumulative Mortality`=cumulative_mortality,
+                                            `% Incident Surviving`=percsurvivalscaled,
+                                            `MRR`=mrr, `ARR`=arr, 
+                                            `Years of Life Saved`=yearssaved),
                                           futimes,
                                           policynames=ex1$pol$name,
                                           pop_size=popsize)
+                # Return lower and upper tables, too
+                tables <- compile_outcomes(list(
+                                            `Cumulative Incidence`=cumulative_incidence,
+                                            `Cumulative Mortality`=cumulative_mortality,
+                                            `% Incident Surviving`=survival,
+                                            `MRR`=mrr, `ARR`=arr, 
+                                            `Years of Life Saved`=yearssaved),
+                                          futimes,
+                                          policynames=ex1$pol$name,
+                                          pop_size=popsize,
+                                          stats=c('mean', 'lower', 'upper'))
+
+                # Show a single uncertainty table
+                bounds <- format_bounds_list(tables,
+                                             digits=c(0,0,1,2,1,0))
 
         }
 )
@@ -173,6 +193,19 @@ test_that('compile_outcomes works with only 2 policies',
           { 
             uganda_stdpop <- simpolicies(ex1$pol[1:2,], ex1$nh, ex1$tx,
                                          sims=2, popsize=100)
+
+})
+
+test_that('returnstat4matrix works', {
+              mat <- replicate(3, c(0, 0.5, 1))
+              # Mean
+              expect_equal(unique(returnstat4matrix(mat, 'mean')), 0.5)
+              # Continuous quantile type
+              expect_equal(unique(returnstat4matrix(mat, 'lower')), 0.025)
+              expect_equal(unique(returnstat4matrix(mat, 'upper')), 0.975)
+              # Empirical quantile type
+              expect_equal(unique(returnstat4matrix(mat, 'lower', quanttype=1)), 0)
+              expect_equal(unique(returnstat4matrix(mat, 'upper', quanttype=1)), 1)
 
 })
 
