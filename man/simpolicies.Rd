@@ -6,10 +6,11 @@
 \usage{
 simpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
   minage = 0, maxage = 100, incsource = "Uganda", mortsource = "Uganda",
-  popsize = 1e+05, sims = 5, futimes = c(5, 10), denom = 1e+05)
+  popsize = 1e+05, sims = 5, futimes = c(5, 10),
+  returnstats = c("mean"), denom = 1e+05)
 }
 \arguments{
-\item{scenarios}{Data frame of scenarios to simulate (see define_scenarios)}
+\item{scenarios}{Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.}
 
 \item{naturalhist}{Data frame with natural history parameters (see compile_naturalhist)}
 
@@ -29,8 +30,13 @@ simpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
 
 \item{futimes}{Follow-up times at which to tally outcomes}
 
+\item{returnstats}{Defaults to means across sims, but you can also ask for c('mean', 'lower', upper')}
+
 \item{Denominator}{by which to report outcomes
 male=0, i.e. all female sex.}
+}
+\value{
+Table if returnstats='mean', or list of tables of length(returnstats)
 }
 \description{
 Run the model for a series of policies and compare outcomes to the base case

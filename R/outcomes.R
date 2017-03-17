@@ -221,6 +221,7 @@ round_matrix <- function(mat, digbyrow) {
         as.character(round(mat[x,], digbyrow[x]))
         }))
     rownames(newmat) <- rownames(mat)
+    colnames(newmat) <- colnames(mat)
     return(newmat)
 }
 
@@ -233,6 +234,7 @@ format_bounds <- function(lower, upper, digits=NULL) {
                 paste(lower[,c], upper[,c], sep=', ') 
               })
     rownames(bounds) <- rownames(lower)
+    colnames(bounds) <- colnames(lower)
     return(bounds)
 }
 

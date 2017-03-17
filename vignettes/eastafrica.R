@@ -102,7 +102,11 @@ eafr$tx <- data.frame(eafr$tx, stringsAsFactors=FALSE)
 
 # Using example data
 uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
+paruganda_stdpop <- parsimpolicies(ex1$pol, ex1$nh, ex1$tx)
 
+# Timing it. Parallelizing is definitely faster but computer did heat up a lot more.
+t1 <- system.time(simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #311 seconds
+t2 <- system.time(parsimpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #161 seconds
 
 # manuscript_eastafrica <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
 

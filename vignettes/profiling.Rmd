@@ -1,0 +1,24 @@
+---
+title: "NSFG Combined"
+output:
+  html_notebook: 
+      toc: true
+      toc_depth: 2
+      number_sections: true
+  html_document: 
+      toc: true
+      toc_depth: 2
+      number_sections: true
+---
+# Profiling the code for speed
+
+```{r}
+library(plyr)
+library(profvis)
+
+profvis({
+    library(bcimodel)
+    uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=10)
+})
+```
+

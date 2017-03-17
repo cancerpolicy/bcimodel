@@ -8,39 +8,6 @@
 ## sim_multinom
 ############################################################
 
-sim_multinom <- function(
-    nsims,
-        ### Number of size=1 sims from the multinomial
-    nreps,  
-        ### Number of times to replicate the nsims
-        ### Put the smaller number here, the bigger one as nsims
-    probs,
-        ### Vector of probabilities for each of the K categories
-    names
-        ### Vector of names associated with each of the categories
-        ### Must be of same length as probs
-        ### Can be character or numeric. Use numeric row IDs if 
-        ### you're referring to a group defined by multiple
-        ### variables whose groupings are defined in a separate
-        ### data frame
-) {
-
-    # Helper function to do one rep
-    one_rep <- function(id, nsims, probs, names) {
-
-        # Do the draw from rmultinom
-        draws <- rmultinom(nsims, size=1, probs)
-
-        # Match to names
-        indices <- apply(draws, 2, function(x) which(x==1))
-        return(t(names[indices]))
-    }
-
-    # Now do the replicates
-    all_reps <- sapply(1:nreps, FUN=one_rep, nsims, probs, names)
-
-    return(all_reps)
-}
 
 ############################################################
 ## sim_clinical_incidence
@@ -129,10 +96,6 @@ results_as_matrix=FALSE
 ### A data frame or matrix with nsim columns of randomly
 ### drawn ages at other-cause death for individuals (rows)
 }
-
-############################################################
-## sim_treatment_by_subgroup
-############################################################
 
 
 ############################################################
