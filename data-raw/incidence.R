@@ -4,16 +4,18 @@
 
 #-------------------------------------------------------------------------------
 # Specify countries to include, and their file names
+# (Files stored in inst/extdata/incidence/CI5-Xd)
 #-------------------------------------------------------------------------------
+# 3/17/17 Update: presumes that "incfiles" was created and loaded into memory
+# via data-raw/incidence_preprocess.R
 
-# Files stored in inst/extdata/incidence/CI5-Xd to access
+
 # 1/10/17: We start with only Uganda, with plans to expand
 
-incfiles <- data.frame(filen=c('18000299_uga.csv'),
-                       country='Uganda',
-                       county='Kyadondo County',
-                       years='2003-2007')
-
+#incfiles <- data.frame(filen=c('18000299_uga.csv'),
+#                       country='Uganda',
+#                       county='Kyadondo County',
+#                       years='2003-2007')
 
 #-------------------------------------------------------------------------------
 # Setup
