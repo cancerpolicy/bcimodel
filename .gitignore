@@ -17,6 +17,7 @@ bcimodel/inst/extdata
 
 # Output files from R CMD build
 /*.tar.gz
+.Rbuildignore
 
 # Output files from R CMD check
 /*.Rcheck/

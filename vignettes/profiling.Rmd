@@ -1,5 +1,5 @@
 ---
-title: "NSFG Combined"
+title: "Profiling"
 output:
   html_notebook: 
       toc: true
@@ -13,12 +13,16 @@ output:
 # Profiling the code for speed
 
 ```{r}
-library(plyr)
-library(profvis)
+profileNow <- FALSE
 
-profvis({
-    library(bcimodel)
-    uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=10)
-})
+if (profileNow) {
+    library(plyr)
+    library(profvis)
+
+    profvis({
+        library(bcimodel)
+        uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=10)
+    })
+}
 ```
 

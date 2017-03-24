@@ -1,0 +1,221 @@
+---
+title: "Policy simulation for East Africa"
+output:
+  html_notebook: 
+      toc: true
+      toc_depth: 2
+      number_sections: true
+  html_document: 
+      toc: true
+      toc_depth: 2
+      number_sections: true
+---
+
+# Setup
+```{r}
+#--------------------------------------------------------------------------------
+# Run anything of substance?
+#--------------------------------------------------------------------------------
+# Set default to FALSE, so it doesn't stall building the package
+runNow <- FALSE
+
+#-------------------------------------------------------------------------------
+# Setup 
+#-------------------------------------------------------------------------------
+library(knitr)
+library(plyr)
+library(bcimodel)
+data(ex1)
+
+#--------------------------------------------------------------------------------
+# Knitr
+#--------------------------------------------------------------------------------
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Set up inputs
+
+## Initialize stats holder object
+This is perhaps better done in a .csv file and then imported?
+```{r}
+#-------------------------------------------------------------------------------
+# Stats will be contained in "eafr" list object
+#-------------------------------------------------------------------------------
+eafr <- vector('list', length=length(ex1))
+(names(eafr) <- names(ex1))
+```
+
+## Define policies to investigate
+
+Note: baseline % advanced = 78%
+```{r}
+eafr$pol  <- data.frame(num=c(1:10),
+                         id=c('adv78', 
+                              'adv78.tam', 'adv78.tamchemo', 'adv78.tamchemoERpos',
+                              'adv60.tam', 'adv60.tamchemo', 'adv60.tamchemoERpos',
+                              'adv35.tam', 'adv35.tamchemo', 'adv35.tamchemoERpos'
+                              ),
+                         name=c('T0: Surgery only', 'T1: Tamoxifen for ER+', 
+                                'T2: T1 plus Chemo for ER-',
+                                'T3: T2 plus Chemo for Advanced ER+', 
+                                'T1 plus downstaging to 60% advanced',
+                                'T2 plus downstaging to 60% advanced',
+                                'T3 plus downstaging to 60% advanced',
+                                'T1 plus downstaging to 35% advanced',
+                                'T2 plus downstaging to 35% advanced',
+                                'T3 plus downstaging to 35% advanced'),
+                         pairnum=c(NA, NA, NA, NA, rep(c(2,3,4), 2)),
+                         earlydetHR=c(rep(1, 4), rep(0.60/0.78, 3),
+                                      rep(0.35/0.78, 3)),
+                         stringsAsFactors=FALSE)
+kable(eafr$pol)
+```
+
+## Define natural history parameters
+
+Advanced-stage is 78% and proportion ER+ is 41%. 
+
+Mortality rates correspond to 35% 5-year survival for advanced and 80% 5-year survival for early.
+```{r}
+eafr$nh <- compile_naturalhist(prop_adv=0.78, 
+                 mortrates=c(Early=0.0446, Advanced=0.21),
+                 subgroup_probs=c(`ER+`=0.41, `ER-`=0.59))
+kable(eafr$nh[,c('stage', 'subgroup', 'mortrate', 'prop')])
+```
+
+The "map" assigns numeric id's to each stage-subgroup. The stage-shifting will keep ER status constant, e.g. stage #3 shifts to #1 and stage #4 shifts to #2.
+```{r}
+(eafr$map <- create_stageshift_map(eafr$nh))
+```
+
+# Specify treatment for each policy
+
+According to the policies defined above, there are 4 treatment scenarios: T0, T1, T2 and T3. We will define those for the no-stage-shift policies, and then copy them over for the 2 other stage shifts. 
+```{r}
+eafr$tx <- data.frame(expand.grid(txSSid=c('None', 'Tamoxifen', 'Chemo',
+                                           'Tamoxifen+Chemo'),
+                                     SSno=1:nrow(eafr$nh)),
+                      stringsAsFactors=FALSE)
+ntreat <- nrow(eafr$tx)
+ntx <- length(unique(eafr$tx$txSSid))
+
+# Proportions sum to 1 within stage-subgroup groups
+eafr$tx <- transform(eafr$tx, 
+                     SSid=c(rep('Early.ER+', ntx), rep('Early.ER-', ntx), 
+                            rep('Advanced.ER+', ntx), rep('Advanced.ER-', ntx)), 
+                     txSSno=1:ntreat)
+eafr$tx <- transform(eafr$tx,
+                        txHR=c(1, 0.7, 0.775, 0.775*0.7, 
+                               1, 1, 0.775, 0.775,
+                               1, 0.7,  0.775, 0.775*0.7,
+                               1, 1, 0.775, 0.775))
+adv78 <- adv78.tam <- rep(0, ntreat)
+txSSid <- as.character(eafr$tx$txSSid)
+SSid <- as.character(eafr$tx$SSid)
+adv78[txSSid=='None'] <- 1 
+adv78.tam[txSSid=='Tamoxifen' & (SSid=='Early.ER+' | SSid=='Advanced.ER+')] <- 1
+adv78.tamchemo <- adv78.tam
+adv78.tam[txSSid=='None' & (SSid=='Early.ER-' | SSid=='Advanced.ER-')] <- 1
+adv78.tamchemo[txSSid=='Chemo' & (SSid=='Early.ER-' | SSid=='Advanced.ER-')] <- 1
+adv78.tamchemoERpos <- adv78.tamchemo
+adv78.tamchemoERpos[txSSid=='Tamoxifen' & SSid=='Advanced.ER+'] <- 0
+adv78.tamchemoERpos[txSSid=='Tamoxifen+Chemo' & SSid=='Advanced.ER+'] <- 1
+
+props <- data.frame(adv78, 
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos,
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos,
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos)
+colnames(props) <- eafr$pol$id
+
+eafr$tx <- data.frame(eafr$tx, props, stringsAsFactors=FALSE)
+
+eafr$tx <- data.frame(eafr$tx, stringsAsFactors=FALSE)
+
+kable(eafr$tx)
+```
+
+# Plot incidence and mortality for Uganda, our East African data source
+```{r}
+#-------------------------------------------------------------------------------
+# TO DO 
+#-------------------------------------------------------------------------------
+```
+
+# Test code with example data ("ex1" object embedded in the bcimodel package)
+```{r}
+#-------------------------------------------------------------------------------
+# Simulate policies - example data
+#-------------------------------------------------------------------------------
+
+if (runNow) {
+    # 10 sims
+    uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
+    paruganda_stdpop <- parsimpolicies(ex1$pol, ex1$nh, ex1$tx)
+
+    # 50 sims
+    # Timing it. Parallelizing is definitely faster but computer did heat up a lot more.
+    t1 <- system.time(simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #311 seconds
+    t2 <- system.time(parsimpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #161 seconds
+}
+```
+
+# Real results for East Africa, all ages
+```{r}
+#-------------------------------------------------------------------------------
+# Simulate policies - real data
+#-------------------------------------------------------------------------------
+
+# Test with 10 sims - takes minutes
+if (runNow) {
+    devtools::load_all()
+    manuscript_eastafrica <- simpolicies(eafr$pol, eafr$nh, eafr$tx)
+
+    # Test with 50 sims
+    library(parallel)
+    startclock <- proc.time()
+    manuscript_eastafrica <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, sims=50)
+    (runtime <- proc.time()-startclock)
+}
+```
+
+```{r}
+if (runNow) kable(manuscript_eastafrica[['10']])
+```
+
+# Real results for East Africa, ages 30-49, 50 sims
+```{r}
+#-------------------------------------------------------------------------------
+# Ages 30-49
+#-------------------------------------------------------------------------------
+
+if (runNow) {
+    startclock <- proc.time()
+    manuscript_eastafrica <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, 
+                                            minage=30, maxage=49, sims=50)
+    (runtime <- proc.time()-startclock)
+}
+```
+
+```{r}
+if (runNow) kable(manuscript_eastafrica[['10']])
+```
+
+# Real results for East Africa, ages 30-49, 100 sims
+```{r}
+#-------------------------------------------------------------------------------
+# Ages 30-49
+#-------------------------------------------------------------------------------
+
+if (runNow) {
+    startclock <- proc.time()
+    manuscript_eastafrica100 <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, minage=30, maxage=49, sims=100)
+    (runtime <- proc.time()-startclock)
+}
+```
+
+```{r}
+if (runNow) kable(manuscript_eastafrica100[['10']])
+```
+
+# Comments
+
