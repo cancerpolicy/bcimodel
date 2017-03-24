@@ -15,7 +15,7 @@
 
 rexp_matrix <- function(ratematrix) {
     return(
-           apply(ratematrix, 2, 
+           apply(ratematrix, 2,
                  FUN=function(x) { rexp(rep(1, length(x)), rate=x) })
     )
 
@@ -25,10 +25,10 @@ rexp_matrix <- function(ratematrix) {
 # timetocancerdeath_by_policy
 #-------------------------------------------------------------------------------
 #' Sim time to cancer death based on policy guidelines
-#' 
-#' Sim non-stage-shifted times, to be updated for shifted cases using the 
+#'
+#' Sim non-stage-shifted times, to be updated for shifted cases using the
 #' update_time_stageshift function
-#' 
+#'
 #' @param policies A "scenarios" data frame containing an 'id' for the policies
 #' and a 'pairnum' column indicating either NA or the paired policy, for
 #  strategies with early detection
@@ -37,11 +37,11 @@ rexp_matrix <- function(ratematrix) {
 
 timetocancerdeath_by_policy <- function(policies, rates, pop_size, nsim) {
 
-    # Two possible policy types: if policies$pairnum is NA, then 
+    # Two possible policy types: if policies$pairnum is NA, then
     # sim times for everyone. If it's not, that indicates that
-    # we will handle the paired sim for stage-shifted cases in 
-    # update_time_stageshift 
-    times <- lapply(policies$id, 
+    # we will handle the paired sim for stage-shifted cases in
+    # update_time_stageshift
+    times <- lapply(policies$id,
                      function(x) {
                          policy <- policies$num[which(policies$id==x)]
                          pairnum <- policies$pairnum[which(policies$id==x)]
@@ -57,11 +57,11 @@ timetocancerdeath_by_policy <- function(policies, rates, pop_size, nsim) {
 }
 
 #-------------------------------------------------------------------------------
-# update_time_stageshift 
+# update_time_stageshift
 #-------------------------------------------------------------------------------
 #' For stage-shifted cases in an early detection scenario, update treatment
-#' 
-#' Takes treatments from a paired scenario with no early detection and 
+#'
+#' Takes treatments from a paired scenario with no early detection and
 #' updates treatments only for those advanced-stage cases who were
 #' stage-shifted in the early detection scenario
 #'
@@ -70,11 +70,11 @@ timetocancerdeath_by_policy <- function(policies, rates, pop_size, nsim) {
 update_time_stageshift <- function(policies, shifts, rates, times) {
     for (i in policies$num) {
         pairnum <- policies$pairnum[i]
-        if (!is.na(pairnum)) { 
+        if (!is.na(pairnum)) {
             # Start with times from paired scenario
             temp <- times[[pairnum]]
             # Simulate quantile-correlated times
-            correlated <- sim_same_qexp(oldtime=temp, 
+            correlated <- sim_same_qexp(oldtime=temp,
                                         oldrate=rates[[pairnum]],
                                         newrate=rates[[i]],
                                         prefix='c')
@@ -91,7 +91,7 @@ update_time_stageshift <- function(policies, shifts, rates, times) {
 #-------------------------------------------------------------------------------
 # summarize
 #-------------------------------------------------------------------------------
-                                    
+
 cuminc <- function(futimes, times) {
     sapply(futimes, function(x) colSums(times<=x))
 }
@@ -132,7 +132,7 @@ calcarr <- function(cummortlist, controlindex, reverse=FALSE) {
 returnstat4matrix <- function(matrix, stat, quanttype=7) {
     if (!quanttype%in%c(1,7)) stop('Choose quantile type 1 or 7')
     if (!stat%in%c('mean', 'lower', 'upper')) stop('stat not supported')
-    switch(stat, 
+    switch(stat,
            mean=colMeans(matrix),
            lower=apply(matrix, 2, quantile, na.rm=TRUE, probs=0.025, type=quanttype),
            upper=apply(matrix, 2, quantile, na.rm=TRUE, probs=0.975, type=quanttype))
@@ -145,13 +145,13 @@ compile_outcomes <- function(all, pop_size, futimes, policynames,
                              stats=c('mean'), # can add 'lower' and 'upper'
                              per=100000) {
 
-    # Each set of outcomes has to be summarized across sims and 
+    # Each set of outcomes has to be summarized across sims and
     # multipled by the "per" denominator
     standardized <- sapply(stats, function(stat) {
-                                lapply(all, function(x, s=stat) { 
+                                lapply(all, function(x, s=stat) {
                                            if (is.list(x)) {
-                                                lapply(x, function(y, ss=s) { 
-                                                    returnstat4matrix(y, ss)*per/pop_size 
+                                                lapply(x, function(y, ss=s) {
+                                                    returnstat4matrix(y, ss)*per/pop_size
                                                 })
                                            } else return(returnstat4matrix(x, s)*per/pop_size)
                                 })
@@ -164,22 +164,22 @@ compile_outcomes <- function(all, pop_size, futimes, policynames,
                                         if (is.list(x)) {
                                             r <- t(do.call('rbind', x))
                                         } else {
-                                            r <- cbind(matrix(x, nrow=length(x)), 
-                                                  matrix(NA, nrow=length(x), 
+                                            r <- cbind(matrix(x, nrow=length(x)),
+                                                  matrix(NA, nrow=length(x),
                                                          ncol=length(policynames)-1))
                                         }
                                         rownames(r) <- futimes
                                         return(r)
                                 })
                            }, USE.NAMES=TRUE, simplify=FALSE)
-    condenseall <- sapply(stats, 
+    condenseall <- sapply(stats,
                            function(stat) {
                                 do.call(rbind, condensed[[stat]])
                            }, USE.NAMES=TRUE, simplify=FALSE)
 
     # Previously just means - can delete this later
     if (1==0) {
-        standardized <- lapply(all, function(x) { 
+        standardized <- lapply(all, function(x) {
                                    if (is.list(x)) {
                                     lapply(x, function(y) { colMeans(y)*per/pop_size })
                                    } else return(colMeans(x)*per/pop_size)
@@ -188,8 +188,8 @@ compile_outcomes <- function(all, pop_size, futimes, policynames,
                                 if (is.list(x)) {
                                     r <- t(do.call('rbind', x))
                                 } else {
-                                    r <- cbind(matrix(x, nrow=length(x)), 
-                                          matrix(NA, nrow=length(x), 
+                                    r <- cbind(matrix(x, nrow=length(x)),
+                                          matrix(NA, nrow=length(x),
                                                  ncol=length(standardized[[5]])-1))
                                 }
                                 rownames(r) <- futimes
@@ -202,7 +202,7 @@ compile_outcomes <- function(all, pop_size, futimes, policynames,
     byfu <- lapply(futimes, function(fu) {
         sapply(stats, function(stat, i=fu) {
                    table <- condenseall[[stat]][
-                                which(rownames(condenseall[[stat]])== 
+                                which(rownames(condenseall[[stat]])==
                                       as.character(i)),]
                             rownames(table) <- names(all)
                             colnames(table) <- policynames
@@ -230,8 +230,8 @@ format_bounds <- function(lower, upper, digits=NULL) {
     # If digits is not null, round
     lower <- round_matrix(lower, digits)
     upper <- round_matrix(upper, digits)
-    bounds <- sapply(1:ncol(lower), function(c) { 
-                paste(lower[,c], upper[,c], sep=', ') 
+    bounds <- sapply(1:ncol(lower), function(c) {
+                paste(lower[,c], upper[,c], sep=', ')
               })
     rownames(bounds) <- rownames(lower)
     colnames(bounds) <- colnames(lower)
@@ -239,6 +239,7 @@ format_bounds <- function(lower, upper, digits=NULL) {
 }
 
 # Return bounds for each element of the list
+#' @export
 format_bounds_list <- function(list, digits=NULL) {
     lapply(list, function(l) format_bounds(l$lower, l$upper, digits))
 }

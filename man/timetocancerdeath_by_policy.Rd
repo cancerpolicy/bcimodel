@@ -11,7 +11,7 @@ timetocancerdeath_by_policy(policies, rates, pop_size, nsim)
 and a 'pairnum' column indicating either NA or the paired policy, for}
 }
 \description{
-Sim non-stage-shifted times, to be updated for shifted cases using the 
+Sim non-stage-shifted times, to be updated for shifted cases using the
 update_time_stageshift function
 }
 

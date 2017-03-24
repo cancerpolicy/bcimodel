@@ -7,7 +7,7 @@
 update_time_stageshift(policies, shifts, rates, times)
 }
 \description{
-Takes treatments from a paired scenario with no early detection and 
+Takes treatments from a paired scenario with no early detection and
 updates treatments only for those advanced-stage cases who were
 stage-shifted in the early detection scenario
 }
