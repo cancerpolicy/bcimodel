@@ -1,5 +1,16 @@
 
 #-------------------------------------------------------------------------------
+# cumsurv_to_exprate
+#-------------------------------------------------------------------------------
+#' Convert survivals to rates
+#' @param cum.surv  Proportion surviving
+#' @param year Time corresponding to cum.surv, i.e. time since time=0, cum.surv=1
+#' @param haz Hazard ratio, of the cum.surv reflects an original curve raised to a hazard
+#' 
+#' @export
+cumsurv_to_exprate = function(cum.surv, year=10, haz=1) {log(cum.surv)/(-year*haz)}
+
+#-------------------------------------------------------------------------------
 # sim_multinom
 #-------------------------------------------------------------------------------
 #' Simulate a category assignment using a multinomial distribution

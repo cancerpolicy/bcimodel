@@ -135,3 +135,38 @@ test_that('treatments_by_policy and update_treat_stageshift work',
             }
 )
 
+
+test_that('sim_treatment_by_subgroup works if only 1 treatment', {
+
+    # Set up 1-treatment scenario
+    library(bcimodel)
+    data(ex1)
+    ex1$tx <- subset(ex1$tx, txSSid=='None')
+    ex1$tx <- transform(ex1$tx, txSSno=1:4, base=1, tam=1, tamandshift=1)
+
+    # Small example
+    popsize <- 10
+    sims <- 5
+    # Base case has equally distributed groups 1 to 4 
+    b <- matrix(sample.int(4, size=popsize*sims, replace=TRUE), 
+              nrow=popsize, ncol=sims) 
+    # Map of 1:4 onto stage and ER status 
+    m <- ex1[[3]] 
+    # Shifts
+    s <- lapply(ex1[[1]]$earlydetHR, 
+              stageshift_indicator, pop_size=popsize, nsim=sims) 
+    # Get new stages (advanced cases only)
+    n <- lapply(s, shift_stages, original=b, map=m)
+    # Create indicator for shifting treatment (advanced cases only)
+    st <- lapply(ex1[[1]]$num, shifttreatment_indicator, 
+               type=ex1[[1]]$pairnum, shifts=s, basecase=b, map=m)
+
+    # Simulate treatment (for early detection scenarios, candidate
+    # early-stage treatments for shifted cases)
+    t <- treatments_by_policy(policies=ex1[[1]], treat_chars=ex1[[4]], 
+                            stagegroups=n, map=m, popsize, sims)
+
+    # MANUALLY RERAN TESTS FROM ABOVE...
+
+}
+

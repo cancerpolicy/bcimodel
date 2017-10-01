@@ -149,7 +149,7 @@ allmortrates <- function(lifefile, source='ihme') {
 #' @examples
 #' # Plot incidence
 #' data(incratesf)
-#' plot.rates(incratesf$Age, incratesf$Female.Rate.Per.100K,
+#' plot_rates(incratesf$Age, incratesf$Female.Rate.Per.100K,
 #'         psize=incratesf$Cases, group=paste(incratesf$Country,
 #'                                            incratesf$Year))
 #' 
@@ -157,11 +157,11 @@ allmortrates <- function(lifefile, source='ihme') {
 #' data(allmortratesf)
 #' df <- subset(allmortratesf, 
 #'                   Country=='United States' | Country=='Uganda')
-#' plot.rates(df$Age, df$Rate.Per.100K, psize=NULL, group=df$Country)
+#' plot_rates(df$Age, df$Rate.Per.100K, psize=NULL, group=df$Country)
 #'
 #' @export
 
-plot.rates <- function(x, y, psize=NULL, group=NULL) {
+plot_rates <- function(x, y, psize=NULL, group=NULL) {
     if (length(x)!=length(y)) stop('x and y must be same length')
     if (is.null(psize)) psize <- rep(1, length(x))
     if (is.null(group)) group <- rep(1, length(x))

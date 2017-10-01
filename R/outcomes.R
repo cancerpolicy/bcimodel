@@ -89,7 +89,7 @@ update_time_stageshift <- function(policies, shifts, rates, times) {
 }
 
 #-------------------------------------------------------------------------------
-# summarize
+# Summary functions
 #-------------------------------------------------------------------------------
 
 cuminc <- function(futimes, times) {
@@ -216,6 +216,7 @@ compile_outcomes <- function(all, pop_size, futimes, policynames,
 }
 
 # Round a matrix, specifying digits per row
+#' @export
 round_matrix <- function(mat, digbyrow) {
     newmat <- t(sapply(1:nrow(mat), function(x) {
         as.character(round(mat[x,], digbyrow[x]))
@@ -226,22 +227,139 @@ round_matrix <- function(mat, digbyrow) {
 }
 
 # Lower and upper are tables of the same dimensions with rownames
-format_bounds <- function(lower, upper, digits=NULL) {
+# For including a meanmat, the line break \n between mean and uncertainty
+# works for exporting as csv (it will get stripped) or for printing 
+# with pander but NOT printing with kable.
+#' @export
+format_bounds <- function(lower, upper, digits=NULL, paren=FALSE,
+                          meanmat=NULL) {
     # If digits is not null, round
-    lower <- round_matrix(lower, digits)
-    upper <- round_matrix(upper, digits)
+    if (!is.null(digits)) {
+        if (length(digits)!=nrow(lower)) stop('In format_bounds, digits must
+                                      have length of nrow(lower)')
+        lower <- round_matrix(lower, digits)
+        upper <- round_matrix(upper, digits)
+        if (!is.null(meanmat)) meanmat <- round_matrix(meanmat, digits)
+    }
     bounds <- sapply(1:ncol(lower), function(c) {
-                paste(lower[,c], upper[,c], sep=', ')
+                beginning <- ifelse(paren, '(', '')
+                ending <- ifelse(paren, ')', '')
+                if (is.null(meanmat)) {
+                    paste0(beginning, lower[,c], ', ', upper[,c], ending)
+                } else {
+                    paste0(meanmat[,c], ' ',
+                           beginning, lower[,c], ', ', upper[,c], ending)
+                }
               })
     rownames(bounds) <- rownames(lower)
     colnames(bounds) <- colnames(lower)
+    # An aside - replace NA's with blanks
+    replacewithblank <- bounds=='NA' | bounds=='NA (NA, NA)'
+    bounds[replacewithblank] <- ''
     return(bounds)
 }
 
 # Return bounds for each element of the list
+# Options are:
+# lower, upper
+# (lower, upper)
+# mean (lower, upper)
 #' @export
-format_bounds_list <- function(list, digits=NULL) {
-    lapply(list, function(l) format_bounds(l$lower, l$upper, digits))
+format_bounds_list <- function(thislist, digits=NULL, paren=FALSE,
+                               includemean=FALSE, compileall=FALSE) {
+    if (!includemean) {
+        flist <- lapply(thislist, function(x) {
+                   format_bounds(x$lower, x$upper, digits, paren)
+        })
+    } else {
+        flist <- lapply(thislist, function(x) {
+                   format_bounds(x$lower, x$upper, digits, paren,
+                                 meanmat=x$mean)
+        })
+    }
+    if (compileall) {
+        for (i in 1:length(flist)) {
+            flist[[i]] <- as.data.frame(flist[[i]], check.names=FALSE)
+            flist[[i]]$Measure <- rownames(flist[[i]])
+        }
+        ftable <- ldply(flist)
+        ftable <- rename(ftable, c('.id'='Follow-Up Year'))
+        addblanks <- rep('', nrow(ftable))
+        keepthese <- seq(1,nrow(ftable),by=nrow(flist[[1]]))
+        addblanks[keepthese] <- ftable[['Follow-Up Year']][keepthese]
+        ftable[['Follow-Up Year']] <- addblanks
+        statcol <- which(colnames(ftable)=='Measure')
+        ftable <- ftable[,c(1,statcol, 2:(statcol-1))]
+    } else ftable <- flist
+
+    return(ftable)
 }
 
+#' Compile results long
+#' @export
+compile_long <- function(thislist) {
+    for (i in 1:length(thislist)) {
+        for (j in 1:length(thislist[[i]])) {
+        thislist[[i]][[j]] <- 
+            as.data.frame(thislist[[i]][[j]], check.names=FALSE)
+        thislist[[i]][[j]]$Measure <- rownames(thislist[[i]][[j]])
+        }
+    }
+    thislist2 <- lapply(thislist, ldply, .id='Statistic')
+    df <- ldply(thislist2, .id='Year')
+    df <- melt(df, id.vars=c('Year', 'Statistic', 'Measure'), 
+               variable_name='Scenario')
+    df <- cast(df, Year+Scenario+Measure~Statistic)
+    return(df)
+}
+
+#' Plot results
+#' Select on measures and panel them
+#' Group on f-u year?
+#' @export
+plot_results <- function(rlong, measures=NULL, type='bar',
+                         rotate_xlab=TRUE) {
+    if (is.null(measures)) measures <- unique(rlong$Measure)
+    rlong <- subset(rlong, Measure %in% measures)
+    switch(type,
+
+    'bar'= {
+        # I don't love the bar
+        g <- ggplot(rlong, aes(x=Year, y=mean, fill=Scenario)) +
+            geom_bar(position=position_dodge(), stat='identity',
+                     colour='black', size=0.3) +
+            geom_errorbar(aes(ymin=lower, ymax=upper),
+                          size=0.3, width=0.2, 
+                          position=position_dodge(0.9)) + 
+            facet_grid(Measure~., scales='free_y') +
+            xlab('Follow-Up Year') + ylab('') +
+            scale_fill_hue(name='Scenario') + 
+            theme_bw()
+
+    },
+
+    'line'={
+
+        # Line
+        pd <- position_dodge(0.1)
+        g <- ggplot(rlong, aes(x=Scenario, y=mean, color=Year, group=Year)) +
+            geom_errorbar(aes(ymin=lower, ymax=upper), colour='black',
+                          position=pd, width=0.1) +
+            geom_line(position=pd) +
+            geom_point(position=pd, size=2, shape=21, fill='white') +
+            facet_grid(Measure~., scales='free_y') +
+            xlab('Scenario') + ylab('') +
+            scale_fill_hue(name='Follow-Up Year') + 
+            expand_limits(y=0) +
+            theme_bw()
+        if (rotate_xlab) g <- g+ theme(axis.text.x=element_text(angle=90, 
+                                                                hjust=1))
+        
+    })
+return(g)
+}
+
+#-------------------------------------------------------------------------------
+# Save 
+#-------------------------------------------------------------------------------
 

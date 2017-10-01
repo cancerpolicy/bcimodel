@@ -140,26 +140,32 @@ n_sim=100,
 time=FALSE,
     ### Return age at other-cause death, or time from
     ### current age to other-cause death?
-haz=1
+haz=1,
     ### Should the US lifetables be modified by a hazard
     ### ratio before drawing from them? If so, the cohort
     ### survival will be raised to this number. 
+max100=TRUE
+    ### Interpolate out to 100 as the max
 ) {
 
     # Check that sort is as expected
     if (lifetable$Survival[nrow(lifetable)]>
         lifetable$Survival[1]) stop('Sort by descending survival')
 
-    # Check that max age is below 100
-    if (max(lifetable$Age)>100) stop('Max age is above 100')
-
-    # Interpolate survival out to age 100
-    itime <- (max(lifetable$Age)+1):100
-    isurv <- approx(c(max(lifetable$Age), 100),
-                    c(min(lifetable$Survival), 0),
-                    xout=itime)
-    times <- c(lifetable$Age, isurv$x)
-    survival <- c(lifetable$Survival, isurv$y)
+    if (max100) {
+        # Interpolate survival out to age 100
+        itime <- (max(lifetable$Age)+1):100
+        isurv <- approx(c(max(lifetable$Age), 100),
+                        c(min(lifetable$Survival), 0),
+                        xout=itime)
+        times <- c(lifetable$Age, isurv$x)
+        survival <- c(lifetable$Survival, isurv$y)
+        maxage=100
+    } else {
+        times <- lifetable$Age
+        survival <- lifetable$Survival
+        maxage=max(lifetable$Age)
+    }
     
     # Apply hazard modifier
     if (haz!=1) survival <- survival^haz
@@ -173,11 +179,11 @@ haz=1
     # survival corresponds to the upper bound for age at
     # death. Next,linearly interpolate between age and
     # survival estimates and determine the age that
-    # corresponds to the draw. Use 100 as the maximum age
+    # corresponds to the draw. Use maxage as the maximum age
     # possible (survival=0)
     death <- sim_KM(survival, times, 
                     smalltimes=ageentry, 
-                    bigtimes=100, 
+                    bigtimes=maxage, 
                     nsims=n_sim, 
                     mindraw=0, 
                     maxdraw=maxu)
@@ -188,7 +194,7 @@ haz=1
 
     # Check for errors
     if (sum(is.na(death))!=0 | sum(death==0)!=0) 
-        stop("In calc_ac_lifespan(), death values equal NA or O")
+        browser("In calc_ac_lifespan(), death values equal NA or O")
     return(death)
 
 ### A vector of length n_sim containing ages at other-cause
@@ -217,9 +223,12 @@ bootrows,
 life_table,
 results_as_matrix=FALSE,
     ### Convert the results from a data frame to a matrix?
-survHR=1
+survHR=1,
     ### Hazard ratio for survival as a modification of the
     ### life table in use
+max100_topass=TRUE
+    ### Interpolate out to max age of 100? TRUE/FALSE pass on to 
+    ### calc_ac_lifespan
 ) {
     # Determine number of simulations
     nsim = ncol(bootrows)
@@ -256,7 +265,8 @@ survHR=1
                                                       male=male, 
                                                       n_sim=nrow, 
                                                       haz=survHR, 
-                                                      lifetable=life_table) 
+                                                      lifetable=life_table,
+                                                      max100=max100_topass) 
                             ageOCs = data.frame(x, ageOC=matrix(ageOCs, 
                                                                 nrow=nrow, ncol=1))
                             return(ageOCs)

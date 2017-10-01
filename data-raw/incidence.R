@@ -57,7 +57,18 @@ inclist[[length(inclist)+1]] <-
                      Years='1975-1979'), 
            select=c('Country', 'County', 'Years', 
                     'Age', 'Cases', 'Female.Rate.Per.100K'))
+inclist[[length(inclist)]] <- transform(inclist[[length(inclist)]],
+                                        Female.Rate.Per.100K=
+                                            as.numeric(Female.Rate.Per.100K))
 
+#-------------------------------------------------------------------------------
+# Add SEER with a secular trend of 0.25% over 20 years
+#-------------------------------------------------------------------------------
+
+USno <- length(inclist)
+inclist[[USno+1]] <- transform(inclist[[USno]],
+                               Country='United States times 1.005^20=1.1',
+                               Female.Rate.Per.100K=Female.Rate.Per.100K*1.1)
 
 
 #-------------------------------------------------------------------------------

@@ -1,5 +1,5 @@
 ################################################################################
-# Create cumulative survival database from lifetables
+# allmortratesf: Create cumulative survival database from lifetables
 ################################################################################
 
 #-------------------------------------------------------------------------------
@@ -41,5 +41,15 @@ file.remove(grep('IHME_GBD_2013', dir(), value=TRUE))
 
 allmortratesf <- subset(allmortrates, Male==0)
 use_data(allmortratesf, overwrite=TRUE)
+
+
+################################################################################
+# cohortltf: Load cohort mortality from BMD, used in cantrance/Annals
+################################################################################
+
+library(cantrance)
+data(life_table)
+cohortltf <- subset(life_table, Male==0)
+use_data(cohortltf, overwrite=TRUE)
 
 

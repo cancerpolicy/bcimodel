@@ -209,3 +209,29 @@ test_that('returnstat4matrix works', {
 
 })
 
+test_that('Formatting, saving and plotting results', {
+    # Load data
+    library(bcimodel)
+    data(ex1)
+    # Model
+    ex <- simpolicies(ex1$pol, ex1$nh, ex1$tx, 
+                      returnstats=c('mean', 'lower', 'upper'),
+                      futimes=c(5,10,20))
+    # Uncertainty alone
+    uncertainty <- format_bounds_list(ex, paren=TRUE)
+    # Mean and uncertainty in same table
+    uncertainty <- format_bounds_list(ex, paren=TRUE, includemean=TRUE)
+    # One table for all years of follow-up
+    all <- format_bounds_list(ex, paren=TRUE, includemean=TRUE,
+                                      compileall=TRUE)
+    # Format digits better
+    all <- format_bounds_list(ex, paren=TRUE, includemean=TRUE, 
+                              digits=c(0,0,1,2,0,0),
+                              compileall=TRUE)
+
+    # Plots
+    rlong <- compile_long(ex)
+    rplot <- plot_results(rlong, type='bar')
+    rplot <- plot_results(rlong, c('MRR', 'ARR'), type='line')
+})
+

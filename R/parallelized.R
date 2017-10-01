@@ -161,15 +161,24 @@ parinitialize_pop <- function(pop_size, nsim,
     data(agestructure)
 
     # Compute survival from incidence/mortality databases
+    # Edit 8/21/17: removed "maxage=100" argument from interpolate_cumsurv
     inc <- interpolate_cumsurv(incratesf, 
                               ratevar='Female.Rate.Per.100K',
-                              country=incsource,
-                              maxage=100)
-    mort <- interpolate_cumsurv(allmortratesf, 
-                              ratevar='Rate.Per.100K',
-                              country=mortsource)
-    # Code compatibility tweaks
-    mort <- transform(mort, Age=age, Survival=cumsurv, Male=0)
+                              country=incsource)
+    # Edit 8/21/17: allow use of BMD cohort life tables
+    if (!grepl('Birth Cohort 1950', mortsource)) {
+        mort <- interpolate_cumsurv(allmortratesf, 
+                                  ratevar='Rate.Per.100K',
+                                  country=mortsource)
+        # Code compatibility tweaks
+        mort <- transform(mort, Age=age, Survival=cumsurv, Male=0)
+        interpolate_to_100=TRUE
+    } else {
+        data(cohortltf)
+        mort <- subset(cohortltf, BirthCohort==1950)
+        interpolate_to_100=FALSE
+    }
+        
 
     # Add age to pop_chars using parameter choices
     pop_chars[['age']] <- format_age(subset(agestructure, Country==agesource,
@@ -201,7 +210,8 @@ parinitialize_pop <- function(pop_size, nsim,
     ageOC <- calc_ac_lifespan_pop(popdata=pop_chars,
                                     bootrows=pop_chars_rows,
                                     life_table=mort,
-                                    results_as_matrix=TRUE)
+                                    results_as_matrix=TRUE,
+                                    max100_topass=interpolate_to_100)
 
     # Ages at cancer incidence
     ageclin <- sim_clinical_incidence(popdata=pop_chars,
