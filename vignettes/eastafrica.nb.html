@@ -179,12 +179,14 @@ $(document).ready(function () {
 <li><a href="#define-natural-history-parameters"><span class="toc-section-number">2.3</span> Define natural history parameters</a></li>
 </ul></li>
 <li><a href="#specify-treatment-for-each-policy"><span class="toc-section-number">3</span> Specify treatment for each policy</a></li>
-<li><a href="#plot-incidence-and-mortality-for-uganda-our-east-african-data-source"><span class="toc-section-number">4</span> Plot incidence and mortality for Uganda, our East African data source</a></li>
-<li><a href="#test-code-with-example-data-ex1-object-embedded-in-the-bcimodel-package"><span class="toc-section-number">5</span> Test code with example data (“ex1” object embedded in the bcimodel package)</a></li>
-<li><a href="#real-results-for-east-africa-all-ages"><span class="toc-section-number">6</span> Real results for East Africa, all ages</a></li>
-<li><a href="#real-results-for-east-africa-ages-30-49-50-sims"><span class="toc-section-number">7</span> Real results for East Africa, ages 30-49, 50 sims</a></li>
-<li><a href="#real-results-for-east-africa-ages-30-49-100-sims"><span class="toc-section-number">8</span> Real results for East Africa, ages 30-49, 100 sims</a></li>
-<li><a href="#comments"><span class="toc-section-number">9</span> Comments</a></li>
+<li><a href="#incidence"><span class="toc-section-number">4</span> Incidence</a></li>
+<li><a href="#system-time"><span class="toc-section-number">5</span> System time</a></li>
+<li><a href="#results-for-east-africa-ages-30-49"><span class="toc-section-number">6</span> Results for East Africa, ages 30-49</a><ul>
+<li><a href="#run-model"><span class="toc-section-number">6.1</span> Run model</a></li>
+<li><a href="#runtime"><span class="toc-section-number">6.2</span> Runtime</a></li>
+<li><a href="#results"><span class="toc-section-number">6.3</span> Results</a></li>
+</ul></li>
+<li><a href="#comments"><span class="toc-section-number">7</span> Comments</a></li>
 </ul>
 </div>
 
@@ -193,9 +195,42 @@ $(document).ready(function () {
 <h1><span class="header-section-number">1</span> Setup</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucnVuTm93IDwtIEZBTFNFXG4jIERlZmluZSBuc2ltcyBoZXJlXG5uc2ltcyA8LSAxMFxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgU2V0dXAgXG4jLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLVxubGlicmFyeShyZXNoYXBlKVxubGlicmFyeShwYXJhbGxlbClcbmxpYnJhcnkoZ2dwbG90MilcblxuYGBgIn0= -->
+<pre class="r"><code>runNow &lt;- FALSE
+# Define nsims here
+nsims &lt;- 10
+#-------------------------------------------------------------------------------
+# Setup 
+#-------------------------------------------------------------------------------
+library(reshape)
+library(parallel)
+library(ggplot2)
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDigJhnZ3Bsb3Qy4oCZIHdhcyBidWlsdCB1bmRlciBSIHZlcnNpb24gMy4zLjJcbiJ9 -->
+<pre><code>package ‘ggplot2’ was built under R version 3.3.2</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShrbml0cilcbmBgYCJ9 -->
+<pre class="r"><code>library(knitr)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-output-begin eyJkYXRhIjoicGFja2FnZSDigJhrbml0cuKAmSB3YXMgYnVpbHQgdW5kZXIgUiB2ZXJzaW9uIDMuMy4yXG4ifQ== -->
 <pre><code>package ‘knitr’ was built under R version 3.3.2</code></pre>
 <!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwbHlyKVxuYGBgIn0= -->
+<pre class="r"><code>library(plyr)</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiXG5BdHRhY2hpbmcgcGFja2FnZTog4oCYcGx5cuKAmVxuXG5UaGUgZm9sbG93aW5nIG9iamVjdHMgYXJlIG1hc2tlZCBmcm9tIOKAmHBhY2thZ2U6cmVzaGFwZeKAmTpcblxuICAgIHJlbmFtZSwgcm91bmRfYW55XG4ifQ== -->
+<pre><code>
+Attaching package: ‘plyr’
+
+The following objects are masked from ‘package:reshape’:
+
+    rename, round_any</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShiY2ltb2RlbClcbmRhdGEoZXgxKVxuYGBgIn0= -->
+<pre class="r"><code>library(bcimodel)
+data(ex1)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
@@ -206,6 +241,11 @@ $(document).ready(function () {
 <p>This is perhaps better done in a .csv file and then imported?</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZWFmciA8LSB2ZWN0b3IoJ2xpc3QnLCBsZW5ndGg9bGVuZ3RoKGV4MSkpXG4obmFtZXMoZWFmcikgPC0gbmFtZXMoZXgxKSlcblxuYGBgIn0= -->
+<pre class="r"><code>eafr &lt;- vector('list', length=length(ex1))
+(names(eafr) &lt;- names(ex1))
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-output-begin eyJkYXRhIjoiWzFdIFwicG9sXCIgXCJuaFwiICBcIm1hcFwiIFwidHhcIiBcbiJ9 -->
 <pre><code>[1] &quot;pol&quot; &quot;nh&quot;  &quot;map&quot; &quot;tx&quot; </code></pre>
 <!-- rnb-output-end -->
@@ -312,58 +352,20 @@ $(document).ready(function () {
 </div>
 <div id="define-natural-history-parameters" class="section level2">
 <h2><span class="header-section-number">2.3</span> Define natural history parameters</h2>
+<div id="stage-and-er" class="section level3">
+<h3><span class="header-section-number">2.3.1</span> Stage and ER+</h3>
 <p>Advanced-stage is 78% and proportion ER+ is 41%.</p>
-<p>Mortality rates correspond to 35% 5-year survival for advanced and 80% 5-year survival for early.</p>
+</div>
+<div id="mortality-rates" class="section level3">
+<h3><span class="header-section-number">2.3.2</span> Mortality rates</h3>
+<p>If we use Galakunde and Culter (US), mortality rates correspond to 35% 5-year survival for advanced and 80% 5-year survival for early.</p>
+<p>From Kantehardt metastasis-free survival curve and using GraphClick, we get the coordinates of 80% surviving at 3 years for stage 1+2, 54.7% surviving at 3 years for stage 3. Translating those to 5-yr survivals:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-
-<!-- rnb-html-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImtuaXRfYXNpcyJdLCJzaXppbmdQb2xpY3kiOltdfX0= -->
-
-<table>
-<thead>
-<tr class="header">
-<th align="left">stage</th>
-<th align="left">subgroup</th>
-<th align="right">mortrate</th>
-<th align="right">prop</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Early</td>
-<td align="left">ER+</td>
-<td align="right">0.0446</td>
-<td align="right">0.0902</td>
-</tr>
-<tr class="even">
-<td align="left">Early</td>
-<td align="left">ER-</td>
-<td align="right">0.0446</td>
-<td align="right">0.1298</td>
-</tr>
-<tr class="odd">
-<td align="left">Advanced</td>
-<td align="left">ER+</td>
-<td align="right">0.2100</td>
-<td align="right">0.3198</td>
-</tr>
-<tr class="even">
-<td align="left">Advanced</td>
-<td align="left">ER-</td>
-<td align="right">0.2100</td>
-<td align="right">0.4602</td>
-</tr>
-</tbody>
-</table>
-
-
-<!-- rnb-html-end -->
-
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<p>The “map” assigns numeric id’s to each stage-subgroup. The stage-shifting will keep ER status constant, e.g. stage #3 shifts to #1 and stage #4 shifts to #2.</p>
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuKGVhZnIkbWFwIDwtIGNyZWF0ZV9zdGFnZXNoaWZ0X21hcChlYWZyJG5oKSlcblxuYGBgIn0= -->
+<pre class="r"><code>(eafr$map &lt;- create_stageshift_map(eafr$nh))
+</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-output-begin eyJkYXRhIjoiICAgICAgICAgRVIrIEVSLVxuRWFybHkgICAgICAxICAgMlxuQWR2YW5jZWQgICAzICAgNFxuIn0= -->
 <pre><code>         ER+ ER-
 Early      1   2
@@ -371,6 +373,166 @@ Advanced   3   4</code></pre>
 <!-- rnb-output-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<p>But actually, the other Kantehardt reference gives these 5-year survivals:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<div id="math-for-no-tamoxifen-mortality-rate-among-er" class="section level4">
+<h4><span class="header-section-number">2.3.2.1</span> Math for no-Tamoxifen mortality rate among ER+</h4>
+<p>Variables:</p>
+<table>
+<thead>
+<tr class="header">
+<th>Description</th>
+<th>Notation</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Proportion of cases that are ER positive</td>
+<td><span class="math inline">\(p_{ER+}\)</span></td>
+<td>0.72</td>
+</tr>
+<tr class="even">
+<td>Presumed proportion of ER+ treated with Tamoxifen</td>
+<td><span class="math inline">\(t\)</span></td>
+<td>0.57</td>
+</tr>
+<tr class="odd">
+<td>Hazard ratio for Tamoxifen</td>
+<td><span class="math inline">\(h\)</span></td>
+<td>0.7</td>
+</tr>
+<tr class="even">
+<td>Observed mortality rate, all</td>
+<td><span class="math inline">\(m_{o}\)</span></td>
+<td>0.028 (early) or 0.120 (adv)</td>
+</tr>
+<tr class="odd">
+<td>Observed 5-year survival, all</td>
+<td><span class="math inline">\(S_{o}\)</span></td>
+<td>0.028 (early) or 0.120 (adv)</td>
+</tr>
+<tr class="even">
+<td>Baseline mortality rate, ER-</td>
+<td><span class="math inline">\(m_{ER-}\)</span></td>
+<td>To be estimated</td>
+</tr>
+<tr class="odd">
+<td>Baseline mortality rate, ER+</td>
+<td><span class="math inline">\(m_{ER+}\)</span></td>
+<td>To be estimated</td>
+</tr>
+<tr class="even">
+<td>Baseline mortality rate, ER+, no Tamoxifen</td>
+<td><span class="math inline">\(m_{b}\)</span></td>
+<td>To be estimated</td>
+</tr>
+<tr class="odd">
+<td>Baseline 5-year survival, ER-</td>
+<td><span class="math inline">\(S_{ER-}\)</span></td>
+<td>To be estimated</td>
+</tr>
+<tr class="even">
+<td>Baseline 5-year survival, ER+</td>
+<td><span class="math inline">\(S_{ER+}\)</span></td>
+<td>To be estimated</td>
+</tr>
+<tr class="odd">
+<td>Baseline 5-year survival (no Tamoxifen), ER+</td>
+<td><span class="math inline">\(S_{b}\)</span></td>
+<td>To be estimated</td>
+</tr>
+</tbody>
+</table>
+<div id="on-the-hazard-scale" class="section level5">
+<h5><span class="header-section-number">2.3.2.1.1</span> On the hazard scale</h5>
+<p><em>Abandoned this because hazard is a conditional probability, and conditioning on survival to time t for ER+ and ER- is not equivalent</em></p>
+<p>For each stage-specific mortality for ER+ women, observed mortality is a weighted sum of those who do not receive Tamoxifen and those who do,</p>
+<p><span class="math inline">\(m_{o} = p_{ER+}m_{ER+} + (1-p_{ER+})m_{ER-}\)</span></p>
+<p><span class="math inline">\(m_{ER+} = (1-t)m_{b} + thm_{b}\)</span></p>
+<p>Let us assume that <span class="math inline">\(m_{ER-}\)</span> = <span class="math inline">\(m_{b}\)</span>, i.e. there is equal chemotherapy in both ER groups and thus mortality is the same when the benefit of Tamoxifen is removed. Then our expression for <span class="math inline">\(m_{obs}\)</span> simplifies as follows:</p>
+<p><span class="math inline">\(m_{o} = p_{ER+}[(1-t)m_{b} + thm_{b}] + (1-p_{ER+})m_{b}\)</span></p>
+<p><span class="math inline">\(m_{b} = \frac{m_{o}}{p_{ER+}(1-t) + p_{ER+}th + (1-p_{ER+})}\)</span></p>
+<p><span class="math inline">\(S_{b} = e^{-5*m_{b}}\)</span></p>
+</div>
+<div id="on-the-survival-scale-at-5-years" class="section level5">
+<h5><span class="header-section-number">2.3.2.1.2</span> On the survival scale, at 5 years</h5>
+<p>Using the similar assumption that <span class="math inline">\(S_{ER-}\)</span> = <span class="math inline">\(S_{b}\)</span>, i.e. there is equal chemotherapy in both ER groups and thus survival is the same when the benefit of Tamoxifen is removed.</p>
+<p><span class="math inline">\(S_{o} = p_{ER+}[(1-t)S_{b} + t(S_{b})^h] + (1-p_{ER+})S_{b}\)</span></p>
+<p><span class="math inline">\(0 = p_{ER+}(1-t)S_{b} + p_{ER+}t(S_{b})^h + (1-p_{ER+})S_{b} - S_{o}\)</span></p>
+<p>This is a fractional polynomial:</p>
+<p><strong>EARLY STAGE</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZiA9IGZ1bmN0aW9uKHgsIHA9MC40MSwgdD0xLCBoPTAuNywgU289ZWFybHkuNXlyKSB7IHAqKDEtdCkqeCArIHAqdCp4XmggKyAoMS1wKSp4IC0gU299XG5zdHIoU2IuZWFybHkgPC0gdW5pcm9vdChmLCBsb3dlcj0wLjUsIHVwcGVyPWVhcmx5LjV5ciwgdG9sID0gMC4wMDAxKSlcblxuYGBgIn0= -->
+<pre class="r"><code>f = function(x, p=0.41, t=1, h=0.7, So=early.5yr) { p*(1-t)*x + p*t*x^h + (1-p)*x - So}
+str(Sb.early &lt;- uniroot(f, lower=0.5, upper=early.5yr, tol = 0.0001))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiTGlzdCBvZiA1XG4gJCByb290ICAgICAgOiBudW0gMC42ODZcbiAkIGYucm9vdCAgICA6IG51bSAxLjI3ZS0wN1xuICQgaXRlciAgICAgIDogaW50IDNcbiAkIGluaXQuaXQgICA6IGludCBOQVxuICQgZXN0aW0ucHJlYzogbnVtIDVlLTA1XG4ifQ== -->
+<pre><code>List of 5
+ $ root      : num 0.686
+ $ f.root    : num 1.27e-07
+ $ iter      : int 3
+ $ init.it   : int NA
+ $ estim.prec: num 5e-05</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuKGVhcmx5Lm1yYXRlID0gY3Vtc3Vydl90b19leHByYXRlKFNiLmVhcmx5JHJvb3QsIHllYXI9NSkpXG5gYGAifQ== -->
+<pre class="r"><code>(early.mrate = cumsurv_to_exprate(Sb.early$root, year=5))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMDc1MjY5MThcbiJ9 -->
+<pre><code>[1] 0.07526918</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p><strong>ADVANCED STAGE - JUST CURIOUS</strong></p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuKGN1bXN1cnZfdG9fZXhwcmF0ZShTYi5hZHYkcm9vdCwgeWVhcj01KSlcblxuYGBgIn0= -->
+<pre class="r"><code>(cumsurv_to_exprate(Sb.adv$root, year=5))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMjU2OTk5OFxuIn0= -->
+<pre><code>[1] 0.2569998</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>We’ll still use Galukande, 5-yr surv of 35%:</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuKGFkdi5tcmF0ZSA8LSBjdW1zdXJ2X3RvX2V4cHJhdGUoMC4zNSwgeWVhcj01KSlcblxuYGBgIn0= -->
+<pre class="r"><code>(adv.mrate &lt;- cumsurv_to_exprate(0.35, year=5))
+</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-output-begin eyJkYXRhIjoiWzFdIDAuMjA5OTY0NFxuIn0= -->
+<pre><code>[1] 0.2099644</code></pre>
+<!-- rnb-output-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZWFmciRuaCA8LSBjb21waWxlX25hdHVyYWxoaXN0KHByb3BfYWR2PTAuNzgsIFxuICAgICAgICAgICAgICAgICBtb3J0cmF0ZXM9YyhFYXJseT1lYXJseS5tcmF0ZSwgQWR2YW5jZWQ9YWR2Lm1yYXRlKSxcbiAgICAgICAgICAgICAgICAgc3ViZ3JvdXBfcHJvYnM9YyhgRVIrYD0wLjQxLCBgRVItYD0wLjU5KSlcbmthYmxlKGVhZnIkbmhbLGMoJ3N0YWdlJywgJ3N1Ymdyb3VwJywgJ21vcnRyYXRlJywgJ3Byb3AnKV0pXG5gYGAifQ== -->
+<pre class="r"><code>eafr$nh &lt;- compile_naturalhist(prop_adv=0.78, 
+                 mortrates=c(Early=early.mrate, Advanced=adv.mrate),
+                 subgroup_probs=c(`ER+`=0.41, `ER-`=0.59))
+kable(eafr$nh[,c('stage', 'subgroup', 'mortrate', 'prop')])</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+<p>The “map” assigns numeric id’s to each stage-subgroup. The stage-shifting will keep ER status constant, e.g. stage #3 shifts to #1 and stage #4 shifts to #2.</p>
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuKGVhZnIkbWFwIDwtIGNyZWF0ZV9zdGFnZXNoaWZ0X21hcChlYWZyJG5oKSlcbmBgYCJ9 -->
+<pre class="r"><code>(eafr$map &lt;- create_stageshift_map(eafr$nh))</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
+</div>
+</div>
 </div>
 </div>
 <div id="specify-treatment-for-each-policy" class="section level1">
@@ -378,765 +540,185 @@ Advanced   3   4</code></pre>
 <p>According to the policies defined above, there are 4 treatment scenarios: T0, T1, T2 and T3. We will define those for the no-stage-shift policies, and then copy them over for the 2 other stage shifts.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZWFmciR0eCA8LSBkYXRhLmZyYW1lKGV4cGFuZC5ncmlkKHR4U1NpZD1jKCdOb25lJywgJ1RhbW94aWZlbicsICdDaGVtbycsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ1RhbW94aWZlbitDaGVtbycpLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNTbm89MTpucm93KGVhZnIkbmgpKSxcbiAgICAgICAgICAgICAgICAgICAgICBzdHJpbmdzQXNGYWN0b3JzPUZBTFNFKVxubnRyZWF0IDwtIG5yb3coZWFmciR0eClcbm50eCA8LSBsZW5ndGgodW5pcXVlKGVhZnIkdHgkdHhTU2lkKSlcblxuIyBQcm9wb3J0aW9ucyBzdW0gdG8gMSB3aXRoaW4gc3RhZ2Utc3ViZ3JvdXAgZ3JvdXBzXG5lYWZyJHR4IDwtIHRyYW5zZm9ybShlYWZyJHR4LCBcbiAgICAgICAgICAgICAgICAgICAgIFNTaWQ9YyhyZXAoJ0Vhcmx5LkVSKycsIG50eCksIHJlcCgnRWFybHkuRVItJywgbnR4KSwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVwKCdBZHZhbmNlZC5FUisnLCBudHgpLCByZXAoJ0FkdmFuY2VkLkVSLScsIG50eCkpLCBcbiAgICAgICAgICAgICAgICAgICAgIHR4U1Nubz0xOm50cmVhdClcbmVhZnIkdHggPC0gdHJhbnNmb3JtKGVhZnIkdHgsXG4gICAgICAgICAgICAgICAgICAgICAgICB0eEhSPWMoMSwgMC43LCAwLjc3NSwgMC43NzUqMC43LCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLCAxLCAwLjc3NSwgMC43NzUsXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMSwgMC43LCAgMC43NzUsIDAuNzc1KjAuNyxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLCAxLCAwLjc3NSwgMC43NzUpKVxuYWR2NzggPC0gYWR2NzgudGFtIDwtIHJlcCgwLCBudHJlYXQpXG50eFNTaWQgPC0gYXMuY2hhcmFjdGVyKGVhZnIkdHgkdHhTU2lkKVxuU1NpZCA8LSBhcy5jaGFyYWN0ZXIoZWFmciR0eCRTU2lkKVxuYWR2NzhbdHhTU2lkPT0nTm9uZSddIDwtIDEgXG5hZHY3OC50YW1bdHhTU2lkPT0nVGFtb3hpZmVuJyAmIChTU2lkPT0nRWFybHkuRVIrJyB8IFNTaWQ9PSdBZHZhbmNlZC5FUisnKV0gPC0gMVxuYWR2NzgudGFtY2hlbW8gPC0gYWR2NzgudGFtXG5hZHY3OC50YW1bdHhTU2lkPT0nTm9uZScgJiAoU1NpZD09J0Vhcmx5LkVSLScgfCBTU2lkPT0nQWR2YW5jZWQuRVItJyldIDwtIDFcbmFkdjc4LnRhbWNoZW1vW3R4U1NpZD09J0NoZW1vJyAmIChTU2lkPT0nRWFybHkuRVItJyB8IFNTaWQ9PSdBZHZhbmNlZC5FUi0nKV0gPC0gMVxuYWR2NzgudGFtY2hlbW9FUnBvcyA8LSBhZHY3OC50YW1jaGVtb1xuYWR2NzgudGFtY2hlbW9FUnBvc1t0eFNTaWQ9PSdUYW1veGlmZW4nICYgU1NpZD09J0FkdmFuY2VkLkVSKyddIDwtIDBcbmFkdjc4LnRhbWNoZW1vRVJwb3NbdHhTU2lkPT0nVGFtb3hpZmVuK0NoZW1vJyAmIFNTaWQ9PSdBZHZhbmNlZC5FUisnXSA8LSAxXG5cbnByb3BzIDwtIGRhdGEuZnJhbWUoYWR2NzgsIFxuICAgICAgICAgICAgICAgYWR2NzgudGFtLCBhZHY3OC50YW1jaGVtbywgYWR2NzgudGFtY2hlbW9FUnBvcyxcbiAgICAgICAgICAgICAgIGFkdjc4LnRhbSwgYWR2NzgudGFtY2hlbW8sIGFkdjc4LnRhbWNoZW1vRVJwb3MsXG4gICAgICAgICAgICAgICBhZHY3OC50YW0sIGFkdjc4LnRhbWNoZW1vLCBhZHY3OC50YW1jaGVtb0VScG9zKVxuY29sbmFtZXMocHJvcHMpIDwtIGVhZnIkcG9sJGlkXG5cbmVhZnIkdHggPC0gZGF0YS5mcmFtZShlYWZyJHR4LCBwcm9wcywgc3RyaW5nc0FzRmFjdG9ycz1GQUxTRSlcblxuZWFmciR0eCA8LSBkYXRhLmZyYW1lKGVhZnIkdHgsIHN0cmluZ3NBc0ZhY3RvcnM9RkFMU0UpXG5cbmthYmxlKGVhZnIkdHgpXG5gYGAifQ== -->
+<pre class="r"><code>eafr$tx &lt;- data.frame(expand.grid(txSSid=c('None', 'Tamoxifen', 'Chemo',
+                                           'Tamoxifen+Chemo'),
+                                     SSno=1:nrow(eafr$nh)),
+                      stringsAsFactors=FALSE)
+ntreat &lt;- nrow(eafr$tx)
+ntx &lt;- length(unique(eafr$tx$txSSid))
 
-<!-- rnb-html-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImtuaXRfYXNpcyJdLCJzaXppbmdQb2xpY3kiOltdfX0= -->
+# Proportions sum to 1 within stage-subgroup groups
+eafr$tx &lt;- transform(eafr$tx, 
+                     SSid=c(rep('Early.ER+', ntx), rep('Early.ER-', ntx), 
+                            rep('Advanced.ER+', ntx), rep('Advanced.ER-', ntx)), 
+                     txSSno=1:ntreat)
+eafr$tx &lt;- transform(eafr$tx,
+                        txHR=c(1, 0.7, 0.775, 0.775*0.7, 
+                               1, 1, 0.775, 0.775,
+                               1, 0.7,  0.775, 0.775*0.7,
+                               1, 1, 0.775, 0.775))
+adv78 &lt;- adv78.tam &lt;- rep(0, ntreat)
+txSSid &lt;- as.character(eafr$tx$txSSid)
+SSid &lt;- as.character(eafr$tx$SSid)
+adv78[txSSid=='None'] &lt;- 1 
+adv78.tam[txSSid=='Tamoxifen' &amp; (SSid=='Early.ER+' | SSid=='Advanced.ER+')] &lt;- 1
+adv78.tamchemo &lt;- adv78.tam
+adv78.tam[txSSid=='None' &amp; (SSid=='Early.ER-' | SSid=='Advanced.ER-')] &lt;- 1
+adv78.tamchemo[txSSid=='Chemo' &amp; (SSid=='Early.ER-' | SSid=='Advanced.ER-')] &lt;- 1
+adv78.tamchemoERpos &lt;- adv78.tamchemo
+adv78.tamchemoERpos[txSSid=='Tamoxifen' &amp; SSid=='Advanced.ER+'] &lt;- 0
+adv78.tamchemoERpos[txSSid=='Tamoxifen+Chemo' &amp; SSid=='Advanced.ER+'] &lt;- 1
 
-<table style="width:100%;">
-<colgroup>
-<col width="8%" />
-<col width="2%" />
-<col width="6%" />
-<col width="3%" />
-<col width="3%" />
-<col width="3%" />
-<col width="5%" />
-<col width="7%" />
-<col width="10%" />
-<col width="5%" />
-<col width="7%" />
-<col width="10%" />
-<col width="5%" />
-<col width="7%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left">txSSid</th>
-<th align="right">SSno</th>
-<th align="left">SSid</th>
-<th align="right">txSSno</th>
-<th align="right">txHR</th>
-<th align="right">adv78</th>
-<th align="right">adv78.tam</th>
-<th align="right">adv78.tamchemo</th>
-<th align="right">adv78.tamchemoERpos</th>
-<th align="right">adv60.tam</th>
-<th align="right">adv60.tamchemo</th>
-<th align="right">adv60.tamchemoERpos</th>
-<th align="right">adv35.tam</th>
-<th align="right">adv35.tamchemo</th>
-<th align="right">adv35.tamchemoERpos</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">None</td>
-<td align="right">1</td>
-<td align="left">Early.ER+</td>
-<td align="right">1</td>
-<td align="right">1.0000</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen</td>
-<td align="right">1</td>
-<td align="left">Early.ER+</td>
-<td align="right">2</td>
-<td align="right">0.7000</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">Chemo</td>
-<td align="right">1</td>
-<td align="left">Early.ER+</td>
-<td align="right">3</td>
-<td align="right">0.7750</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen+Chemo</td>
-<td align="right">1</td>
-<td align="left">Early.ER+</td>
-<td align="right">4</td>
-<td align="right">0.5425</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">None</td>
-<td align="right">2</td>
-<td align="left">Early.ER-</td>
-<td align="right">5</td>
-<td align="right">1.0000</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen</td>
-<td align="right">2</td>
-<td align="left">Early.ER-</td>
-<td align="right">6</td>
-<td align="right">1.0000</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">Chemo</td>
-<td align="right">2</td>
-<td align="left">Early.ER-</td>
-<td align="right">7</td>
-<td align="right">0.7750</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen+Chemo</td>
-<td align="right">2</td>
-<td align="left">Early.ER-</td>
-<td align="right">8</td>
-<td align="right">0.7750</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">None</td>
-<td align="right">3</td>
-<td align="left">Advanced.ER+</td>
-<td align="right">9</td>
-<td align="right">1.0000</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen</td>
-<td align="right">3</td>
-<td align="left">Advanced.ER+</td>
-<td align="right">10</td>
-<td align="right">0.7000</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">Chemo</td>
-<td align="right">3</td>
-<td align="left">Advanced.ER+</td>
-<td align="right">11</td>
-<td align="right">0.7750</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen+Chemo</td>
-<td align="right">3</td>
-<td align="left">Advanced.ER+</td>
-<td align="right">12</td>
-<td align="right">0.5425</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-</tr>
-<tr class="odd">
-<td align="left">None</td>
-<td align="right">4</td>
-<td align="left">Advanced.ER-</td>
-<td align="right">13</td>
-<td align="right">1.0000</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen</td>
-<td align="right">4</td>
-<td align="left">Advanced.ER-</td>
-<td align="right">14</td>
-<td align="right">1.0000</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-<tr class="odd">
-<td align="left">Chemo</td>
-<td align="right">4</td>
-<td align="left">Advanced.ER-</td>
-<td align="right">15</td>
-<td align="right">0.7750</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">0</td>
-<td align="right">1</td>
-<td align="right">1</td>
-</tr>
-<tr class="even">
-<td align="left">Tamoxifen+Chemo</td>
-<td align="right">4</td>
-<td align="left">Advanced.ER-</td>
-<td align="right">16</td>
-<td align="right">0.7750</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-</tr>
-</tbody>
-</table>
+props &lt;- data.frame(adv78, 
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos,
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos,
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos)
+colnames(props) &lt;- eafr$pol$id
 
+eafr$tx &lt;- data.frame(eafr$tx, props, stringsAsFactors=FALSE)
 
-<!-- rnb-html-end -->
+eafr$tx &lt;- data.frame(eafr$tx, stringsAsFactors=FALSE)
 
+kable(eafr$tx)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="plot-incidence-and-mortality-for-uganda-our-east-african-data-source" class="section level1">
-<h1><span class="header-section-number">4</span> Plot incidence and mortality for Uganda, our East African data source</h1>
+<div id="incidence" class="section level1">
+<h1><span class="header-section-number">4</span> Incidence</h1>
+<p>We are using Uganda for our East Africa example.</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuZGF0YShpbmNyYXRlc2YpXG50aGVzZXJhdGVzIDwtIHN1YnNldChpbmNyYXRlc2YsXG4gICAgICAgICAgICAgICAgICAgICBDb3VudHJ5ICVpbiUgYygnVW5pdGVkIFN0YXRlcycsICdVZ2FuZGEnLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ01hbGF3aScsICdTb3V0aCBBZnJpY2EnLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdaaW1iYWJ3ZScsICdUdW5pc2lhJykpXG5wbG90X3JhdGVzKHRoZXNlcmF0ZXMkQWdlLCB0aGVzZXJhdGVzJEZlbWFsZS5SYXRlLlBlci4xMDBLLFxuICAgICAgICAgICAgICAgICAgICAgIHBzaXplPXRoZXNlcmF0ZXMkQ2FzZXMsIFxuICAgICAgICAgICAgICAgICAgICAgIGdyb3VwPXBhc3RlKHRoZXNlcmF0ZXMkQ291bnRyeSwgdGhlc2VyYXRlcyRZZWFyKSlcbmBgYCJ9 -->
+<pre class="r"><code>data(incratesf)
+theserates &lt;- subset(incratesf,
+                     Country %in% c('United States', 'Uganda',
+                                    'Malawi', 'South Africa', 
+                                    'Zimbabwe', 'Tunisia'))
+plot_rates(theserates$Age, theserates$Female.Rate.Per.100K,
+                      psize=theserates$Cases, 
+                      group=paste(theserates$Country, theserates$Year))</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="test-code-with-example-data-ex1-object-embedded-in-the-bcimodel-package" class="section level1">
-<h1><span class="header-section-number">5</span> Test code with example data (“ex1” object embedded in the bcimodel package)</h1>
+<div id="system-time" class="section level1">
+<h1><span class="header-section-number">5</span> System time</h1>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgU2ltdWxhdGUgcG9saWNpZXMgLSBleGFtcGxlIGRhdGFcbiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tXG5cbmlmICgxPT0wKSB7XG4gICAgIyA1MCBzaW1zXG4gICAgIyBUaW1pbmcgaXQuIFBhcmFsbGVsaXppbmcgaXMgZGVmaW5pdGVseSBmYXN0ZXIgYnV0IGNvbXB1dGVyIGRpZCBoZWF0IHVwIGEgbG90IG1vcmUuXG4gICAgdDEgPC0gc3lzdGVtLnRpbWUoc2ltcG9saWNpZXMoZXgxJHBvbCwgZXgxJG5oLCBleDEkdHgsIHNpbXM9NTApKSAjMzExIHNlY29uZHNcbiAgICB0MiA8LSBzeXN0ZW0udGltZShwYXJzaW1wb2xpY2llcyhleDEkcG9sLCBleDEkbmgsIGV4MSR0eCwgc2ltcz01MCkpICMxNjEgc2Vjb25kc1xufVxuYGBgIn0= -->
+<pre class="r"><code>#-------------------------------------------------------------------------------
+# Simulate policies - example data
+#-------------------------------------------------------------------------------
+
+if (1==0) {
+    # 50 sims
+    # Timing it. Parallelizing is definitely faster but computer did heat up a lot more.
+    t1 &lt;- system.time(simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #311 seconds
+    t2 &lt;- system.time(parsimpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #161 seconds
+}</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="real-results-for-east-africa-all-ages" class="section level1">
-<h1><span class="header-section-number">6</span> Real results for East Africa, all ages</h1>
+<div id="results-for-east-africa-ages-30-49" class="section level1">
+<h1><span class="header-section-number">6</span> Results for East Africa, ages 30-49</h1>
+<div id="run-model" class="section level2">
+<h2><span class="header-section-number">6.1</span> Run model</h2>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5Jbml0aWFsaXppbmcgcG9wdWxhdGlvbi4uLlxuU2ltdWxhdGluZyBiYXNlIGNhc2Ugc3RhZ2UgYW5kIHN1Ymdyb3VwLi4uXG5EZXRlcm1pbmluZyBzdGFnZSBzaGlmdHMuLi5cblNpbXVsYXRpbmcgdHJlYXRtZW50IHJlY2VpdmVkLi4uXG5TaW11bGF0aW5nIGNhbmNlciBtb3J0YWxpdHkuLi5cblRhYnVsYXRpbmcgdGltZSB0byBhbmQgY2F1c2Ugb2YgZGVhdGguLi5cblN1bW1hcml6aW5nIG91dGNvbWVzLi4uICAgdXNlciAgc3lzdGVtIGVsYXBzZWQgXG4gNjUuODk3ICAyMC45MDUgMzc0LjU2OCBcbiJ9 -->
-<pre><code>
-Initializing population...
-Simulating base case stage and subgroup...
-Determining stage shifts...
-Simulating treatment received...
-Simulating cancer mortality...
-Tabulating time to and cause of death...
-Summarizing outcomes...   user  system elapsed 
- 65.897  20.905 374.568 </code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cbiMgQWdlcyAzMC00OVxuIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS1cblxuaWYgKHJ1bk5vdykge1xuICAgICMgTW9kZWxcbiAgICBzdGFydGNsb2NrIDwtIHByb2MudGltZSgpXG4gICAgbWFudXNjcmlwdF9lYXN0YWZyaWNhIDwtIHBhcnNpbXBvbGljaWVzKGVhZnIkcG9sLCBlYWZyJG5oLCBlYWZyJHR4LCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY3NvdXJjZT0nVWdhbmRhJyxcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1vcnRzb3VyY2U9J1VnYW5kYScsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmV0dXJuc3RhdHM9YygnbWVhbicsICdsb3dlcicsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAndXBwZXInKSwgXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBmdXRpbWVzPWMoNSwxMCwyMCksIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbWluYWdlPTMwLCBtYXhhZ2U9NDksIHNpbXM9bnNpbXMpXG4gICAgIyBSdW50aW1lIGluIG1pbnV0ZXNcbiAgICBydW50aW1lX21pbnV0ZXMgPC0gKHByb2MudGltZSgpLXN0YXJ0Y2xvY2spLzYwXG4gICAgIyBGb3JtYXQgYW5kIHNhdmUgcmVzdWx0c1xuICAgIGZpbmFsdGFiIDwtIGZvcm1hdF9ib3VuZHNfbGlzdChtYW51c2NyaXB0X2Vhc3RhZnJpY2EsIFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBwYXJlbj1UUlVFLCBpbmNsdWRlbWVhbj1UUlVFLCBcbiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgZGlnaXRzPWMoMCwwLDEsMiwwLDApLFxuICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb21waWxlYWxsPVRSVUUpXG4gICAgd3JpdGUuY3N2KGZpbmFsdGFiLCBmaWxlPXBhc3RlMCgnZWFzdGFmcmljYV8nLCBuc2ltcywgJ3NpbXMuY3N2JyksXG4gICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByb3cubmFtZXM9RkFMU0UpXG59XG5gYGAifQ== -->
+<pre class="r"><code>#-------------------------------------------------------------------------------
+# Ages 30-49
+#-------------------------------------------------------------------------------
 
-<!-- rnb-html-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImtuaXRfYXNpcyJdLCJzaXppbmdQb2xpY3kiOltdfX0= -->
-
-<table>
-<colgroup>
-<col width="7%" />
-<col width="5%" />
-<col width="6%" />
-<col width="7%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">T0: Surgery only</th>
-<th align="right">T1: Tamoxifen for ER+</th>
-<th align="right">T2: T1 plus Chemo for ER-</th>
-<th align="right">T3: T2 plus Chemo for Advanced ER+</th>
-<th align="right">T1 plus downstaging to 60% advanced</th>
-<th align="right">T2 plus downstaging to 60% advanced</th>
-<th align="right">T3 plus downstaging to 60% advanced</th>
-<th align="right">T1 plus downstaging to 35% advanced</th>
-<th align="right">T2 plus downstaging to 35% advanced</th>
-<th align="right">T3 plus downstaging to 35% advanced</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Cumulative BC Incidence</td>
-<td align="right">403.74</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">Cumulative BC Mortality</td>
-<td align="right">170.94</td>
-<td align="right">157.36</td>
-<td align="right">142.74</td>
-<td align="right">135.08</td>
-<td align="right">134.34</td>
-<td align="right">122.08</td>
-<td align="right">115.12</td>
-<td align="right">103.72</td>
-<td align="right">92.16</td>
-<td align="right">89.24</td>
-</tr>
-<tr class="odd">
-<td align="left">% Incident Surviving</td>
-<td align="right">57.69</td>
-<td align="right">61.02</td>
-<td align="right">64.67</td>
-<td align="right">66.53</td>
-<td align="right">66.72</td>
-<td align="right">69.78</td>
-<td align="right">71.47</td>
-<td align="right">74.30</td>
-<td align="right">77.19</td>
-<td align="right">77.86</td>
-</tr>
-<tr class="even">
-<td align="left">MRR</td>
-<td align="right">1.00</td>
-<td align="right">0.92</td>
-<td align="right">0.84</td>
-<td align="right">0.79</td>
-<td align="right">0.79</td>
-<td align="right">0.72</td>
-<td align="right">0.68</td>
-<td align="right">0.61</td>
-<td align="right">0.54</td>
-<td align="right">0.52</td>
-</tr>
-<tr class="odd">
-<td align="left">ARR</td>
-<td align="right">0.00</td>
-<td align="right">13.58</td>
-<td align="right">28.20</td>
-<td align="right">35.86</td>
-<td align="right">36.60</td>
-<td align="right">48.86</td>
-<td align="right">55.82</td>
-<td align="right">67.22</td>
-<td align="right">78.78</td>
-<td align="right">81.70</td>
-</tr>
-<tr class="even">
-<td align="left">Years of Life Saved</td>
-<td align="right">0.00</td>
-<td align="right">50.65</td>
-<td align="right">110.06</td>
-<td align="right">141.90</td>
-<td align="right">139.52</td>
-<td align="right">188.03</td>
-<td align="right">211.27</td>
-<td align="right">247.50</td>
-<td align="right">292.51</td>
-<td align="right">306.39</td>
-</tr>
-</tbody>
-</table>
-
-
-<!-- rnb-html-end -->
-
+if (runNow) {
+    # Model
+    startclock &lt;- proc.time()
+    manuscript_eastafrica &lt;- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, 
+                                          incsource='Uganda',
+                                          mortsource='Uganda', 
+                                          returnstats=c('mean', 'lower', 
+                                                        'upper'), 
+                                          futimes=c(5,10,20), 
+                                          minage=30, maxage=49, sims=nsims)
+    # Runtime in minutes
+    runtime_minutes &lt;- (proc.time()-startclock)/60
+    # Format and save results
+    finaltab &lt;- format_bounds_list(manuscript_eastafrica, 
+                                   paren=TRUE, includemean=TRUE, 
+                                   digits=c(0,0,1,2,0,0),
+                                   compileall=TRUE)
+    write.csv(finaltab, file=paste0('eastafrica_', nsims, 'sims.csv'),
+                                    row.names=FALSE)
+}</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="real-results-for-east-africa-ages-30-49-50-sims" class="section level1">
-<h1><span class="header-section-number">7</span> Real results for East Africa, ages 30-49, 50 sims</h1>
+<div id="runtime" class="section level2">
+<h2><span class="header-section-number">6.2</span> Runtime</h2>
+<p>Runtime in minutes:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5Jbml0aWFsaXppbmcgcG9wdWxhdGlvbi4uLlxuU2ltdWxhdGluZyBiYXNlIGNhc2Ugc3RhZ2UgYW5kIHN1Ymdyb3VwLi4uXG5EZXRlcm1pbmluZyBzdGFnZSBzaGlmdHMuLi5cblNpbXVsYXRpbmcgdHJlYXRtZW50IHJlY2VpdmVkLi4uXG5TaW11bGF0aW5nIGNhbmNlciBtb3J0YWxpdHkuLi5cblRhYnVsYXRpbmcgdGltZSB0byBhbmQgY2F1c2Ugb2YgZGVhdGguLi5cblN1bW1hcml6aW5nIG91dGNvbWVzLi4uICAgdXNlciAgc3lzdGVtIGVsYXBzZWQgXG4gNjQuMTQxICAyNy43NDEgNDA0LjY2MyBcbiJ9 -->
-<pre><code>
-Initializing population...
-Simulating base case stage and subgroup...
-Determining stage shifts...
-Simulating treatment received...
-Simulating cancer mortality...
-Tabulating time to and cause of death...
-Summarizing outcomes...   user  system elapsed 
- 64.141  27.741 404.663 </code></pre>
-<!-- rnb-output-end -->
-<!-- rnb-chunk-end -->
-<!-- rnb-text-begin -->
-<!-- rnb-text-end -->
-<!-- rnb-chunk-begin -->
-
-<!-- rnb-html-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImtuaXRfYXNpcyJdLCJzaXppbmdQb2xpY3kiOltdfX0= -->
-
-<table>
-<colgroup>
-<col width="7%" />
-<col width="5%" />
-<col width="6%" />
-<col width="7%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">T0: Surgery only</th>
-<th align="right">T1: Tamoxifen for ER+</th>
-<th align="right">T2: T1 plus Chemo for ER-</th>
-<th align="right">T3: T2 plus Chemo for Advanced ER+</th>
-<th align="right">T1 plus downstaging to 60% advanced</th>
-<th align="right">T2 plus downstaging to 60% advanced</th>
-<th align="right">T3 plus downstaging to 60% advanced</th>
-<th align="right">T1 plus downstaging to 35% advanced</th>
-<th align="right">T2 plus downstaging to 35% advanced</th>
-<th align="right">T3 plus downstaging to 35% advanced</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Cumulative BC Incidence</td>
-<td align="right">619.28</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">Cumulative BC Mortality</td>
-<td align="right">268.18</td>
-<td align="right">247.26</td>
-<td align="right">224.00</td>
-<td align="right">213.18</td>
-<td align="right">211.36</td>
-<td align="right">189.54</td>
-<td align="right">182.34</td>
-<td align="right">161.18</td>
-<td align="right">144.90</td>
-<td align="right">137.86</td>
-</tr>
-<tr class="odd">
-<td align="left">% Incident Surviving</td>
-<td align="right">56.70</td>
-<td align="right">60.08</td>
-<td align="right">63.85</td>
-<td align="right">65.57</td>
-<td align="right">65.88</td>
-<td align="right">69.41</td>
-<td align="right">70.55</td>
-<td align="right">73.98</td>
-<td align="right">76.61</td>
-<td align="right">77.74</td>
-</tr>
-<tr class="even">
-<td align="left">MRR</td>
-<td align="right">1.00</td>
-<td align="right">0.92</td>
-<td align="right">0.84</td>
-<td align="right">0.80</td>
-<td align="right">0.79</td>
-<td align="right">0.71</td>
-<td align="right">0.68</td>
-<td align="right">0.60</td>
-<td align="right">0.54</td>
-<td align="right">0.51</td>
-</tr>
-<tr class="odd">
-<td align="left">ARR</td>
-<td align="right">0.00</td>
-<td align="right">20.92</td>
-<td align="right">44.18</td>
-<td align="right">55.00</td>
-<td align="right">56.82</td>
-<td align="right">78.64</td>
-<td align="right">85.84</td>
-<td align="right">107.00</td>
-<td align="right">123.28</td>
-<td align="right">130.32</td>
-</tr>
-<tr class="even">
-<td align="left">Years of Life Saved</td>
-<td align="right">0.00</td>
-<td align="right">77.34</td>
-<td align="right">173.35</td>
-<td align="right">214.31</td>
-<td align="right">210.19</td>
-<td align="right">288.48</td>
-<td align="right">317.85</td>
-<td align="right">390.93</td>
-<td align="right">448.46</td>
-<td align="right">475.88</td>
-</tr>
-</tbody>
-</table>
-
-
-<!-- rnb-html-end -->
-
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucnVudGltZV9taW51dGVzXG5gYGAifQ== -->
+<pre class="r"><code>runtime_minutes</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 </div>
-<div id="real-results-for-east-africa-ages-30-49-100-sims" class="section level1">
-<h1><span class="header-section-number">8</span> Real results for East Africa, ages 30-49, 100 sims</h1>
+<div id="results" class="section level2">
+<h2><span class="header-section-number">6.3</span> Results</h2>
+<p>RESULTS FOR 10 SIMS:</p>
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-<!-- rnb-output-begin eyJkYXRhIjoiXG5Jbml0aWFsaXppbmcgcG9wdWxhdGlvbi4uLlxuU2ltdWxhdGluZyBiYXNlIGNhc2Ugc3RhZ2UgYW5kIHN1Ymdyb3VwLi4uXG5EZXRlcm1pbmluZyBzdGFnZSBzaGlmdHMuLi5cblNpbXVsYXRpbmcgdHJlYXRtZW50IHJlY2VpdmVkLi4uXG5TaW11bGF0aW5nIGNhbmNlciBtb3J0YWxpdHkuLi5cblRhYnVsYXRpbmcgdGltZSB0byBhbmQgY2F1c2Ugb2YgZGVhdGguLi5cblN1bW1hcml6aW5nIG91dGNvbWVzLi4uICAgdXNlciAgc3lzdGVtIGVsYXBzZWQgXG4xMjIuOTk4ICA1Ny4wNDIgNzc3LjI4MCBcbiJ9 -->
-<pre><code>
-Initializing population...
-Simulating base case stage and subgroup...
-Determining stage shifts...
-Simulating treatment received...
-Simulating cancer mortality...
-Tabulating time to and cause of death...
-Summarizing outcomes...   user  system elapsed 
-122.998  57.042 777.280 </code></pre>
-<!-- rnb-output-end -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxubGlicmFyeShwYW5kZXIpXG5wYW5kZXJPcHRpb25zKCdrZWVwLmxpbmUuYnJlYWtzJywgVFJVRSlcbnN0YXR3aWR0aCA8LSAxLjI1KjEwMC9uY29sKGZpbmFsdGFiKVxuZnV3aWR0aCA8LSAwLjUqc3RhdHdpZHRoXG5jZWxsd2lkdGhzIDwtICgxMDAtc3RhdHdpZHRoLWZ1d2lkdGgpL25jb2woZmluYWx0YWIpXG5hbGx3aWR0aHMgPC0gcm91bmQoYyhmdXdpZHRoLCBzdGF0d2lkdGgsIFxuICAgICAgICAgICAgICAgICAgICAgcmVwKGNlbGx3aWR0aHMsIChuY29sKGZpbmFsdGFiKS0yKSkpLDIpXG5hbGx3aWR0aHNbMl0gPC0gYWxsd2lkdGhzWzJdKygxMDAtc3VtKGFsbHdpZHRocykpXG53aWR0aHMgPC0gcGFzdGUwKGFsbHdpZHRocywgJyUnKVxuIyBjaGFyd2lkdGhzPWMoMiwgMjAsIHJlcCgxMCwgbmNvbChmaW5hbHRhYiktMikpXG4jIGlmIChydW5Ob3cpIHBhbmRlcihmaW5hbHRhYiwgc3BsaXQuY2VsbHM9d2lkdGhzKVxuIyBpZiAocnVuTm93KSBwYW5kZXIoZmluYWx0YWIpXG4jIE5vdGUsIGl0IHdhcyB2ZXJ5IGRpZmZpY3VsdCB0byBnZXQgdGhlIHRhYmxlIHRvIGxvb2sgcmlnaHQuIFRoZXJlIHdlcmVcbiMgc29tZSBjb21iaW5hdGlvbnMgb2YgcGFyYW1ldGVycyB0aGF0IGRpZCBub3Qgd29yay4gZS5nLiBoYXZpbmcgc3BsaXQudGFibGVzPTE3NSBvciAyNTBcbiMgSSBnYXZlIHVwIC0gcmVtb3ZlZCB0aGUgXCJcXG5cIiBmcm9tIGZvcm1hdF9ib3VuZHMgYW5kIHdlbnQgYmFjayB0byBcIiBcIlxuIyBpZiAocnVuTm93KSBwYW5kb2MudGFibGUoZmluYWx0YWIsIHNwbGl0LmNlbGxzPXdpZHRocywgc3BsaXQudGFibGVzPTE2NSlcbmlmIChydW5Ob3cpIGthYmxlKGZpbmFsdGFiKVxuYGBgIn0= -->
+<pre class="r"><code>library(pander)
+panderOptions('keep.line.breaks', TRUE)
+statwidth &lt;- 1.25*100/ncol(finaltab)
+fuwidth &lt;- 0.5*statwidth
+cellwidths &lt;- (100-statwidth-fuwidth)/ncol(finaltab)
+allwidths &lt;- round(c(fuwidth, statwidth, 
+                     rep(cellwidths, (ncol(finaltab)-2))),2)
+allwidths[2] &lt;- allwidths[2]+(100-sum(allwidths))
+widths &lt;- paste0(allwidths, '%')
+# charwidths=c(2, 20, rep(10, ncol(finaltab)-2))
+# if (runNow) pander(finaltab, split.cells=widths)
+# if (runNow) pander(finaltab)
+# Note, it was very difficult to get the table to look right. There were
+# some combinations of parameters that did not work. e.g. having split.tables=175 or 250
+# I gave up - removed the &quot;\n&quot; from format_bounds and went back to &quot; &quot;
+# if (runNow) pandoc.table(finaltab, split.cells=widths, split.tables=165)
+if (runNow) kable(finaltab)</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
 <!-- rnb-text-end -->
 <!-- rnb-chunk-begin -->
-
-<!-- rnb-html-begin eyJtZXRhZGF0YSI6eyJjbGFzc2VzIjpbImtuaXRfYXNpcyJdLCJzaXppbmdQb2xpY3kiOltdfX0= -->
-
-<table>
-<colgroup>
-<col width="7%" />
-<col width="5%" />
-<col width="6%" />
-<col width="7%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-<col width="10%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th align="left"></th>
-<th align="right">T0: Surgery only</th>
-<th align="right">T1: Tamoxifen for ER+</th>
-<th align="right">T2: T1 plus Chemo for ER-</th>
-<th align="right">T3: T2 plus Chemo for Advanced ER+</th>
-<th align="right">T1 plus downstaging to 60% advanced</th>
-<th align="right">T2 plus downstaging to 60% advanced</th>
-<th align="right">T3 plus downstaging to 60% advanced</th>
-<th align="right">T1 plus downstaging to 35% advanced</th>
-<th align="right">T2 plus downstaging to 35% advanced</th>
-<th align="right">T3 plus downstaging to 35% advanced</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td align="left">Cumulative BC Incidence</td>
-<td align="right">616.41</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-</tr>
-<tr class="even">
-<td align="left">Cumulative BC Mortality</td>
-<td align="right">265.94</td>
-<td align="right">244.32</td>
-<td align="right">220.40</td>
-<td align="right">207.94</td>
-<td align="right">208.93</td>
-<td align="right">186.84</td>
-<td align="right">176.89</td>
-<td align="right">158.04</td>
-<td align="right">141.83</td>
-<td align="right">135.75</td>
-</tr>
-<tr class="odd">
-<td align="left">% Incident Surviving</td>
-<td align="right">56.85</td>
-<td align="right">60.37</td>
-<td align="right">64.24</td>
-<td align="right">66.26</td>
-<td align="right">66.11</td>
-<td align="right">69.68</td>
-<td align="right">71.31</td>
-<td align="right">74.36</td>
-<td align="right">76.99</td>
-<td align="right">77.98</td>
-</tr>
-<tr class="even">
-<td align="left">MRR</td>
-<td align="right">1.00</td>
-<td align="right">0.92</td>
-<td align="right">0.83</td>
-<td align="right">0.78</td>
-<td align="right">0.79</td>
-<td align="right">0.70</td>
-<td align="right">0.67</td>
-<td align="right">0.59</td>
-<td align="right">0.53</td>
-<td align="right">0.51</td>
-</tr>
-<tr class="odd">
-<td align="left">ARR</td>
-<td align="right">0.00</td>
-<td align="right">21.62</td>
-<td align="right">45.54</td>
-<td align="right">58.00</td>
-<td align="right">57.01</td>
-<td align="right">79.10</td>
-<td align="right">89.05</td>
-<td align="right">107.90</td>
-<td align="right">124.11</td>
-<td align="right">130.19</td>
-</tr>
-<tr class="even">
-<td align="left">Years of Life Saved</td>
-<td align="right">0.00</td>
-<td align="right">88.73</td>
-<td align="right">174.87</td>
-<td align="right">224.21</td>
-<td align="right">211.56</td>
-<td align="right">290.71</td>
-<td align="right">333.93</td>
-<td align="right">393.12</td>
-<td align="right">451.23</td>
-<td align="right">474.92</td>
-</tr>
-</tbody>
-</table>
-
-
-<!-- rnb-html-end -->
-
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucmxvbmcgPC0gY29tcGlsZV9sb25nKG1hbnVzY3JpcHRfZWFzdGFmcmljYSlcbnJwbG90IDwtIHBsb3RfcmVzdWx0cyhybG9uZywgdHlwZT0nbGluZScpXG5ycGxvdFxuYGBgIn0= -->
+<pre class="r"><code>rlong &lt;- compile_long(manuscript_eastafrica)
+rplot &lt;- plot_results(rlong, type='line')
+rplot</code></pre>
+<!-- rnb-source-end -->
 <!-- rnb-chunk-end -->
 <!-- rnb-text-begin -->
+<!-- rnb-text-end -->
+<!-- rnb-chunk-begin -->
+<!-- rnb-source-begin eyJkYXRhIjoiYGBgclxucnBsb3QgPC0gcGxvdF9yZXN1bHRzKHJsb25nLCB0eXBlPSdiYXInKVxucnBsb3RcbmBgYCJ9 -->
+<pre class="r"><code>rplot &lt;- plot_results(rlong, type='bar')
+rplot</code></pre>
+<!-- rnb-source-end -->
+<!-- rnb-chunk-end -->
+<!-- rnb-text-begin -->
+</div>
 </div>
 <div id="comments" class="section level1">
-<h1><span class="header-section-number">9</span> Comments</h1>
+<h1><span class="header-section-number">7</span> Comments</h1>
 <!-- rnb-text-end -->
 </div>
 
-<div id="rmd-source-code">LS0tCnRpdGxlOiAiUG9saWN5IHNpbXVsYXRpb24gZm9yIEVhc3QgQWZyaWNhIgpvdXRwdXQ6CiAgaHRtbF9ub3RlYm9vazogCiAgICAgIHRvYzogdHJ1ZQogICAgICB0b2NfZGVwdGg6IDIKICAgICAgbnVtYmVyX3NlY3Rpb25zOiB0cnVlCiAgaHRtbF9kb2N1bWVudDogCiAgICAgIHRvYzogdHJ1ZQogICAgICB0b2NfZGVwdGg6IDIKICAgICAgbnVtYmVyX3NlY3Rpb25zOiB0cnVlCi0tLQoKIyBTZXR1cApgYGB7cn0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBTZXR1cCAKIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KbGlicmFyeShrbml0cikKbGlicmFyeShwbHlyKQpsaWJyYXJ5KGJjaW1vZGVsKQpkYXRhKGV4MSkKCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQojIEtuaXRyCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQpvcHRzX2NodW5rJHNldChlY2hvPUZBTFNFLCBtZXNzYWdlPUZBTFNFLCB3YXJuaW5nPUZBTFNFKQpgYGAKCiMgU2V0IHVwIGlucHV0cwoKIyMgSW5pdGlhbGl6ZSBzdGF0cyBob2xkZXIgb2JqZWN0ClRoaXMgaXMgcGVyaGFwcyBiZXR0ZXIgZG9uZSBpbiBhIC5jc3YgZmlsZSBhbmQgdGhlbiBpbXBvcnRlZD8KYGBge3J9CiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMgU3RhdHMgd2lsbCBiZSBjb250YWluZWQgaW4gImVhZnIiIGxpc3Qgb2JqZWN0CiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCmVhZnIgPC0gdmVjdG9yKCdsaXN0JywgbGVuZ3RoPWxlbmd0aChleDEpKQoobmFtZXMoZWFmcikgPC0gbmFtZXMoZXgxKSkKYGBgCgojIyBEZWZpbmUgcG9saWNpZXMgdG8gaW52ZXN0aWdhdGUKCk5vdGU6IGJhc2VsaW5lICUgYWR2YW5jZWQgPSA3OCUKYGBge3J9CmVhZnIkcG9sICA8LSBkYXRhLmZyYW1lKG51bT1jKDE6MTApLAogICAgICAgICAgICAgICAgICAgICAgICAgaWQ9YygnYWR2NzgnLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ2Fkdjc4LnRhbScsICdhZHY3OC50YW1jaGVtbycsICdhZHY3OC50YW1jaGVtb0VScG9zJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ2FkdjYwLnRhbScsICdhZHY2MC50YW1jaGVtbycsICdhZHY2MC50YW1jaGVtb0VScG9zJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ2FkdjM1LnRhbScsICdhZHYzNS50YW1jaGVtbycsICdhZHYzNS50YW1jaGVtb0VScG9zJwogICAgICAgICAgICAgICAgICAgICAgICAgICAgICApLAogICAgICAgICAgICAgICAgICAgICAgICAgbmFtZT1jKCdUMDogU3VyZ2VyeSBvbmx5JywgJ1QxOiBUYW1veGlmZW4gZm9yIEVSKycsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdUMjogVDEgcGx1cyBDaGVtbyBmb3IgRVItJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVDM6IFQyIHBsdXMgQ2hlbW8gZm9yIEFkdmFuY2VkIEVSKycsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdUMSBwbHVzIGRvd25zdGFnaW5nIHRvIDYwJSBhZHZhbmNlZCcsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ1QyIHBsdXMgZG93bnN0YWdpbmcgdG8gNjAlIGFkdmFuY2VkJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVDMgcGx1cyBkb3duc3RhZ2luZyB0byA2MCUgYWR2YW5jZWQnLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdUMSBwbHVzIGRvd25zdGFnaW5nIHRvIDM1JSBhZHZhbmNlZCcsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ1QyIHBsdXMgZG93bnN0YWdpbmcgdG8gMzUlIGFkdmFuY2VkJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVDMgcGx1cyBkb3duc3RhZ2luZyB0byAzNSUgYWR2YW5jZWQnKSwKICAgICAgICAgICAgICAgICAgICAgICAgIHBhaXJudW09YyhOQSwgTkEsIE5BLCBOQSwgcmVwKGMoMiwzLDQpLCAyKSksCiAgICAgICAgICAgICAgICAgICAgICAgICBlYXJseWRldEhSPWMocmVwKDEsIDQpLCByZXAoMC42MC8wLjc4LCAzKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXAoMC4zNS8wLjc4LCAzKSksCiAgICAgICAgICAgICAgICAgICAgICAgICBzdHJpbmdzQXNGYWN0b3JzPUZBTFNFKQprYWJsZShlYWZyJHBvbCkKYGBgCgojIyBEZWZpbmUgbmF0dXJhbCBoaXN0b3J5IHBhcmFtZXRlcnMKCkFkdmFuY2VkLXN0YWdlIGlzIDc4JSBhbmQgcHJvcG9ydGlvbiBFUisgaXMgNDElLiAKCk1vcnRhbGl0eSByYXRlcyBjb3JyZXNwb25kIHRvIDM1JSA1LXllYXIgc3Vydml2YWwgZm9yIGFkdmFuY2VkIGFuZCA4MCUgNS15ZWFyIHN1cnZpdmFsIGZvciBlYXJseS4KYGBge3J9CmVhZnIkbmggPC0gY29tcGlsZV9uYXR1cmFsaGlzdChwcm9wX2Fkdj0wLjc4LCAKICAgICAgICAgICAgICAgICBtb3J0cmF0ZXM9YyhFYXJseT0wLjA0NDYsIEFkdmFuY2VkPTAuMjEpLAogICAgICAgICAgICAgICAgIHN1Ymdyb3VwX3Byb2JzPWMoYEVSK2A9MC40MSwgYEVSLWA9MC41OSkpCmthYmxlKGVhZnIkbmhbLGMoJ3N0YWdlJywgJ3N1Ymdyb3VwJywgJ21vcnRyYXRlJywgJ3Byb3AnKV0pCmBgYAoKVGhlICJtYXAiIGFzc2lnbnMgbnVtZXJpYyBpZCdzIHRvIGVhY2ggc3RhZ2Utc3ViZ3JvdXAuIFRoZSBzdGFnZS1zaGlmdGluZyB3aWxsIGtlZXAgRVIgc3RhdHVzIGNvbnN0YW50LCBlLmcuIHN0YWdlICMzIHNoaWZ0cyB0byAjMSBhbmQgc3RhZ2UgIzQgc2hpZnRzIHRvICMyLgpgYGB7cn0KKGVhZnIkbWFwIDwtIGNyZWF0ZV9zdGFnZXNoaWZ0X21hcChlYWZyJG5oKSkKYGBgCgojIFNwZWNpZnkgdHJlYXRtZW50IGZvciBlYWNoIHBvbGljeQoKQWNjb3JkaW5nIHRvIHRoZSBwb2xpY2llcyBkZWZpbmVkIGFib3ZlLCB0aGVyZSBhcmUgNCB0cmVhdG1lbnQgc2NlbmFyaW9zOiBUMCwgVDEsIFQyIGFuZCBUMy4gV2Ugd2lsbCBkZWZpbmUgdGhvc2UgZm9yIHRoZSBuby1zdGFnZS1zaGlmdCBwb2xpY2llcywgYW5kIHRoZW4gY29weSB0aGVtIG92ZXIgZm9yIHRoZSAyIG90aGVyIHN0YWdlIHNoaWZ0cy4gCmBgYHtyfQplYWZyJHR4IDwtIGRhdGEuZnJhbWUoZXhwYW5kLmdyaWQodHhTU2lkPWMoJ05vbmUnLCAnVGFtb3hpZmVuJywgJ0NoZW1vJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdUYW1veGlmZW4rQ2hlbW8nKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIFNTbm89MTpucm93KGVhZnIkbmgpKSwKICAgICAgICAgICAgICAgICAgICAgIHN0cmluZ3NBc0ZhY3RvcnM9RkFMU0UpCm50cmVhdCA8LSBucm93KGVhZnIkdHgpCm50eCA8LSBsZW5ndGgodW5pcXVlKGVhZnIkdHgkdHhTU2lkKSkKCiMgUHJvcG9ydGlvbnMgc3VtIHRvIDEgd2l0aGluIHN0YWdlLXN1Ymdyb3VwIGdyb3VwcwplYWZyJHR4IDwtIHRyYW5zZm9ybShlYWZyJHR4LCAKICAgICAgICAgICAgICAgICAgICAgU1NpZD1jKHJlcCgnRWFybHkuRVIrJywgbnR4KSwgcmVwKCdFYXJseS5FUi0nLCBudHgpLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJlcCgnQWR2YW5jZWQuRVIrJywgbnR4KSwgcmVwKCdBZHZhbmNlZC5FUi0nLCBudHgpKSwgCiAgICAgICAgICAgICAgICAgICAgIHR4U1Nubz0xOm50cmVhdCkKZWFmciR0eCA8LSB0cmFuc2Zvcm0oZWFmciR0eCwKICAgICAgICAgICAgICAgICAgICAgICAgdHhIUj1jKDEsIDAuNywgMC43NzUsIDAuNzc1KjAuNywgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLCAxLCAwLjc3NSwgMC43NzUsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAxLCAwLjcsICAwLjc3NSwgMC43NzUqMC43LAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMSwgMSwgMC43NzUsIDAuNzc1KSkKYWR2NzggPC0gYWR2NzgudGFtIDwtIHJlcCgwLCBudHJlYXQpCnR4U1NpZCA8LSBhcy5jaGFyYWN0ZXIoZWFmciR0eCR0eFNTaWQpClNTaWQgPC0gYXMuY2hhcmFjdGVyKGVhZnIkdHgkU1NpZCkKYWR2NzhbdHhTU2lkPT0nTm9uZSddIDwtIDEgCmFkdjc4LnRhbVt0eFNTaWQ9PSdUYW1veGlmZW4nICYgKFNTaWQ9PSdFYXJseS5FUisnIHwgU1NpZD09J0FkdmFuY2VkLkVSKycpXSA8LSAxCmFkdjc4LnRhbWNoZW1vIDwtIGFkdjc4LnRhbQphZHY3OC50YW1bdHhTU2lkPT0nTm9uZScgJiAoU1NpZD09J0Vhcmx5LkVSLScgfCBTU2lkPT0nQWR2YW5jZWQuRVItJyldIDwtIDEKYWR2NzgudGFtY2hlbW9bdHhTU2lkPT0nQ2hlbW8nICYgKFNTaWQ9PSdFYXJseS5FUi0nIHwgU1NpZD09J0FkdmFuY2VkLkVSLScpXSA8LSAxCmFkdjc4LnRhbWNoZW1vRVJwb3MgPC0gYWR2NzgudGFtY2hlbW8KYWR2NzgudGFtY2hlbW9FUnBvc1t0eFNTaWQ9PSdUYW1veGlmZW4nICYgU1NpZD09J0FkdmFuY2VkLkVSKyddIDwtIDAKYWR2NzgudGFtY2hlbW9FUnBvc1t0eFNTaWQ9PSdUYW1veGlmZW4rQ2hlbW8nICYgU1NpZD09J0FkdmFuY2VkLkVSKyddIDwtIDEKCnByb3BzIDwtIGRhdGEuZnJhbWUoYWR2NzgsIAogICAgICAgICAgICAgICBhZHY3OC50YW0sIGFkdjc4LnRhbWNoZW1vLCBhZHY3OC50YW1jaGVtb0VScG9zLAogICAgICAgICAgICAgICBhZHY3OC50YW0sIGFkdjc4LnRhbWNoZW1vLCBhZHY3OC50YW1jaGVtb0VScG9zLAogICAgICAgICAgICAgICBhZHY3OC50YW0sIGFkdjc4LnRhbWNoZW1vLCBhZHY3OC50YW1jaGVtb0VScG9zKQpjb2xuYW1lcyhwcm9wcykgPC0gZWFmciRwb2wkaWQKCmVhZnIkdHggPC0gZGF0YS5mcmFtZShlYWZyJHR4LCBwcm9wcywgc3RyaW5nc0FzRmFjdG9ycz1GQUxTRSkKCmVhZnIkdHggPC0gZGF0YS5mcmFtZShlYWZyJHR4LCBzdHJpbmdzQXNGYWN0b3JzPUZBTFNFKQoKa2FibGUoZWFmciR0eCkKYGBgCgojIFBsb3QgaW5jaWRlbmNlIGFuZCBtb3J0YWxpdHkgZm9yIFVnYW5kYSwgb3VyIEVhc3QgQWZyaWNhbiBkYXRhIHNvdXJjZQpgYGB7cn0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBUTyBETyAKIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KYGBgCgojIFRlc3QgY29kZSB3aXRoIGV4YW1wbGUgZGF0YSAoImV4MSIgb2JqZWN0IGVtYmVkZGVkIGluIHRoZSBiY2ltb2RlbCBwYWNrYWdlKQpgYGB7cn0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBTaW11bGF0ZSBwb2xpY2llcyAtIGV4YW1wbGUgZGF0YQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoKaWYgKDE9PTApIHsKIyAxMCBzaW1zCnVnYW5kYV9zdGRwb3AgPC0gc2ltcG9saWNpZXMoZXgxJHBvbCwgZXgxJG5oLCBleDEkdHgpCnBhcnVnYW5kYV9zdGRwb3AgPC0gcGFyc2ltcG9saWNpZXMoZXgxJHBvbCwgZXgxJG5oLCBleDEkdHgpCgojIDUwIHNpbXMKIyBUaW1pbmcgaXQuIFBhcmFsbGVsaXppbmcgaXMgZGVmaW5pdGVseSBmYXN0ZXIgYnV0IGNvbXB1dGVyIGRpZCBoZWF0IHVwIGEgbG90IG1vcmUuCnQxIDwtIHN5c3RlbS50aW1lKHNpbXBvbGljaWVzKGV4MSRwb2wsIGV4MSRuaCwgZXgxJHR4LCBzaW1zPTUwKSkgIzMxMSBzZWNvbmRzCnQyIDwtIHN5c3RlbS50aW1lKHBhcnNpbXBvbGljaWVzKGV4MSRwb2wsIGV4MSRuaCwgZXgxJHR4LCBzaW1zPTUwKSkgIzE2MSBzZWNvbmRzCn0KYGBgCgojIFJlYWwgcmVzdWx0cyBmb3IgRWFzdCBBZnJpY2EsIGFsbCBhZ2VzCmBgYHtyfQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQojIFNpbXVsYXRlIHBvbGljaWVzIC0gcmVhbCBkYXRhCiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCgojIFRlc3Qgd2l0aCAxMCBzaW1zIC0gdGFrZXMgbWludXRlcwppZiAoMT09MCkgewpkZXZ0b29sczo6bG9hZF9hbGwoKQptYW51c2NyaXB0X2Vhc3RhZnJpY2EgPC0gc2ltcG9saWNpZXMoZWFmciRwb2wsIGVhZnIkbmgsIGVhZnIkdHgpCn0KCiMgVGVzdCB3aXRoIDUwIHNpbXMKbGlicmFyeShwYXJhbGxlbCkKc3RhcnRjbG9jayA8LSBwcm9jLnRpbWUoKQptYW51c2NyaXB0X2Vhc3RhZnJpY2EgPC0gcGFyc2ltcG9saWNpZXMoZWFmciRwb2wsIGVhZnIkbmgsIGVhZnIkdHgsIHNpbXM9NTApCihydW50aW1lIDwtIHByb2MudGltZSgpLXN0YXJ0Y2xvY2spCmBgYAoKYGBge3J9CmthYmxlKG1hbnVzY3JpcHRfZWFzdGFmcmljYVtbJzEwJ11dKQpgYGAKCiMgUmVhbCByZXN1bHRzIGZvciBFYXN0IEFmcmljYSwgYWdlcyAzMC00OSwgNTAgc2ltcwpgYGB7cn0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBBZ2VzIDMwLTQ5CiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCgpzdGFydGNsb2NrIDwtIHByb2MudGltZSgpCm1hbnVzY3JpcHRfZWFzdGFmcmljYSA8LSBwYXJzaW1wb2xpY2llcyhlYWZyJHBvbCwgZWFmciRuaCwgZWFmciR0eCwgbWluYWdlPTMwLCBtYXhhZ2U9NDksIHNpbXM9NTApCihydW50aW1lIDwtIHByb2MudGltZSgpLXN0YXJ0Y2xvY2spCmBgYAoKYGBge3J9CmthYmxlKG1hbnVzY3JpcHRfZWFzdGFmcmljYVtbJzEwJ11dKQpgYGAKCiMgUmVhbCByZXN1bHRzIGZvciBFYXN0IEFmcmljYSwgYWdlcyAzMC00OSwgMTAwIHNpbXMKYGBge3J9CiMtLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMgQWdlcyAzMC00OQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoKc3RhcnRjbG9jayA8LSBwcm9jLnRpbWUoKQptYW51c2NyaXB0X2Vhc3RhZnJpY2ExMDAgPC0gcGFyc2ltcG9saWNpZXMoZWFmciRwb2wsIGVhZnIkbmgsIGVhZnIkdHgsIG1pbmFnZT0zMCwgbWF4YWdlPTQ5LCBzaW1zPTEwMCkKKHJ1bnRpbWUgPC0gcHJvYy50aW1lKCktc3RhcnRjbG9jaykKYGBgCgpgYGB7cn0Ka2FibGUobWFudXNjcmlwdF9lYXN0YWZyaWNhMTAwW1snMTAnXV0pCmBgYAoKIyBDb21tZW50cwoK</div>
+<div id="rmd-source-code">LS0tCnRpdGxlOiAiUG9saWN5IHNpbXVsYXRpb24gZm9yIEVhc3QgQWZyaWNhIgpvdXRwdXQ6CiAgaHRtbF9kb2N1bWVudDoKICAgIG51bWJlcl9zZWN0aW9uczogeWVzCiAgICB0b2M6IHllcwogICAgdG9jX2RlcHRoOiAyCiAgaHRtbF9ub3RlYm9vazoKICAgIG51bWJlcl9zZWN0aW9uczogeWVzCiAgICB0b2M6IHllcwogICAgdG9jX2RlcHRoOiAyCi0tLQoKIyBTZXR1cApgYGB7cn0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMgUnVuIGFueXRoaW5nIG9mIHN1YnN0YW5jZT8KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tCiMgU2V0IGRlZmF1bHQgdG8gRkFMU0UsIHNvIGl0IGRvZXNuJ3Qgc3RhbGwgYnVpbGRpbmcgdGhlIHBhY2thZ2UKcnVuTm93IDwtIFRSVUUKIyBEZWZpbmUgbnNpbXMgaGVyZQpuc2ltcyA8LSAxMAoKIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBTZXR1cCAKIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KbGlicmFyeShyZXNoYXBlKQpsaWJyYXJ5KHBhcmFsbGVsKQpsaWJyYXJ5KGdncGxvdDIpCmxpYnJhcnkoa25pdHIpCmxpYnJhcnkocGx5cikKbGlicmFyeShiY2ltb2RlbCkKZGF0YShleDEpCgojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBLbml0cgojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0Kb3B0c19jaHVuayRzZXQoZWNobz1GQUxTRSwgbWVzc2FnZT1GQUxTRSwgd2FybmluZz1GQUxTRSkKYGBgCgojIFNldCB1cCBpbnB1dHMKCiMjIEluaXRpYWxpemUgc3RhdHMgaG9sZGVyIG9iamVjdApUaGlzIGlzIHBlcmhhcHMgYmV0dGVyIGRvbmUgaW4gYSAuY3N2IGZpbGUgYW5kIHRoZW4gaW1wb3J0ZWQ/CmBgYHtyfQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQojIFN0YXRzIHdpbGwgYmUgY29udGFpbmVkIGluICJlYWZyIiBsaXN0IG9iamVjdAojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQplYWZyIDwtIHZlY3RvcignbGlzdCcsIGxlbmd0aD1sZW5ndGgoZXgxKSkKKG5hbWVzKGVhZnIpIDwtIG5hbWVzKGV4MSkpCmBgYAoKIyMgRGVmaW5lIHBvbGljaWVzIHRvIGludmVzdGlnYXRlCgpOb3RlOiBiYXNlbGluZSAlIGFkdmFuY2VkID0gNzglCmBgYHtyfQplYWZyJHBvbCAgPC0gZGF0YS5mcmFtZShudW09YygxOjEwKSwKICAgICAgICAgICAgICAgICAgICAgICAgIGlkPWMoJ2Fkdjc4JywgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdhZHY3OC50YW0nLCAnYWR2NzgudGFtY2hlbW8nLCAnYWR2NzgudGFtY2hlbW9FUnBvcycsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdhZHY2MC50YW0nLCAnYWR2NjAudGFtY2hlbW8nLCAnYWR2NjAudGFtY2hlbW9FUnBvcycsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdhZHYzNS50YW0nLCAnYWR2MzUudGFtY2hlbW8nLCAnYWR2MzUudGFtY2hlbW9FUnBvcycKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgKSwKICAgICAgICAgICAgICAgICAgICAgICAgIG5hbWU9YygnVDA6IFN1cmdlcnkgb25seScsICdUMTogVGFtb3hpZmVuIGZvciBFUisnLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVDI6IFQxIHBsdXMgQ2hlbW8gZm9yIEVSLScsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ1QzOiBUMiBwbHVzIENoZW1vIGZvciBBZHZhbmNlZCBFUisnLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVDEgcGx1cyBkb3duc3RhZ2luZyB0byA2MCUgYWR2YW5jZWQnLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdUMiBwbHVzIGRvd25zdGFnaW5nIHRvIDYwJSBhZHZhbmNlZCcsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ1QzIHBsdXMgZG93bnN0YWdpbmcgdG8gNjAlIGFkdmFuY2VkJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVDEgcGx1cyBkb3duc3RhZ2luZyB0byAzNSUgYWR2YW5jZWQnLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICdUMiBwbHVzIGRvd25zdGFnaW5nIHRvIDM1JSBhZHZhbmNlZCcsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgJ1QzIHBsdXMgZG93bnN0YWdpbmcgdG8gMzUlIGFkdmFuY2VkJyksCiAgICAgICAgICAgICAgICAgICAgICAgICBwYWlybnVtPWMoTkEsIE5BLCBOQSwgTkEsIHJlcChjKDIsMyw0KSwgMikpLAogICAgICAgICAgICAgICAgICAgICAgICAgZWFybHlkZXRIUj1jKHJlcCgxLCA0KSwgcmVwKDAuNjAvMC43OCwgMyksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcmVwKDAuMzUvMC43OCwgMykpLAogICAgICAgICAgICAgICAgICAgICAgICAgc3RyaW5nc0FzRmFjdG9ycz1GQUxTRSkKa2FibGUoZWFmciRwb2wpCmBgYAoKIyMgRGVmaW5lIG5hdHVyYWwgaGlzdG9yeSBwYXJhbWV0ZXJzCgojIyMgU3RhZ2UgYW5kIEVSKwpBZHZhbmNlZC1zdGFnZSBpcyA3OCUgYW5kIHByb3BvcnRpb24gRVIrIGlzIDQxJS4gCgojIyMgTW9ydGFsaXR5IHJhdGVzCklmIHdlIHVzZSBHYWxha3VuZGUgYW5kIEN1bHRlciAoVVMpLCBtb3J0YWxpdHkgcmF0ZXMgY29ycmVzcG9uZCB0byAzNSUgNS15ZWFyIHN1cnZpdmFsIGZvciBhZHZhbmNlZCBhbmQgODAlIDUteWVhciBzdXJ2aXZhbCBmb3IgZWFybHkuCgpGcm9tIEthbnRlaGFyZHQgbWV0YXN0YXNpcy1mcmVlIHN1cnZpdmFsIGN1cnZlIGFuZCB1c2luZyBHcmFwaENsaWNrLCB3ZSBnZXQgdGhlIGNvb3JkaW5hdGVzIG9mIDgwJSBzdXJ2aXZpbmcgYXQgMyB5ZWFycyBmb3Igc3RhZ2UgMSsyLCA1NC43JSBzdXJ2aXZpbmcgYXQgMyB5ZWFycyBmb3Igc3RhZ2UgMy4gVHJhbnNsYXRpbmcgdGhvc2UgdG8gNS15ciBzdXJ2aXZhbHM6CmBgYHtyfQprYW50ZWhhcmR0LmVhcmx5Lm0gPC0gY3Vtc3Vydl90b19leHByYXRlKDAuODAsIHllYXI9MykKa2FudGVoYXJkdC5sYXRlLm0gPC0gY3Vtc3Vydl90b19leHByYXRlKDAuNTQ3LCB5ZWFyPTMpCihrYW50ZWhhcmR0LmVhcmx5LnN1cnYgPC0gZXhwKC01KmthbnRlaGFyZHQuZWFybHkubSkpCihrYW50ZWhhcmR0LmxhdGUuc3VydiA8LSBleHAoLTUqa2FudGVoYXJkdC5sYXRlLm0pKQpgYGAKCkJ1dCBhY3R1YWxseSwgdGhlIG90aGVyIEthbnRlaGFyZHQgcmVmZXJlbmNlIGdpdmVzIHRoZXNlIDUteWVhciBzdXJ2aXZhbHM6CmBgYHtyfQplYXJseS41eXIgPSAwLjcyCmFkdi41eXIgPSAwLjMzCmBgYAoKIyMjIyBNYXRoIGZvciBuby1UYW1veGlmZW4gbW9ydGFsaXR5IHJhdGUgYW1vbmcgRVIrClZhcmlhYmxlczogCgpEZXNjcmlwdGlvbiB8IE5vdGF0aW9uIHwgVmFsdWUKLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tIHwgLS0tLS0tLS0gfCAtLS0tLS0tLS0tLS0tLS0tLS0tLS0KUHJvcG9ydGlvbiBvZiBjYXNlcyB0aGF0IGFyZSBFUiBwb3NpdGl2ZSB8ICRwX3tFUit9JCB8IDAuNzIKUHJlc3VtZWQgcHJvcG9ydGlvbiBvZiBFUisgdHJlYXRlZCB3aXRoIFRhbW94aWZlbiB8ICR0JCB8IDAuNTcKSGF6YXJkIHJhdGlvIGZvciBUYW1veGlmZW4gfCAkaCQgfCAwLjcKT2JzZXJ2ZWQgbW9ydGFsaXR5IHJhdGUsIGFsbCB8ICRtX3tvfSQgfCAwLjAyOCAoZWFybHkpIG9yIDAuMTIwIChhZHYpCk9ic2VydmVkIDUteWVhciBzdXJ2aXZhbCwgYWxsIHwgJFNfe299JCB8IDAuMDI4IChlYXJseSkgb3IgMC4xMjAgKGFkdikKQmFzZWxpbmUgbW9ydGFsaXR5IHJhdGUsIEVSLSB8ICRtX3tFUi19JCB8IFRvIGJlIGVzdGltYXRlZApCYXNlbGluZSBtb3J0YWxpdHkgcmF0ZSwgRVIrIHwgJG1fe0VSK30kIHwgVG8gYmUgZXN0aW1hdGVkCkJhc2VsaW5lIG1vcnRhbGl0eSByYXRlLCBFUissIG5vIFRhbW94aWZlbiB8ICRtX3tifSQgfCBUbyBiZSBlc3RpbWF0ZWQKQmFzZWxpbmUgNS15ZWFyIHN1cnZpdmFsLCBFUi0gfCAkU197RVItfSQgfCBUbyBiZSBlc3RpbWF0ZWQKQmFzZWxpbmUgNS15ZWFyIHN1cnZpdmFsLCBFUisgfCAkU197RVIrfSQgfCBUbyBiZSBlc3RpbWF0ZWQKQmFzZWxpbmUgNS15ZWFyIHN1cnZpdmFsIChubyBUYW1veGlmZW4pLCBFUisgfCAkU197Yn0kIHwgVG8gYmUgZXN0aW1hdGVkCgojIyMjIyBPbiB0aGUgaGF6YXJkIHNjYWxlCl9BYmFuZG9uZWQgdGhpcyBiZWNhdXNlIGhhemFyZCBpcyBhIGNvbmRpdGlvbmFsIHByb2JhYmlsaXR5LCBhbmQgY29uZGl0aW9uaW5nIG9uIHN1cnZpdmFsIHRvIHRpbWUgdCBmb3IgRVIrIGFuZCBFUi0gaXMgbm90IGVxdWl2YWxlbnRfCgpGb3IgZWFjaCBzdGFnZS1zcGVjaWZpYyBtb3J0YWxpdHkgZm9yIEVSKyB3b21lbiwgb2JzZXJ2ZWQgbW9ydGFsaXR5IGlzIGEgd2VpZ2h0ZWQgc3VtIG9mIHRob3NlIHdobyBkbyBub3QgcmVjZWl2ZSBUYW1veGlmZW4gYW5kIHRob3NlIHdobyBkbywKCiRtX3tvfSA9IHBfe0VSK31tX3tFUit9ICsgKDEtcF97RVIrfSltX3tFUi19JAoKJG1fe0VSK30gPSAoMS10KW1fe2J9ICsgdGhtX3tifSQKCkxldCB1cyBhc3N1bWUgdGhhdCAkbV97RVItfSQgPSAkbV97Yn0kLCBpLmUuIHRoZXJlIGlzIGVxdWFsIGNoZW1vdGhlcmFweSBpbiBib3RoIEVSIGdyb3VwcyBhbmQgdGh1cyBtb3J0YWxpdHkgaXMgdGhlIHNhbWUgd2hlbiB0aGUgYmVuZWZpdCBvZiBUYW1veGlmZW4gaXMgcmVtb3ZlZC4gVGhlbiBvdXIgZXhwcmVzc2lvbiBmb3IgJG1fe29ic30kIHNpbXBsaWZpZXMgYXMgZm9sbG93czoKCiRtX3tvfSA9IHBfe0VSK31bKDEtdCltX3tifSArIHRobV97Yn1dICsgKDEtcF97RVIrfSltX3tifSQKCiRtX3tifSA9IFxmcmFje21fe299fXtwX3tFUit9KDEtdCkgKyBwX3tFUit9dGggKyAoMS1wX3tFUit9KX0kCgokU197Yn0gPSBlXnstNSptX3tifX0kCgojIyMjIyBPbiB0aGUgc3Vydml2YWwgc2NhbGUsIGF0IDUgeWVhcnMKVXNpbmcgdGhlIHNpbWlsYXIgYXNzdW1wdGlvbiB0aGF0ICRTX3tFUi19JCA9ICRTX3tifSQsIGkuZS4gdGhlcmUgaXMgZXF1YWwgY2hlbW90aGVyYXB5IGluIGJvdGggRVIgZ3JvdXBzIGFuZCB0aHVzIHN1cnZpdmFsIGlzIHRoZSBzYW1lIHdoZW4gdGhlIGJlbmVmaXQgb2YgVGFtb3hpZmVuIGlzIHJlbW92ZWQuCgokU197b30gPSBwX3tFUit9WygxLXQpU197Yn0gKyB0KFNfe2J9KV5oXSArICgxLXBfe0VSK30pU197Yn0kCgokMCA9IHBfe0VSK30oMS10KVNfe2J9ICsgcF97RVIrfXQoU197Yn0pXmggKyAoMS1wX3tFUit9KVNfe2J9IC0gU197b30kCgpUaGlzIGlzIGEgZnJhY3Rpb25hbCBwb2x5bm9taWFsOgoKKipFQVJMWSBTVEFHRSoqCmBgYHtyfQojIEVhcmx5IHN0YWdlCmYgPSBmdW5jdGlvbih4LCBwPTAuNDEsIHQ9MSwgaD0wLjcsIFNvPWVhcmx5LjV5cikgeyBwKigxLXQpKnggKyBwKnQqeF5oICsgKDEtcCkqeCAtIFNvfQpzdHIoU2IuZWFybHkgPC0gdW5pcm9vdChmLCBsb3dlcj0wLjUsIHVwcGVyPWVhcmx5LjV5ciwgdG9sID0gMC4wMDAxKSkKKGVhcmx5Lm1yYXRlID0gY3Vtc3Vydl90b19leHByYXRlKFNiLmVhcmx5JHJvb3QsIHllYXI9NSkpCmBgYAoKKipBRFZBTkNFRCBTVEFHRSAtIEpVU1QgQ1VSSU9VUyoqCmBgYHtyfQojIEFkdmFuY2VkIHN0YWdlIC0ganVzdCBvdXQgb2YgY3VyaW9zaXR5LiBTaW5jZSB0aGUgS2FsZW5kZWhhcmR0IGRhdGEgYXJlIGFjdHVhbGx5IG1ldHMtZnJlZSBzdXJ2aXZhbCwgbm90IHN1cnZpdmFsLCBpdCdzIGEgd29yc2UgYXBwcm94IGZvciBhZHZhbmNlZCBzdGFnZSB0aGFuIGl0IGlzIGZvciBlYXJseSBzdGFnZS4gCmYgPSBmdW5jdGlvbih4LCBwPTAuNDEsIHQ9MSwgaD0wLjcsIFNvPWFkdi41eXIpIHsgcCooMS10KSp4ICsgcCp0KnheaCArICgxLXApKnggLSBTb30Kc3RyKFNiLmFkdiA8LSB1bmlyb290KGYsIGxvd2VyPTAuMiwgdXBwZXI9YWR2LjV5ciwgdG9sID0gMC4wMDAxKSkKIyBSYXRlIGZyb20gR2FsdWthbmRlCihjdW1zdXJ2X3RvX2V4cHJhdGUoU2IuYWR2JHJvb3QsIHllYXI9NSkpCmBgYAoKV2UnbGwgc3RpbGwgdXNlIEdhbHVrYW5kZSwgNS15ciBzdXJ2IG9mIDM1JToKYGBge3J9CihhZHYubXJhdGUgPC0gY3Vtc3Vydl90b19leHByYXRlKDAuMzUsIHllYXI9NSkpCmBgYAoKYGBge3J9CmVhZnIkbmggPC0gY29tcGlsZV9uYXR1cmFsaGlzdChwcm9wX2Fkdj0wLjc4LCAKICAgICAgICAgICAgICAgICBtb3J0cmF0ZXM9YyhFYXJseT1lYXJseS5tcmF0ZSwgQWR2YW5jZWQ9YWR2Lm1yYXRlKSwKICAgICAgICAgICAgICAgICBzdWJncm91cF9wcm9icz1jKGBFUitgPTAuNDEsIGBFUi1gPTAuNTkpKQprYWJsZShlYWZyJG5oWyxjKCdzdGFnZScsICdzdWJncm91cCcsICdtb3J0cmF0ZScsICdwcm9wJyldKQpgYGAKClRoZSAibWFwIiBhc3NpZ25zIG51bWVyaWMgaWQncyB0byBlYWNoIHN0YWdlLXN1Ymdyb3VwLiBUaGUgc3RhZ2Utc2hpZnRpbmcgd2lsbCBrZWVwIEVSIHN0YXR1cyBjb25zdGFudCwgZS5nLiBzdGFnZSAjMyBzaGlmdHMgdG8gIzEgYW5kIHN0YWdlICM0IHNoaWZ0cyB0byAjMi4KYGBge3J9CihlYWZyJG1hcCA8LSBjcmVhdGVfc3RhZ2VzaGlmdF9tYXAoZWFmciRuaCkpCmBgYAoKIyBTcGVjaWZ5IHRyZWF0bWVudCBmb3IgZWFjaCBwb2xpY3kKCkFjY29yZGluZyB0byB0aGUgcG9saWNpZXMgZGVmaW5lZCBhYm92ZSwgdGhlcmUgYXJlIDQgdHJlYXRtZW50IHNjZW5hcmlvczogVDAsIFQxLCBUMiBhbmQgVDMuIFdlIHdpbGwgZGVmaW5lIHRob3NlIGZvciB0aGUgbm8tc3RhZ2Utc2hpZnQgcG9saWNpZXMsIGFuZCB0aGVuIGNvcHkgdGhlbSBvdmVyIGZvciB0aGUgMiBvdGhlciBzdGFnZSBzaGlmdHMuIApgYGB7cn0KZWFmciR0eCA8LSBkYXRhLmZyYW1lKGV4cGFuZC5ncmlkKHR4U1NpZD1jKCdOb25lJywgJ1RhbW94aWZlbicsICdDaGVtbycsCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnVGFtb3hpZmVuK0NoZW1vJyksCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBTU25vPTE6bnJvdyhlYWZyJG5oKSksCiAgICAgICAgICAgICAgICAgICAgICBzdHJpbmdzQXNGYWN0b3JzPUZBTFNFKQpudHJlYXQgPC0gbnJvdyhlYWZyJHR4KQpudHggPC0gbGVuZ3RoKHVuaXF1ZShlYWZyJHR4JHR4U1NpZCkpCgojIFByb3BvcnRpb25zIHN1bSB0byAxIHdpdGhpbiBzdGFnZS1zdWJncm91cCBncm91cHMKZWFmciR0eCA8LSB0cmFuc2Zvcm0oZWFmciR0eCwgCiAgICAgICAgICAgICAgICAgICAgIFNTaWQ9YyhyZXAoJ0Vhcmx5LkVSKycsIG50eCksIHJlcCgnRWFybHkuRVItJywgbnR4KSwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICByZXAoJ0FkdmFuY2VkLkVSKycsIG50eCksIHJlcCgnQWR2YW5jZWQuRVItJywgbnR4KSksIAogICAgICAgICAgICAgICAgICAgICB0eFNTbm89MTpudHJlYXQpCmVhZnIkdHggPC0gdHJhbnNmb3JtKGVhZnIkdHgsCiAgICAgICAgICAgICAgICAgICAgICAgIHR4SFI9YygxLCAwLjcsIDAuNzc1LCAwLjc3NSowLjcsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMSwgMSwgMC43NzUsIDAuNzc1LAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgMSwgMC43LCAgMC43NzUsIDAuNzc1KjAuNywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIDEsIDEsIDAuNzc1LCAwLjc3NSkpCmFkdjc4IDwtIGFkdjc4LnRhbSA8LSByZXAoMCwgbnRyZWF0KQp0eFNTaWQgPC0gYXMuY2hhcmFjdGVyKGVhZnIkdHgkdHhTU2lkKQpTU2lkIDwtIGFzLmNoYXJhY3RlcihlYWZyJHR4JFNTaWQpCmFkdjc4W3R4U1NpZD09J05vbmUnXSA8LSAxIAphZHY3OC50YW1bdHhTU2lkPT0nVGFtb3hpZmVuJyAmIChTU2lkPT0nRWFybHkuRVIrJyB8IFNTaWQ9PSdBZHZhbmNlZC5FUisnKV0gPC0gMQphZHY3OC50YW1jaGVtbyA8LSBhZHY3OC50YW0KYWR2NzgudGFtW3R4U1NpZD09J05vbmUnICYgKFNTaWQ9PSdFYXJseS5FUi0nIHwgU1NpZD09J0FkdmFuY2VkLkVSLScpXSA8LSAxCmFkdjc4LnRhbWNoZW1vW3R4U1NpZD09J0NoZW1vJyAmIChTU2lkPT0nRWFybHkuRVItJyB8IFNTaWQ9PSdBZHZhbmNlZC5FUi0nKV0gPC0gMQphZHY3OC50YW1jaGVtb0VScG9zIDwtIGFkdjc4LnRhbWNoZW1vCmFkdjc4LnRhbWNoZW1vRVJwb3NbdHhTU2lkPT0nVGFtb3hpZmVuJyAmIFNTaWQ9PSdBZHZhbmNlZC5FUisnXSA8LSAwCmFkdjc4LnRhbWNoZW1vRVJwb3NbdHhTU2lkPT0nVGFtb3hpZmVuK0NoZW1vJyAmIFNTaWQ9PSdBZHZhbmNlZC5FUisnXSA8LSAxCgpwcm9wcyA8LSBkYXRhLmZyYW1lKGFkdjc4LCAKICAgICAgICAgICAgICAgYWR2NzgudGFtLCBhZHY3OC50YW1jaGVtbywgYWR2NzgudGFtY2hlbW9FUnBvcywKICAgICAgICAgICAgICAgYWR2NzgudGFtLCBhZHY3OC50YW1jaGVtbywgYWR2NzgudGFtY2hlbW9FUnBvcywKICAgICAgICAgICAgICAgYWR2NzgudGFtLCBhZHY3OC50YW1jaGVtbywgYWR2NzgudGFtY2hlbW9FUnBvcykKY29sbmFtZXMocHJvcHMpIDwtIGVhZnIkcG9sJGlkCgplYWZyJHR4IDwtIGRhdGEuZnJhbWUoZWFmciR0eCwgcHJvcHMsIHN0cmluZ3NBc0ZhY3RvcnM9RkFMU0UpCgplYWZyJHR4IDwtIGRhdGEuZnJhbWUoZWFmciR0eCwgc3RyaW5nc0FzRmFjdG9ycz1GQUxTRSkKCmthYmxlKGVhZnIkdHgpCmBgYAoKIyBJbmNpZGVuY2UKV2UgYXJlIHVzaW5nIFVnYW5kYSBmb3Igb3VyIEVhc3QgQWZyaWNhIGV4YW1wbGUuCmBgYHtyfQpkYXRhKGluY3JhdGVzZikKdGhlc2VyYXRlcyA8LSBzdWJzZXQoaW5jcmF0ZXNmLAogICAgICAgICAgICAgICAgICAgICBDb3VudHJ5ICVpbiUgYygnVW5pdGVkIFN0YXRlcycsICdVZ2FuZGEnLAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnTWFsYXdpJywgJ1NvdXRoIEFmcmljYScsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAnWmltYmFid2UnLCAnVHVuaXNpYScpKQpwbG90X3JhdGVzKHRoZXNlcmF0ZXMkQWdlLCB0aGVzZXJhdGVzJEZlbWFsZS5SYXRlLlBlci4xMDBLLAogICAgICAgICAgICAgICAgICAgICAgcHNpemU9dGhlc2VyYXRlcyRDYXNlcywgCiAgICAgICAgICAgICAgICAgICAgICBncm91cD1wYXN0ZSh0aGVzZXJhdGVzJENvdW50cnksIHRoZXNlcmF0ZXMkWWVhcikpCmBgYAoKIyBTeXN0ZW0gdGltZQpgYGB7cn0KIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KIyBTaW11bGF0ZSBwb2xpY2llcyAtIGV4YW1wbGUgZGF0YQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQoKaWYgKDE9PTApIHsKICAgICMgNTAgc2ltcwogICAgIyBUaW1pbmcgaXQuIFBhcmFsbGVsaXppbmcgaXMgZGVmaW5pdGVseSBmYXN0ZXIgYnV0IGNvbXB1dGVyIGRpZCBoZWF0IHVwIGEgbG90IG1vcmUuCiAgICB0MSA8LSBzeXN0ZW0udGltZShzaW1wb2xpY2llcyhleDEkcG9sLCBleDEkbmgsIGV4MSR0eCwgc2ltcz01MCkpICMzMTEgc2Vjb25kcwogICAgdDIgPC0gc3lzdGVtLnRpbWUocGFyc2ltcG9saWNpZXMoZXgxJHBvbCwgZXgxJG5oLCBleDEkdHgsIHNpbXM9NTApKSAjMTYxIHNlY29uZHMKfQpgYGAKCiMgUmVzdWx0cyBmb3IgRWFzdCBBZnJpY2EsIGFnZXMgMzAtNDkKCiMjIFJ1biBtb2RlbApgYGB7ciwgZWNobz1UUlVFfQojLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLQojIEFnZXMgMzAtNDkKIy0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0tLS0KCmlmIChydW5Ob3cpIHsKICAgICMgTW9kZWwKICAgIHN0YXJ0Y2xvY2sgPC0gcHJvYy50aW1lKCkKICAgIG1hbnVzY3JpcHRfZWFzdGFmcmljYSA8LSBwYXJzaW1wb2xpY2llcyhlYWZyJHBvbCwgZWFmciRuaCwgZWFmciR0eCwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGluY3NvdXJjZT0nVWdhbmRhJywKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgbW9ydHNvdXJjZT0nVWdhbmRhJywgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHJldHVybnN0YXRzPWMoJ21lYW4nLCAnbG93ZXInLCAKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAndXBwZXInKSwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGZ1dGltZXM9Yyg1LDEwLDIwKSwgCiAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIG1pbmFnZT0zMCwgbWF4YWdlPTQ5LCBzaW1zPW5zaW1zKQogICAgIyBSdW50aW1lIGluIG1pbnV0ZXMKICAgIHJ1bnRpbWVfbWludXRlcyA8LSAocHJvYy50aW1lKCktc3RhcnRjbG9jaykvNjAKICAgICMgRm9ybWF0IGFuZCBzYXZlIHJlc3VsdHMKICAgIGZpbmFsdGFiIDwtIGZvcm1hdF9ib3VuZHNfbGlzdChtYW51c2NyaXB0X2Vhc3RhZnJpY2EsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIHBhcmVuPVRSVUUsIGluY2x1ZGVtZWFuPVRSVUUsIAogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgIGRpZ2l0cz1jKDAsMCwxLDIsMCwwKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICBjb21waWxlYWxsPVRSVUUpCiAgICB3cml0ZS5jc3YoZmluYWx0YWIsIGZpbGU9cGFzdGUwKCdlYXN0YWZyaWNhXycsIG5zaW1zLCAnc2ltcy5jc3YnKSwKICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgcm93Lm5hbWVzPUZBTFNFKQp9CmBgYAoKIyMgUnVudGltZQpSdW50aW1lIGluIG1pbnV0ZXM6CmBgYHtyLCBlY2hvPVRSVUV9CnJ1bnRpbWVfbWludXRlcwpgYGAKCiMjIFJlc3VsdHMKUkVTVUxUUyBGT1IgYHIgbnNpbXNgIFNJTVM6CmBgYHtyfQpsaWJyYXJ5KHBhbmRlcikKcGFuZGVyT3B0aW9ucygna2VlcC5saW5lLmJyZWFrcycsIFRSVUUpCnN0YXR3aWR0aCA8LSAxLjI1KjEwMC9uY29sKGZpbmFsdGFiKQpmdXdpZHRoIDwtIDAuNSpzdGF0d2lkdGgKY2VsbHdpZHRocyA8LSAoMTAwLXN0YXR3aWR0aC1mdXdpZHRoKS9uY29sKGZpbmFsdGFiKQphbGx3aWR0aHMgPC0gcm91bmQoYyhmdXdpZHRoLCBzdGF0d2lkdGgsIAogICAgICAgICAgICAgICAgICAgICByZXAoY2VsbHdpZHRocywgKG5jb2woZmluYWx0YWIpLTIpKSksMikKYWxsd2lkdGhzWzJdIDwtIGFsbHdpZHRoc1syXSsoMTAwLXN1bShhbGx3aWR0aHMpKQp3aWR0aHMgPC0gcGFzdGUwKGFsbHdpZHRocywgJyUnKQojIGNoYXJ3aWR0aHM9YygyLCAyMCwgcmVwKDEwLCBuY29sKGZpbmFsdGFiKS0yKSkKIyBpZiAocnVuTm93KSBwYW5kZXIoZmluYWx0YWIsIHNwbGl0LmNlbGxzPXdpZHRocykKIyBpZiAocnVuTm93KSBwYW5kZXIoZmluYWx0YWIpCiMgTm90ZSwgaXQgd2FzIHZlcnkgZGlmZmljdWx0IHRvIGdldCB0aGUgdGFibGUgdG8gbG9vayByaWdodC4gVGhlcmUgd2VyZQojIHNvbWUgY29tYmluYXRpb25zIG9mIHBhcmFtZXRlcnMgdGhhdCBkaWQgbm90IHdvcmsuIGUuZy4gaGF2aW5nIHNwbGl0LnRhYmxlcz0xNzUgb3IgMjUwCiMgSSBnYXZlIHVwIC0gcmVtb3ZlZCB0aGUgIlxuIiBmcm9tIGZvcm1hdF9ib3VuZHMgYW5kIHdlbnQgYmFjayB0byAiICIKIyBpZiAocnVuTm93KSBwYW5kb2MudGFibGUoZmluYWx0YWIsIHNwbGl0LmNlbGxzPXdpZHRocywgc3BsaXQudGFibGVzPTE2NSkKaWYgKHJ1bk5vdykga2FibGUoZmluYWx0YWIpCmBgYAoKYGBge3IsIGZpZy5oZWlnaHQ9MTB9CnJsb25nIDwtIGNvbXBpbGVfbG9uZyhtYW51c2NyaXB0X2Vhc3RhZnJpY2EpCnJwbG90IDwtIHBsb3RfcmVzdWx0cyhybG9uZywgdHlwZT0nbGluZScpCnJwbG90CmBgYAoKYGBge3IsIGZpZy5oZWlnaHQ9MTB9CnJwbG90IDwtIHBsb3RfcmVzdWx0cyhybG9uZywgdHlwZT0nYmFyJykKcnBsb3QKYGBgCgojIENvbW1lbnRzCgo=</div>
 
 
 

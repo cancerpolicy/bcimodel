@@ -1,14 +1,14 @@
 ---
 title: "Policy simulation for East Africa"
 output:
-  html_notebook: 
-      toc: true
-      toc_depth: 2
-      number_sections: true
-  html_document: 
-      toc: true
-      toc_depth: 2
-      number_sections: true
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
 ---
 
 # Setup
@@ -17,11 +17,16 @@ output:
 # Run anything of substance?
 #--------------------------------------------------------------------------------
 # Set default to FALSE, so it doesn't stall building the package
-runNow <- FALSE
+runNow <- TRUE
+# Define nsims here
+nsims <- 10
 
 #-------------------------------------------------------------------------------
 # Setup 
 #-------------------------------------------------------------------------------
+library(reshape)
+library(parallel)
+library(ggplot2)
 library(knitr)
 library(plyr)
 library(bcimodel)
@@ -73,12 +78,94 @@ kable(eafr$pol)
 
 ## Define natural history parameters
 
+### Stage and ER+
 Advanced-stage is 78% and proportion ER+ is 41%. 
 
-Mortality rates correspond to 35% 5-year survival for advanced and 80% 5-year survival for early.
+### Mortality rates
+If we use Galakunde and Culter (US), mortality rates correspond to 35% 5-year survival for advanced and 80% 5-year survival for early.
+
+From Kantehardt metastasis-free survival curve and using GraphClick, we get the coordinates of 80% surviving at 3 years for stage 1+2, 54.7% surviving at 3 years for stage 3. Translating those to 5-yr survivals:
+```{r}
+kantehardt.early.m <- cumsurv_to_exprate(0.80, year=3)
+kantehardt.late.m <- cumsurv_to_exprate(0.547, year=3)
+(kantehardt.early.surv <- exp(-5*kantehardt.early.m))
+(kantehardt.late.surv <- exp(-5*kantehardt.late.m))
+```
+
+But actually, the other Kantehardt reference gives these 5-year survivals:
+```{r}
+early.5yr = 0.72
+adv.5yr = 0.33
+```
+
+#### Math for no-Tamoxifen mortality rate among ER+
+Variables: 
+
+Description | Notation | Value
+--------------------------------- | -------- | ---------------------
+Proportion of cases that are ER positive | $p_{ER+}$ | 0.72
+Presumed proportion of ER+ treated with Tamoxifen | $t$ | 0.57
+Hazard ratio for Tamoxifen | $h$ | 0.7
+Observed mortality rate, all | $m_{o}$ | 0.028 (early) or 0.120 (adv)
+Observed 5-year survival, all | $S_{o}$ | 0.028 (early) or 0.120 (adv)
+Baseline mortality rate, ER- | $m_{ER-}$ | To be estimated
+Baseline mortality rate, ER+ | $m_{ER+}$ | To be estimated
+Baseline mortality rate, ER+, no Tamoxifen | $m_{b}$ | To be estimated
+Baseline 5-year survival, ER- | $S_{ER-}$ | To be estimated
+Baseline 5-year survival, ER+ | $S_{ER+}$ | To be estimated
+Baseline 5-year survival (no Tamoxifen), ER+ | $S_{b}$ | To be estimated
+
+##### On the hazard scale
+_Abandoned this because hazard is a conditional probability, and conditioning on survival to time t for ER+ and ER- is not equivalent_
+
+For each stage-specific mortality for ER+ women, observed mortality is a weighted sum of those who do not receive Tamoxifen and those who do,
+
+$m_{o} = p_{ER+}m_{ER+} + (1-p_{ER+})m_{ER-}$
+
+$m_{ER+} = (1-t)m_{b} + thm_{b}$
+
+Let us assume that $m_{ER-}$ = $m_{b}$, i.e. there is equal chemotherapy in both ER groups and thus mortality is the same when the benefit of Tamoxifen is removed. Then our expression for $m_{obs}$ simplifies as follows:
+
+$m_{o} = p_{ER+}[(1-t)m_{b} + thm_{b}] + (1-p_{ER+})m_{b}$
+
+$m_{b} = \frac{m_{o}}{p_{ER+}(1-t) + p_{ER+}th + (1-p_{ER+})}$
+
+$S_{b} = e^{-5*m_{b}}$
+
+##### On the survival scale, at 5 years
+Using the similar assumption that $S_{ER-}$ = $S_{b}$, i.e. there is equal chemotherapy in both ER groups and thus survival is the same when the benefit of Tamoxifen is removed.
+
+$S_{o} = p_{ER+}[(1-t)S_{b} + t(S_{b})^h] + (1-p_{ER+})S_{b}$
+
+$0 = p_{ER+}(1-t)S_{b} + p_{ER+}t(S_{b})^h + (1-p_{ER+})S_{b} - S_{o}$
+
+This is a fractional polynomial:
+
+**EARLY STAGE**
+```{r}
+# Early stage
+f = function(x, p=0.41, t=1, h=0.7, So=early.5yr) { p*(1-t)*x + p*t*x^h + (1-p)*x - So}
+str(Sb.early <- uniroot(f, lower=0.5, upper=early.5yr, tol = 0.0001))
+(early.mrate = cumsurv_to_exprate(Sb.early$root, year=5))
+```
+
+**ADVANCED STAGE - JUST CURIOUS**
+```{r}
+# Advanced stage - just out of curiosity. Since the Kalendehardt data are actually mets-free survival, not survival, it's a worse approx for advanced stage than it is for early stage. 
+f = function(x, p=0.41, t=1, h=0.7, So=adv.5yr) { p*(1-t)*x + p*t*x^h + (1-p)*x - So}
+str(Sb.adv <- uniroot(f, lower=0.2, upper=adv.5yr, tol = 0.0001))
+# Rate from Galukande
+(cumsurv_to_exprate(Sb.adv$root, year=5))
+```
+
+We'll still use Galukande, 5-yr surv of 35%:
+```{r}
+(adv.mrate <- cumsurv_to_exprate(0.35, year=5))
+```
+
 ```{r}
 eafr$nh <- compile_naturalhist(prop_adv=0.78, 
-                 mortrates=c(Early=0.0446, Advanced=0.21),
+                 mortrates=c(Early=early.mrate, Advanced=adv.mrate),
                  subgroup_probs=c(`ER+`=0.41, `ER-`=0.59))
 kable(eafr$nh[,c('stage', 'subgroup', 'mortrate', 'prop')])
 ```
@@ -134,24 +221,26 @@ eafr$tx <- data.frame(eafr$tx, stringsAsFactors=FALSE)
 kable(eafr$tx)
 ```
 
-# Plot incidence and mortality for Uganda, our East African data source
+# Incidence
+We are using Uganda for our East Africa example.
 ```{r}
-#-------------------------------------------------------------------------------
-# TO DO 
-#-------------------------------------------------------------------------------
+data(incratesf)
+theserates <- subset(incratesf,
+                     Country %in% c('United States', 'Uganda',
+                                    'Malawi', 'South Africa', 
+                                    'Zimbabwe', 'Tunisia'))
+plot_rates(theserates$Age, theserates$Female.Rate.Per.100K,
+                      psize=theserates$Cases, 
+                      group=paste(theserates$Country, theserates$Year))
 ```
 
-# Test code with example data ("ex1" object embedded in the bcimodel package)
+# System time
 ```{r}
 #-------------------------------------------------------------------------------
 # Simulate policies - example data
 #-------------------------------------------------------------------------------
 
-if (runNow) {
-    # 10 sims
-    uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
-    paruganda_stdpop <- parsimpolicies(ex1$pol, ex1$nh, ex1$tx)
-
+if (1==0) {
     # 50 sims
     # Timing it. Parallelizing is definitely faster but computer did heat up a lot more.
     t1 <- system.time(simpolicies(ex1$pol, ex1$nh, ex1$tx, sims=50)) #311 seconds
@@ -159,62 +248,73 @@ if (runNow) {
 }
 ```
 
-# Real results for East Africa, all ages
-```{r}
-#-------------------------------------------------------------------------------
-# Simulate policies - real data
-#-------------------------------------------------------------------------------
+# Results for East Africa, ages 30-49
 
-# Test with 10 sims - takes minutes
-if (runNow) {
-    devtools::load_all()
-    manuscript_eastafrica <- simpolicies(eafr$pol, eafr$nh, eafr$tx)
-
-    # Test with 50 sims
-    library(parallel)
-    startclock <- proc.time()
-    manuscript_eastafrica <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, sims=50)
-    (runtime <- proc.time()-startclock)
-}
-```
-
-```{r}
-if (runNow) kable(manuscript_eastafrica[['10']])
-```
-
-# Real results for East Africa, ages 30-49, 50 sims
-```{r}
+## Run model
+```{r, echo=TRUE}
 #-------------------------------------------------------------------------------
 # Ages 30-49
 #-------------------------------------------------------------------------------
 
 if (runNow) {
+    # Model
     startclock <- proc.time()
     manuscript_eastafrica <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, 
-                                            minage=30, maxage=49, sims=50)
-    (runtime <- proc.time()-startclock)
+                                          incsource='Uganda',
+                                          mortsource='Uganda', 
+                                          returnstats=c('mean', 'lower', 
+                                                        'upper'), 
+                                          futimes=c(5,10,20), 
+                                          minage=30, maxage=49, sims=nsims)
+    # Runtime in minutes
+    runtime_minutes <- (proc.time()-startclock)/60
+    # Format and save results
+    finaltab <- format_bounds_list(manuscript_eastafrica, 
+                                   paren=TRUE, includemean=TRUE, 
+                                   digits=c(0,0,1,2,0,0),
+                                   compileall=TRUE)
+    write.csv(finaltab, file=paste0('eastafrica_', nsims, 'sims.csv'),
+                                    row.names=FALSE)
 }
 ```
 
-```{r}
-if (runNow) kable(manuscript_eastafrica[['10']])
+## Runtime
+Runtime in minutes:
+```{r, echo=TRUE}
+runtime_minutes
 ```
 
-# Real results for East Africa, ages 30-49, 100 sims
+## Results
+RESULTS FOR `r nsims` SIMS:
 ```{r}
-#-------------------------------------------------------------------------------
-# Ages 30-49
-#-------------------------------------------------------------------------------
-
-if (runNow) {
-    startclock <- proc.time()
-    manuscript_eastafrica100 <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, minage=30, maxage=49, sims=100)
-    (runtime <- proc.time()-startclock)
-}
+library(pander)
+panderOptions('keep.line.breaks', TRUE)
+statwidth <- 1.25*100/ncol(finaltab)
+fuwidth <- 0.5*statwidth
+cellwidths <- (100-statwidth-fuwidth)/ncol(finaltab)
+allwidths <- round(c(fuwidth, statwidth, 
+                     rep(cellwidths, (ncol(finaltab)-2))),2)
+allwidths[2] <- allwidths[2]+(100-sum(allwidths))
+widths <- paste0(allwidths, '%')
+# charwidths=c(2, 20, rep(10, ncol(finaltab)-2))
+# if (runNow) pander(finaltab, split.cells=widths)
+# if (runNow) pander(finaltab)
+# Note, it was very difficult to get the table to look right. There were
+# some combinations of parameters that did not work. e.g. having split.tables=175 or 250
+# I gave up - removed the "\n" from format_bounds and went back to " "
+# if (runNow) pandoc.table(finaltab, split.cells=widths, split.tables=165)
+if (runNow) kable(finaltab)
 ```
 
-```{r}
-if (runNow) kable(manuscript_eastafrica100[['10']])
+```{r, fig.height=10}
+rlong <- compile_long(manuscript_eastafrica)
+rplot <- plot_results(rlong, type='line')
+rplot
+```
+
+```{r, fig.height=10}
+rplot <- plot_results(rlong, type='bar')
+rplot
 ```
 
 # Comments
