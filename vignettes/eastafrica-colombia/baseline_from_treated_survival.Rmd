@@ -1,0 +1,66 @@
+---
+title: "Baseline from Treated Survival"
+author: "Jeanette Birnbaum"
+date: "9/30/2017"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Colombia, taking out endocrine only
+
+```{r, echo=TRUE}
+propERpos <- 0.70
+early5yr <- 0.87
+adv5yr <- 0.55
+propERTam <- 0.58
+```
+
+```{r, echo=TRUE}
+# Early stage
+f = function(x, p=propERpos, t=propERTam, h=0.7, So=early5yr) { p*(1-t)*x + p*t*x^h + (1-p)*x - So}
+str(Sb.early <- uniroot(f, lower=0.5, upper=early5yr, tol = 0.0001))
+```
+
+```{r, echo=TRUE}
+# Advanced stage 
+f = function(x, p=propERpos, t=propERTam, h=0.7, So=adv5yr) { p*(1-t)*x + p*t*x^h + (1-p)*x - So}
+str(Sb.adv <- uniroot(f, lower=0.2, upper=adv5yr, tol = 0.0001))
+```
+
+## Colombia, taking out endocrine/chemo/combined
+
+```{r, echo=TRUE}
+
+# Treated survivals
+early5yr <- 0.87
+adv5yr <- 0.55
+
+# ER positivity
+propERpos <- 0.70
+
+# Treatments: e=endocrine, c=chemo, b=both, pos=ER+, neg=ER-
+
+# Hazard ratios: e=endocrine, c=chemo, b=both
+
+```
+
+```{r, echo=TRUE}
+# Early stage
+f = function(x, p=propERpos, tepos=0.58, tcpos=0.08, tbpos=0.10, tc=0.55, he=0.7, hc=0.775, So=early5yr) { 
+  p*(1-tepos-tcpos-tbpos)*x + p*tepos*x^he + p*tcpos*x^hc + p*tbpos*x^(he*hc) + 
+  (1-p)*(1-tc)*x  + (1-p)*tc*x^hc - So
+  }
+str(Sb.early <- uniroot(f, lower=0.5, upper=early5yr, tol = 0.0001))
+```
+
+```{r, echo=TRUE}
+# Advanced stage 
+f = function(x, p=propERpos, tepos=0.10, tcpos=0.38, tbpos=0.59, tc=0.95, he=0.7, hc=0.775, So=adv5yr) { 
+  p*(1-tepos-tcpos-tbpos)*x + p*tepos*x^he + p*tcpos*x^hc + p*tbpos*x^(he*hc) + 
+  (1-p)*(1-tc)*x  + (1-p)*tc*x^hc - So
+  }
+str(Sb.adv <- uniroot(f, lower=0.2, upper=adv5yr, tol = 0.0001))
+```

@@ -1,0 +1,256 @@
+---
+title: "Policy simulation for Colombia"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+---
+
+# Setup
+```{r}
+#--------------------------------------------------------------------------------
+# Run anything of substance?
+#--------------------------------------------------------------------------------
+# Set default to FALSE, so it doesn't stall building the package
+runNow <- TRUE
+nsims <- 100
+
+#-------------------------------------------------------------------------------
+# Setup 
+#-------------------------------------------------------------------------------
+library(reshape)
+library(parallel)
+library(ggplot2)
+library(knitr)
+library(plyr)
+library(bcimodel)
+data(ex1)
+
+#--------------------------------------------------------------------------------
+# Knitr
+#--------------------------------------------------------------------------------
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+```
+
+# Set up inputs
+
+## Initialize stats holder object
+
+```{r, echo=TRUE}
+#-------------------------------------------------------------------------------
+# Stats will be contained in "val" list object
+#-------------------------------------------------------------------------------
+val <- vector('list', length=length(ex1))
+
+#-------------------------------------------------------------------------------
+# Statistics from Annals paper
+#-------------------------------------------------------------------------------
+propAdv <- 0.504
+propERpos <- 0.42 
+    # Will make this stage-specific later. 42% is Early. For Advanced, 40%.
+
+# Convert 5-yr survivals to exponential rates
+earlymort <- 0.01992 
+advmort <- 0.10693
+```
+
+
+## Define policies to investigate
+
+Note: baseline % advanced = `r 100*propAdv`%. 
+```{r}
+val$pol <- data.frame(num=c(1:4),
+                         id=c('Y1977', 
+                              'Y1999',
+                              'Y1977.screening',
+                              'Y1999.screening'
+                              ),
+                         name=c('1977 Control',
+                                '1999 Control',
+                                '1977 Screening',
+                                '1999 Screening'),
+                         pairnum=c(NA, NA, 1, 2),
+                         earlydetHR=c(1, 1, 0.85, 0.85),
+                         stringsAsFactors=FALSE)
+kable(val$pol)
+```
+
+## Define natural history parameters
+
+Advanced-stage is `r 100*propAdv`% and proportion ER+ is `r 100*propERpos`%. 
+
+```{r}
+val$nh <- compile_naturalhist(prop_adv=propAdv, 
+                 mortrates=c(Early=earlymort, Advanced=advmort),
+                 subgroup_probs=c(`ER+`=propERpos, `ER-`=1-propERpos))
+
+# Change prop ER+ in advanced stage to 40%, not 42%
+val$nh[val$nh$stage=='Advanced', 'prop'] <- c(0.40*propAdv, 0.60*propAdv)
+
+kable(val$nh[,c('stage', 'subgroup', 'mortrate', 'prop')])
+```
+
+
+The "map" assigns numeric id's to each stage-subgroup. The stage-shifting will keep ER status constant, e.g. stage #3 shifts to #1 and stage #4 shifts to #2.
+```{r}
+(val$map <- create_stageshift_map(val$nh))
+```
+
+# Specify treatment for each policy
+
+```{r}
+# Annals treatments from breast_ER-HER2_6
+annals_tx <- read.csv(system.file(file.path('extdata', 'validation', 
+                                            'annals_treatment.csv'),
+                                  package='bcimodel'))
+# Remove the HER2- because for our purposes, they're duplications
+val$tx <- subset(annals_tx, !grepl('HER2-', subgroup))
+# Remove AI and Trastuzumab treatments
+val$tx <- subset(val$tx, !grepl('AI', tx) & !grepl('Tras', tx))
+
+
+ntreat <- nrow(val$tx)
+ntx <- length(unique(val$tx$tx))
+
+# Proportions sum to 1 within stage-subgroup groups
+val$tx <- rename(val$tx, c('tx'='txSSid',
+                           'HR'='txHR',
+                           'prop_Y1977'='Y1977',
+                           'prop_Y1999'='Y1999'))
+val$tx <- transform(val$tx, 
+                     SSno=c(rep(1,ntx), rep(2,ntx), rep(3,ntx), rep(4,ntx)),
+                     SSid=c(rep('Early.ER+', ntx), rep('Advanced.ER+', ntx), 
+                            rep('Early.ER-', ntx), rep('Advanced.ER-', ntx)), 
+                     txSSno=1:ntreat,
+                     Y1977.screening=Y1977,
+                     Y1999.screening=Y1999)
+
+# Proportions sum to 1
+ddply(val$tx, .(SSno), summarise, s1977=sum(Y1977), s1999=sum(Y1999))
+
+kable(val$tx)
+```
+
+# Incidence
+```{r}
+#-------------------------------------------------------------------------------
+# TO DO 
+#-------------------------------------------------------------------------------
+data(incratesf)
+theserates <- subset(incratesf,
+                     Country %in% c('United States'))
+plot_rates(theserates$Age, theserates$Female.Rate.Per.100K,
+                      psize=theserates$Cases, 
+                      group=paste(theserates$Country, theserates$Year))
+```
+
+# Results for US, no incidence trend
+```{r, echo=TRUE}
+
+if (runNow) {
+    # Model
+    startclock <- proc.time()
+    manuscript_validation <- parsimpolicies(val$pol, val$nh, val$tx, 
+                                          incsource='United States',
+                                          mortsource='United States Birth Cohort 1950', 
+                                          returnstats=c('mean', 'lower', 
+                                                        'upper'), 
+                                          futimes=c(10,25),
+                                          minage=50, maxage=50, sims=nsims)
+    # Runtime
+    runtime_minutes <- (proc.time()-startclock)/60
+    # Format and save results
+    finaltab <- format_bounds_list(manuscript_validation, 
+                                   paren=TRUE, includemean=TRUE, 
+                                   digits=c(0,0,1,2,0,0),
+                                   compileall=TRUE)
+    write.csv(finaltab, file=paste0('validation_', nsims, 'sims.csv'), 
+              row.names=FALSE)
+}
+```
+
+## Runtime
+Runtime in minutes:
+```{r, echo=TRUE}
+if (runNow) runtime_minutes
+```
+
+## Results
+RESULTS FOR `r nsims` SIMS:
+
+```{r}
+if (runNow) kable(finaltab)
+```
+
+```{r, fig.height=10}
+if (runNow) {
+    rlong <- compile_long(manuscript_validation)
+    rplot <- plot_results(rlong, type='line')
+#    rplot
+}
+```
+
+```{r, fig.height=10}
+if (runNow) {
+    rplot <- plot_results(rlong, type='bar')
+#    rplot
+}
+```
+
+# Results for US, with incidence trend
+```{r, echo=TRUE}
+
+if (runNow) {
+    # Model
+    startclock <- proc.time()
+    manuscript_validation_withtrend <- parsimpolicies(val$pol, val$nh, val$tx, 
+                                          incsource='United States times 1.005^20=1.1',
+                                          mortsource='United States Birth Cohort 1950', 
+                                          returnstats=c('mean', 'lower', 
+                                                        'upper'), 
+                                          futimes=c(10,25),
+                                          minage=50, maxage=50, sims=nsims)
+    # Runtime
+    runtime_minutes <- (proc.time()-startclock)/60
+    # Format and save results
+    finaltab <- format_bounds_list(manuscript_validation_withtrend, 
+                                   paren=TRUE, includemean=TRUE, 
+                                   digits=c(0,0,1,2,0,0),
+                                   compileall=TRUE)
+    write.csv(finaltab, file=paste0('validation_withtrend_', nsims, 'sims.csv'), 
+              row.names=FALSE)
+}
+```
+
+## Runtime
+Runtime in minutes:
+```{r, echo=TRUE}
+if (runNow) runtime_minutes
+```
+
+## Results
+RESULTS FOR `r nsims` SIMS:
+
+```{r}
+if (runNow) kable(finaltab)
+```
+
+```{r, fig.height=10}
+if (runNow) {
+    rlong <- compile_long(manuscript_validation_withtrend)
+    rplot <- plot_results(rlong, type='line')
+#    rplot
+}
+```
+
+```{r, fig.height=10}
+if (runNow) {
+    rplot <- plot_results(rlong, type='bar')
+#    rplot
+}
+```

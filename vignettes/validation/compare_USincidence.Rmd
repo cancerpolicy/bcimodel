@@ -1,0 +1,93 @@
+
+---
+title: "Compare old and new code for US incidence survival curves"
+output:
+  html_document:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+  html_notebook:
+    number_sections: yes
+    toc: yes
+    toc_depth: 2
+---
+
+# Setup
+```{r}
+#--------------------------------------------------------------------------------
+# Packages
+#--------------------------------------------------------------------------------
+library(bcimodel)
+library(knitr)
+
+#--------------------------------------------------------------------------------
+# Knitr
+#--------------------------------------------------------------------------------
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+```
+
+# New incidence
+```{r}
+data(incratesf)
+
+# Compute survival from incidence/mortality databases
+newInc <- interpolate_cumsurv(incratesf, 
+                          ratevar='Female.Rate.Per.100K',
+                          country='United States')
+newInc100 <- interpolate_cumsurv(incratesf, 
+                          ratevar='Female.Rate.Per.100K',
+                          country='United States',
+                          maxage=100)
+```
+
+# Old incidence
+```{r}
+incfile <- '~/Documents/jbirnbau/archive/screentreat/data/bc_1975-1979_incidence.csv'
+format_clinical_incidence <- function(
+    incfile
+        ### Path to SEER clinical incidence table
+) {
+
+    # Read in data
+    seer <- read.csv(incfile, stringsAsFactors=FALSE)
+    seer <- within(seer, {
+                   Age <- gsub('[0-9]+=', '', Ages)
+                   Age <- as.character(gsub(' years', '', Age))
+                   Age[Age=='85+'] <- 87
+                   Age <- suppressWarnings(sapply(strsplit(Age, '-'),
+                                 function(x) mean(as.numeric(x))))
+            })
+    seer <- seer[!is.nan(seer$Age),]
+    seer <- seer[!is.na(seer$Age),]
+
+    age_max <- max(seer$Age)
+    incidence <- 
+        data.frame(age = 0:age_max, 
+                   incidence_rate = with(seer, 
+                                          approx(Age, 
+                                                 Crude.Rate, 
+                                                 xout=0:age_max))$y/100000)
+
+    incidence$incidencefree_rate <- 1-incidence$incidence_rate
+    incidence_free_survival <- c()
+    for(i in 1:(age_max+1)){
+      incidence_free_survival[i] <- 
+          prod(incidence$incidencefree_rate[1:i])
+    }
+    incidence$incidencefree_survival <- incidence_free_survival
+    rm(incidence_free_survival)
+
+    return(incidence)
+}
+oldInc <- format_clinical_incidence(incfile)
+```
+
+# Compare rates
+
+# Compare survivals
+```{r}
+plot(newInc100$age, newInc100$cumsurv, col='black', type='l')
+lines(newInc$age, newInc$cumsurv, col='red')
+lines(oldInc$age, oldInc$incidencefree_survival, col='green')
+```
+
