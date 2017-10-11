@@ -162,9 +162,14 @@ parinitialize_pop <- function(pop_size, nsim,
 
     # Compute survival from incidence/mortality databases
     # Edit 8/21/17: removed "maxage=100" argument from interpolate_cumsurv
+    # Edit 10/10/17: returned the maxage arg to interpolate_cumsurv for incidence,
+    # since otherwise it breaks down for maxage > 87 (the incidence data limit). 
+    # Use only if maxage > 87.
+    if (maxage>87) maxIncAge=100 else maxIncAge=NULL
     inc <- interpolate_cumsurv(incratesf, 
                               ratevar='Female.Rate.Per.100K',
-                              country=incsource)
+                              country=incsource,
+                              maxage=maxIncAge)
     # Edit 8/21/17: allow use of BMD cohort life tables
     if (!grepl('Birth Cohort 1950', mortsource)) {
         mort <- interpolate_cumsurv(allmortratesf, 

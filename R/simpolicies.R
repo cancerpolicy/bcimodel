@@ -241,7 +241,6 @@ return(table)
 
 parsimpolicies <- function(scenarios, naturalhist, treatinfo, 
                         agesource='Standard', minage=0, maxage=100,
-                        maxIncAge=100,
                         incsource='Uganda', mortsource='Uganda',
                         popsize=100000, sims=5, futimes=c(5,10), 
                         returnstats=c('mean'),

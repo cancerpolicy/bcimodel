@@ -40,10 +40,14 @@ initialize_pop <- function(pop_size, nsim,
     data(agestructure)
 
     # Compute survival from incidence/mortality databases
+    # Edit 10/10/17: returned the maxage arg to interpolate_cumsurv for incidence,
+    # since otherwise it breaks down for maxage > 87 (the incidence data limit). 
+    # Use only if maxage > 87.
+    if (maxage>87) maxIncAge=100 else maxIncAge=NULL
     inc <- interpolate_cumsurv(incratesf, 
                               ratevar='Female.Rate.Per.100K',
                               country=incsource,
-                              maxage=100)
+                              maxage=maxIncAge)
     mort <- interpolate_cumsurv(allmortratesf, 
                               ratevar='Rate.Per.100K',
                               country=mortsource)
