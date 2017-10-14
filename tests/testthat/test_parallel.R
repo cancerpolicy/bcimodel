@@ -100,3 +100,32 @@ test_that('parsim_treatment_by_subgroup is faster',
               expect_true(t1<t2)
           }
 )
+
+test_that('setting seed for cluster produces identical results for parsim_multinom',
+          {
+              library(bcimodel)
+              library(parallel)
+
+              v1 <- parsim_multinom(5, 5, probs=c(0.1, 0.2, 0.7), 
+                                    names=c(1,2,7))
+              v2 <- parsim_multinom(5, 5, probs=c(0.1, 0.2, 0.7), 
+                                    names=c(1,2,7))
+              expect_equal(v1, v2)
+          }
+)
+
+test_that('setting seed for cluster produces identical results for whole run',
+          {
+            # Load data
+            library(bcimodel)
+            library(parallel)
+            library(plyr)
+            data(ex1)
+            # Model
+            v1 <- parsimpolicies(ex1$pol, ex1$nh, ex1$tx, futimes=10)
+
+            v2 <- parsimpolicies(ex1$pol, ex1$nh, ex1$tx, futimes=10)
+
+            expect_equal(v1, v2)
+          }
+)

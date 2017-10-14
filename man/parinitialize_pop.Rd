@@ -36,6 +36,5 @@ pop <- initialize_pop(pop_size=100000,
                      minage=0, maxage=100, 
                      incsource='Uganda', 
                      mortsource='Uganda')
-
 }
 

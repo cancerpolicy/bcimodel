@@ -2,8 +2,8 @@
 # Anything in a folder named "private"
 private
 
-# Raw data files in egonet package
-bcimodel/inst/extdata
+# Raw data files in package
+inst/extdata
 
 # History files
 .Rhistory
@@ -31,6 +31,10 @@ vignettes/*.tex
 vignettes/*.log
 vignettes/*.toc
 
+# produced vignettes - archived files
+vignettes/eastafrica-colombia/archive
+
+#
 # OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
 .httr-oauth
 

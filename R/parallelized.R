@@ -11,7 +11,7 @@
 #  strategies with early detection
 #' @param method Either 'outer' or 'inner'. If outer, will parallelize the outer
 #' lapply. If inner, will parallelize repeated calls to sim_multinom
-#'
+
 #' @export
 
 partreatments_by_policy <- function(policies, treat_chars, stagegroups,
@@ -19,6 +19,7 @@ partreatments_by_policy <- function(policies, treat_chars, stagegroups,
 
     if (method=='inner') {
         cl <- makeCluster(getOption("cl.cores", ncores)) 
+        clusterSetRNGStream(cl, iseed = 98103)
         clusterExport(cl=cl, varlist=c("treat_chars", "stagegroups", "map",
                                        "policies", "pop_size", "nsim"),
                       envir=environment())
@@ -81,23 +82,18 @@ partreatments_by_policy <- function(policies, treat_chars, stagegroups,
 # parsim_multinom
 #-------------------------------------------------------------------------------
 
-parsim_multinom <- function(
-    nsims,
-        ### Number of size=1 sims from the multinomial
-    nreps,  
-        ### Number of times to replicate the nsims
-        ### Put the smaller number here, the bigger one as nsims
-    probs,
-        ### Vector of probabilities for each of the K categories
-    names,
-        ### Vector of names associated with each of the categories
-        ### Must be of same length as probs
-        ### Can be character or numeric. Use numeric row IDs if 
-        ### you're referring to a group defined by multiple
-        ### variables whose groupings are defined in a separate
-        ### data frame
-    ncores=4
-) {
+#' Simulate from mutinomial, parallelized
+#'
+#' Simulate matrix of draws from multinomial
+#' 
+#' @param nsims Number of size=1 sims from the multinomials
+#' @param nreps Number of times to replicate the nsims. Put the smaller number here, the bigger one as nsims
+#' @param probs Vector of probabilities for each of the K categories
+#' @param names Vector of names associated with each of the categories. Must be of same length as probs. Can be character or numeric. Use numeric row IDs if you're referring to a group defined by multiple variables whose groupings are defined in a separate data frame
+
+#' @export 
+
+parsim_multinom <- function(nsims, nreps, probs, names, ncores=4) {
 
     # Helper function to do one rep
     one_rep <- function(id, nsims, probs, names) {
@@ -111,6 +107,7 @@ parsim_multinom <- function(
     }
 
     cl <- makeCluster(getOption("cl.cores", ncores)) 
+    clusterSetRNGStream(cl, iseed = 98103)
     clusterExport(cl=cl, 
                   varlist=c("nreps", "one_rep", "nsims", "probs", "names"), 
                   envir=environment())
@@ -145,7 +142,7 @@ parsim_multinom <- function(
 #'                      minage=0, maxage=100, 
 #'                      incsource='Uganda', 
 #'                      mortsource='Uganda')
-#'
+
 #' @export
 
 parinitialize_pop <- function(pop_size, nsim,
@@ -250,7 +247,7 @@ parinitialize_pop <- function(pop_size, nsim,
 #' Could ID the groups by name
 #' add_features(matrix(1, nrow=20, ncol=2), probs=c(0.25, 0.25, 0.25, 0.25),
 #'              names=c('EarlyER+', 'EarlyER-', 'AdvancedER+', 'AdvancedER-'))
-#'
+
 #' @export
 
 paradd_features <- function(popbysim, probs, names=NULL, ncores=4) {
