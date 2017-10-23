@@ -32,6 +32,64 @@ str(Sb.adv <- uniroot(f, lower=0.2, upper=adv5yr, tol = 0.0001))
 
 ## Colombia, taking out endocrine/chemo/combined
 
+### Treatments from the US in 2000 (see Annals paper):
+Note: I could have detailed Endocrine, Chemo and Both for the ER-, but the table focuses on treatments that have an impact, grouped by the hazard ratio. So for ER-, chemo and both have the same HR, the HR for just chemo, since Endocrine has no effect in ER-. 
+
+ER Status | Stage | Treatment | Percent
+---- | ------ | ----------- | ------
+Positive | Advanced | Endocrine | 10
+ | | | Chemo | 38
+ | | | Both | 59
+ | | Early | Endocrine | 58
+ | | | Chemo | 8
+ | | | Both | 10
+Negative | Advanced | Chemo OR both | 85+10 = 95
+ | | Early | Chemo OR both | 50+5 = 55
+
+
+Description | Notation | Value
+--------------------------------- | -------- | ---------------------
+Proportion of all cases that are ER positive | $p_{i=ER+}$ | 0.70
+Proportion of all cases that are ER negative | $p_{i=ER-} = 1-p_{j=ER+}$ | 0.30
+Within stage and ER group i, proportion treated with treatment j | $t_{ij}$ | See table below
+Hazard ratio for treatment j | $h_{j}$ | See table below
+Observed 5-year survival, all ER | $S_{o}$ | 0.55 (advanced) or 0.87 (early)
+Baseline 5-year survival, all ER | $S_{b}$ | To be estimated for each stage
+
+Using the assumption $S_{b}$ is the same for both ER+ and ER-, observed survival is sum of survivals under each treatment, weighted by the proportion receiving each treatment. For treatment $j$, survival is $(S_{b})^{h_{i}}$
+
+$$S_{o} = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}}$$
+Rearranging terms gives a fractional polynomial for which $S_{b}$ is the root:
+
+$$0 = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}} - S_{o}$$
+
+
+Stage | ER Status $i$ | Treatment $j$ | Hazard ratio $h_{j}$ | Proportion $t_{ij}$ 
+---- | ------ | ----------- | ------ | --------
+Advanced | Positive | Endocrine | 0.7 | 10 
+| |  | Chemo | 0.775 | 38
+| |  | Both | 0.5425 | 50
+| |  | None | 1 | 2
+| | Negative | Endocrine | 1 | 3 
+| |  | Chemo | 0.775 | 85
+| |  | Both | 0.775 | 10
+| |  | None | 1 | 2
+Early | Positive | Endocrine | 0.7 | 58 
+| |  | Chemo | 0.775 | 8
+| |  | Both | 0.5425 | 10
+| |  | None | 1 | 24
+| | Negative | Endocrine | 1 | 20
+| |  | Chemo | 0.775 | 50
+| |  | Both | 0.775 | 5
+|  |  | None | 1 | 25
+
+For example, for the advanced stage in Colombia:
+
+$$S_{o} = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}}$$
+$$0.55 = 0.70*(0.10{S_{b}}^{0.7} + 0.38{S_{b}}^{0.775} + 0.50{S_{b}}^{0.5425} + 0.02{S_{b}}^{1}) + 0.30*(0.03{S_{b}}^{1} + 0.85{S_{b}}^{0.775} + 0.10{S_{b}}^{0.775} + 0.02{S_{b}}^{1}) $$
+ For the ER negative, no treatment and endocrine have the same hazard ratios, as do chemo and both. Those terms can thus be combined: 
+ 
+ $$0.55 = 0.70*(0.10{S_{b}}^{0.7} + 0.38{S_{b}}^{0.775} + 0.50{S_{b}}^{0.5425} + 0.02{S_{b}}^{1}) + 0.30*(0.05{S_{b}}^{1} + 0.95{S_{b}}^{0.775}) $$
 ```{r, echo=TRUE}
 
 # Treated survivals
@@ -41,9 +99,11 @@ adv5yr <- 0.55
 # ER positivity
 propERpos <- 0.70
 
-# Treatments: e=endocrine, c=chemo, b=both, pos=ER+, neg=ER-
+# Treatment proportions: e=endocrine, c=chemo, b=both, pos=ER+, ''=ER-
 
 # Hazard ratios: e=endocrine, c=chemo, b=both
+
+# For chemo, the terms with the same hazards are combined, i.e. chemo and both are tc and none and endocrine are t
 
 ```
 

@@ -150,6 +150,246 @@ str(Sb.adv &lt;- uniroot(f, lower=0.2, upper=adv5yr, tol = 0.0001))</code></pre>
 </div>
 <div id="colombia-taking-out-endocrinechemocombined" class="section level2">
 <h2>Colombia, taking out endocrine/chemo/combined</h2>
+<div id="treatments-from-the-us-in-2000-see-annals-paper" class="section level3">
+<h3>Treatments from the US in 2000 (see Annals paper):</h3>
+<p>Note: I could have detailed Endocrine, Chemo and Both for the ER-, but the table focuses on treatments that have an impact, grouped by the hazard ratio. So for ER-, chemo and both have the same HR, the HR for just chemo, since Endocrine has no effect in ER-.</p>
+<table>
+<thead>
+<tr class="header">
+<th>ER Status</th>
+<th>Stage</th>
+<th>Treatment</th>
+<th>Percent</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Positive</td>
+<td>Advanced</td>
+<td>Endocrine</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Chemo</td>
+<td>38</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Both</td>
+<td>59</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Early</td>
+<td>Endocrine</td>
+<td>58</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Chemo</td>
+<td>8</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Both</td>
+<td>10</td>
+</tr>
+<tr class="odd">
+<td>Negative</td>
+<td>Advanced</td>
+<td>Chemo OR both</td>
+<td>85+10 = 95</td>
+</tr>
+<tr class="even">
+<td></td>
+<td>Early</td>
+<td>Chemo OR both</td>
+<td>50+5 = 55</td>
+</tr>
+</tbody>
+</table>
+<table style="width:90%;">
+<colgroup>
+<col width="47%"></col>
+<col width="12%"></col>
+<col width="30%"></col>
+</colgroup>
+<thead>
+<tr class="header">
+<th>Description</th>
+<th>Notation</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Proportion of all cases that are ER positive</td>
+<td><span class="math inline">\(p_{i=ER+}\)</span></td>
+<td>0.70</td>
+</tr>
+<tr class="even">
+<td>Proportion of all cases that are ER negative</td>
+<td><span class="math inline">\(p_{i=ER-} = 1-p_{j=ER+}\)</span></td>
+<td>0.30</td>
+</tr>
+<tr class="odd">
+<td>Within stage and ER group i, proportion treated with treatment j</td>
+<td><span class="math inline">\(t_{ij}\)</span></td>
+<td>See table below</td>
+</tr>
+<tr class="even">
+<td>Hazard ratio for treatment j</td>
+<td><span class="math inline">\(h_{j}\)</span></td>
+<td>See table below</td>
+</tr>
+<tr class="odd">
+<td>Observed 5-year survival, all ER</td>
+<td><span class="math inline">\(S_{o}\)</span></td>
+<td>0.55 (advanced) or 0.87 (early)</td>
+</tr>
+<tr class="even">
+<td>Baseline 5-year survival, all ER</td>
+<td><span class="math inline">\(S_{b}\)</span></td>
+<td>To be estimated for each stage</td>
+</tr>
+</tbody>
+</table>
+<p>Using the assumption <span class="math inline">\(S_{b}\)</span> is the same for both ER+ and ER-, observed survival is sum of survivals under each treatment, weighted by the proportion receiving each treatment. For treatment <span class="math inline">\(j\)</span>, survival is <span class="math inline">\((S_{b})^{h_{i}}\)</span></p>
+<p><span class="math display">\[S_{o} = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}}\]</span> Rearranging terms gives a fractional polynomial for which <span class="math inline">\(S_{b}\)</span> is the root:</p>
+<p><span class="math display">\[0 = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}} - S_{o}\]</span></p>
+<table>
+<thead>
+<tr class="header">
+<th>Stage</th>
+<th>ER Status <span class="math inline">\(i\)</span></th>
+<th>Treatment <span class="math inline">\(j\)</span></th>
+<th>Hazard ratio <span class="math inline">\(h_{j}\)</span></th>
+<th>Proportion <span class="math inline">\(t_{ij}\)</span></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Advanced</td>
+<td>Positive</td>
+<td>Endocrine</td>
+<td>0.7</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Chemo</td>
+<td>0.775</td>
+<td>38</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Both</td>
+<td>0.5425</td>
+<td>50</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>None</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Negative</td>
+<td>Endocrine</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Chemo</td>
+<td>0.775</td>
+<td>85</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Both</td>
+<td>0.775</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>None</td>
+<td>1</td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td>Early</td>
+<td>Positive</td>
+<td>Endocrine</td>
+<td>0.7</td>
+<td>58</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Chemo</td>
+<td>0.775</td>
+<td>8</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Both</td>
+<td>0.5425</td>
+<td>10</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>None</td>
+<td>1</td>
+<td>24</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td>Negative</td>
+<td>Endocrine</td>
+<td>1</td>
+<td>20</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>Chemo</td>
+<td>0.775</td>
+<td>50</td>
+</tr>
+<tr class="odd">
+<td></td>
+<td></td>
+<td>Both</td>
+<td>0.775</td>
+<td>5</td>
+</tr>
+<tr class="even">
+<td></td>
+<td></td>
+<td>None</td>
+<td>1</td>
+<td>25</td>
+</tr>
+</tbody>
+</table>
+<p>For example, for the advanced stage in Colombia:</p>
+<p><span class="math display">\[S_{o} = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}}\]</span> <span class="math display">\[0.55 = 0.70*(0.10{S_{b}}^{0.7} + 0.38{S_{b}}^{0.775} + 0.50{S_{b}}^{0.5425} + 0.02{S_{b}}^{1}) + 0.30*(0.03{S_{b}}^{1} + 0.85{S_{b}}^{0.775} + 0.10{S_{b}}^{0.775} + 0.02{S_{b}}^{1}) \]</span> For the ER negative, no treatment and endocrine have the same hazard ratios, as do chemo and both. Those terms can thus be combined:</p>
+<p><span class="math display">\[0.55 = 0.70*(0.10{S_{b}}^{0.7} + 0.38{S_{b}}^{0.775} + 0.50{S_{b}}^{0.5425} + 0.02{S_{b}}^{1}) + 0.30*(0.05{S_{b}}^{1} + 0.95{S_{b}}^{0.775}) \]</span></p>
 <pre class="r"><code># Treated survivals
 early5yr &lt;- 0.87
 adv5yr &lt;- 0.55
@@ -157,9 +397,11 @@ adv5yr &lt;- 0.55
 # ER positivity
 propERpos &lt;- 0.70
 
-# Treatments: e=endocrine, c=chemo, b=both, pos=ER+, neg=ER-
+# Treatment proportions: e=endocrine, c=chemo, b=both, pos=ER+, ''=ER-
 
-# Hazard ratios: e=endocrine, c=chemo, b=both</code></pre>
+# Hazard ratios: e=endocrine, c=chemo, b=both
+
+# For chemo, the terms with the same hazards are combined, i.e. chemo and both are tc and none and endocrine are t</code></pre>
 <pre class="r"><code># Early stage
 f = function(x, p=propERpos, tepos=0.58, tcpos=0.08, tbpos=0.10, tc=0.55, he=0.7, hc=0.775, So=early5yr) { 
   p*(1-tepos-tcpos-tbpos)*x + p*tepos*x^he + p*tcpos*x^hc + p*tbpos*x^(he*hc) + 
@@ -184,6 +426,7 @@ str(Sb.adv &lt;- uniroot(f, lower=0.2, upper=adv5yr, tol = 0.0001))</code></pre>
 ##  $ iter      : int 4
 ##  $ init.it   : int NA
 ##  $ estim.prec: num 5e-05</code></pre>
+</div>
 </div>
 
 
