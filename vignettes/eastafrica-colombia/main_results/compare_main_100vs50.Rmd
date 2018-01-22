@@ -1,0 +1,46 @@
+
+---
+title: "Policy simulations for East Africa and Colombia"
+output: html_document
+---
+
+```{r, echo=FALSE, message=FALSE}
+#--------------------------------------------------------------------------------
+# Files
+#--------------------------------------------------------------------------------
+# Set default to FALSE, so it doesn't stall building the package
+f50 <- c('main_results/main_50sims/colombia_50sims.csv',
+          'main_results/main_50sims/eastafrica_50sims.csv')
+f100 <- c('main_results/main_100sims/colombia_100sims.csv',
+          'main_results/main_100sims/eastafrica_100sims.csv')
+
+library(plyr)
+
+compare_runs <- function(f100, f50, country) {
+    r100 <- read.csv(f100, header=TRUE, check.names=FALSE)
+    r50 <- read.csv(f50, header=TRUE, check.names=FALSE)
+    r <- list(r100, r50)
+    names(r) <- c('100 sims', '50 sims')
+
+    df <- ldply(r)
+    newyr <- c(rep(c(rep(5,6),rep(10,6),rep(20,6)),2))
+    df[,'Follow-Up Year'] <- newyr
+
+    long <- melt(df, id.vars=c('Follow-Up Year', '.id', 'Measure'))
+
+    long10 <- subset(long, `Follow-Up Year`==10)
+
+    wide10 <- data.frame(Country=country, cast(long10, Measure+variable~.id),
+                         check.names=FALSE)
+    return(wide10)
+}
+
+co <- compare_runs(f100[1], f50[1], country='Colombia')
+ea <- compare_runs(f100[2], f50[2], country='East Africa')
+
+final <- rbind(co, ea)
+
+write.csv(final, 'main_results/compare_main_100v50.csv', row.names=FALSE)
+```
+
+

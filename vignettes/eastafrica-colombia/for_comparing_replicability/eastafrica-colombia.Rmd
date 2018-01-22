@@ -1,0 +1,608 @@
+---
+title: "Policy simulations for East Africa and Colombia"
+output: word_document
+---
+
+```{r, echo=FALSE, message=FALSE}
+#--------------------------------------------------------------------------------
+# Run anything of substance?
+#--------------------------------------------------------------------------------
+# Set default to FALSE, so it doesn't stall building the package
+runNow <- TRUE
+# Define nsims here
+nsims <- 100
+
+#-------------------------------------------------------------------------------
+# Setup 
+#-------------------------------------------------------------------------------
+library(reshape)
+library(parallel)
+library(ggplot2)
+library(knitr)
+library(plyr)
+library(bcimodel)
+data(ex1)
+
+#--------------------------------------------------------------------------------
+# Knitr
+#--------------------------------------------------------------------------------
+opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+
+#-------------------------------------------------------------------------------
+# Stats will be contained in "eafr" list object
+#-------------------------------------------------------------------------------
+eafr <- vector('list', length=length(ex1))
+names(eafr) <- names(ex1)
+#-------------------------------------------------------------------------------
+# Stats will be contained in "colomb*" list object
+#-------------------------------------------------------------------------------
+colomb <- vector('list', length=length(ex1))
+names(colomb) <- names(ex1)
+
+#-------------------------------------------------------------------------------
+# Statistics for Colombia 
+#-------------------------------------------------------------------------------
+propAdv <- 0.45
+propERpos <- 0.70
+early5yr <- 0.87
+adv5yr <- 0.55
+#propERTam <- 0.58
+```
+
+# Inputs
+
+## Policies to investigate
+
+### East Africa
+Note: baseline % advanced = 78%
+```{r}
+eafr$pol  <- data.frame(num=c(1:10),
+                         id=c('adv78', 
+                              'adv78.tam', 'adv78.tamchemo', 'adv78.tamchemoERpos',
+                              'adv60.tam', 'adv60.tamchemo', 'adv60.tamchemoERpos',
+                              'adv35.tam', 'adv35.tamchemo', 'adv35.tamchemoERpos'
+                              ),
+                         name=c('E0: Surgery only', 'E1: Endocrine for ER+', 
+                                'E2: E1 plus Chemo for ER-',
+                                'E3: E2 plus Chemo for Advanced ER+', 
+                                'E4: E1 plus downstaging to 60% advanced',
+                                'E5: E2 plus downstaging to 60% advanced',
+                                'E6: E3 plus downstaging to 60% advanced',
+                                'E7: E1 plus downstaging to 35% advanced',
+                                'E8: E2 plus downstaging to 35% advanced',
+                                'E9: E3 plus downstaging to 35% advanced'),
+                         pairnum=c(NA, NA, NA, NA, rep(c(2,3,4), 2)),
+                         earlydetHR=c(rep(1, 4), rep(0.60/0.78, 3),
+                                      rep(0.35/0.78, 3)),
+                         stringsAsFactors=FALSE)
+kable(eafr$pol)
+```
+
+### Colombia
+Note: baseline % advanced = `r 100*propAdv`%. 
+```{r}
+colomb$pol <- data.frame(num=c(1:10),
+                         id=c('adv45', 
+                              'adv45.tam',
+                              'adv45.tamchemo', 'adv45.tamchemoERpos',
+                              'adv35.tam',
+                              'adv35.tamchemo', 'adv35.tamchemoERpos',
+                              'adv30.tam',
+                              'adv30.tamchemo', 'adv30.tamchemoERpos'
+                              ),
+                         name=c('C0: Surgery and Endocrine for some ER+',
+                                'C1: C0 + Endocrine for all ER+',
+                                'C2: C1 plus Chemo for ER-',
+                                'C3: C2 plus Chemo for Advanced ER+', 
+                                'C4: C1 plus downstaging to 35% advanced',
+                                'C5: C2 plus downstaging to 35% advanced',
+                                'C6: C3 plus downstaging to 35% advanced',
+                                'C7: C1 plus downstaging to 30% advanced',
+                                'C8: C2 plus downstaging to 30% advanced',
+                                'C9: C3 plus downstaging to 30% advanced'),
+                         pairnum=c(NA, NA, NA, NA, rep(c(2,3,4), 2)),
+                         earlydetHR=c(rep(1, 4), rep(0.35/propAdv, 3),
+                                      rep(0.30/propAdv, 3)),
+                         stringsAsFactors=FALSE)
+kable(colomb$pol)
+```
+
+## Natural history parameters: incidence
+
+### East Africa
+
+We are using Uganda for our East Africa example.
+```{r, fig.width=8}
+data(incratesf)
+theserates <- subset(incratesf,
+                     Country %in% c('United States', 'Uganda',
+                                    'Malawi', 'South Africa', 
+                                    'Zimbabwe', 'Tunisia'))
+plot_rates(theserates$Age, theserates$Female.Rate.Per.100K,
+                      psize=theserates$Cases, 
+                      group=paste(theserates$Country, theserates$Year))
+```
+
+### Colombia
+We are using Cali, Colombia for our example.
+```{r, fig.width=8}
+data(incratesf)
+theserates <- subset(incratesf,
+                     grepl('Colombia', Country) |
+                     Country %in% c('United States'))
+plot_rates(theserates$Age, theserates$Female.Rate.Per.100K,
+                      psize=theserates$Cases, 
+                      group=paste(theserates$Country, theserates$Year))
+```
+
+## Natural history parameters: stage and survival
+
+### Solving for survivals without Tamoxifen or Chemo
+
+Description | Notation | East Africa | Colombia
+------------------- | -------- | ------------- | ----------------
+Proportion of all cases that are ER positive | $p_{i=ER+}$ | 0.41 | 0.70
+Proportion of all cases that are ER negative | $p_{i=ER-} = 1-p_{j=ER+}$ | 0.59 | 0.30
+Within stage and ER group i, proportion treated with treatment j | $t_{ij}$ | See table below | See table below
+Hazard ratio for treatment j | $h_{j}$ |  See table below | See table below
+Observed 5-year survival, all ER | $S_{o}$ | 0.72 (early) | 0.55 (advanced) or 0.87 (early)
+Baseline 5-year survival, all ER | $S_{b}$ | To be estimated for each stage | To be estimated for each stage
+
+Using the assumption $S_{b}$ is the same for both ER+ and ER-, observed survival is sum of survivals under each treatment, weighted by the proportion receiving each treatment. For treatment $j$, survival is $(S_{b})^{h_{i}}$
+
+$$S_{o} = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}}$$
+Rearranging terms gives a fractional polynomial for which $S_{b}$ is the root:
+
+$$0 = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}} - S_{o}$$
+
+
+Stage | ER Status $i$ | Treatment $j$ | Hazard ratio $h_{j}$ | East Africa $t_{ij}$, in % | Colombia $t_{ij}$, in %
+---- | ------ | ----------- | ------ | -------- | --------
+Advanced | Positive | Endocrine | 0.7 | | 10 
+| |  | Chemo | 0.775 | | 38
+| |  | Both | 0.5425 | | 50
+| |  | None | 1 | | 2
+| | Negative | Endocrine | 1 | | 3 
+| |  | Chemo | 0.775 | | 85
+| |  | Both | 0.775 | | 10
+| |  | None | 1 | | 2
+Early | Positive | Endocrine | 0.7 | 100 | 58 
+| |  | Chemo | 0.775 | | 8
+| |  | Both | 0.5425 | | 10
+| |  | None | 1 | | 24
+| | Negative | Endocrine | 1 | | 20
+| |  | Chemo | 0.775 | | 50
+| |  | Both | 0.775 | | 5
+|  |  | None | 1 | | 25
+
+For example, for the early stage in East Africa: 
+
+$$S_{o} = \sum_{i}^{}p_{i}\sum_{j}^{} (t_{ij}S_{b})^{h_{j}}$$
+$$0.72 = 0.41*({S_{b}}^{0.7}) + 0.59*({S_{b}}^{1}) $$
+
+Whereas for the advanced stage in Colombia:
+
+$$0.55 = 0.70*(0.10{S_{b}}^{0.7} + 0.38{S_{b}}^{0.775} + 0.50{S_{b}}^{0.5425} + 0.02{S_{b}}^{1}) + 0.30*(0.03{S_{b}}^{1} + 0.85{S_{b}}^{0.775} + 0.10{S_{b}}^{0.775} + 0.02{S_{b}}^{1}) $$
+
+ For the ER negative, no treatment and endocrine have the same hazard ratios, as do chemo and both. Those terms can thus be combined: 
+ 
+ $$0.55 = 0.70*(0.10{S_{b}}^{0.7} + 0.38{S_{b}}^{0.775} + 0.50{S_{b}}^{0.5425} + 0.02{S_{b}}^{1}) + 0.30*(0.05{S_{b}}^{1} + 0.95{S_{b}}^{0.775}) $$
+ 
+### East Africa
+Advanced-stage is 78% and proportion ER+ is 41%. 
+Advanced-stage 5-year survival is 35%. 
+
+#### Solving for baseline survival without endocrine
+We do this for **early-stage only**. 
+
+For cohort survival of 72% with 100% of the 41% ER+ treated with Tamoxifen (HR=0.7), _baseline_ early-stage 5-year survival is (in %):
+```{r}
+# Early stage
+f = function(x, p=0.41, t=1, h=0.7, So=0.72) { p*(1-t)*x + p*t*x^h + (1-p)*x - So}
+Sb.early <- uniroot(f, lower=0.5, upper=0.72, tol = 0.0001)
+early.mrate.ea = cumsurv_to_exprate(Sb.early$root, year=5)
+round(100*Sb.early$root)
+```
+
+Converting from survival to mortality rate gives us:
+```{r}
+adv.mrate.ea <- cumsurv_to_exprate(0.35, year=5)
+
+eafr$nh <- compile_naturalhist(prop_adv=0.78, 
+                 mortrates=c(Early=early.mrate.ea, Advanced=adv.mrate.ea),
+                 subgroup_probs=c(`ER+`=0.41, `ER-`=0.59))
+kable(eafr$nh[,c('stage', 'subgroup', 'mortrate', 'prop')])
+```
+
+Other-cause mortality is taken from Ugandan life tables.
+
+### Colombia
+
+Advanced-stage is `r 100*propAdv`% and proportion ER+ is `r 100*propERpos`%. 
+
+#### Solving for baseline survival without endocrine, chemo or both
+```{r, echo=TRUE}
+
+# Treated survivals
+early5yr <- 0.87
+adv5yr <- 0.55
+
+# ER positivity
+propERpos <- 0.70
+
+# Treatment proportions: e=endocrine, c=chemo, b=both, pos=ER+, ''=ER-
+
+# Hazard ratios: e=endocrine, c=chemo, b=both
+
+# For chemo, the terms with the same hazards are combined, i.e. chemo and both are tc and none and endocrine are t
+
+```
+
+** EARLY STAGE ** Baseline survival (in %) is:
+```{r, echo=FALSE}
+# Early stage
+f = function(x, p=propERpos, tepos=0.58, tcpos=0.08, tbpos=0.10, tc=0.55, he=0.7, hc=0.775, So=early5yr) { 
+  p*(1-tepos-tcpos-tbpos)*x + p*tepos*x^he + p*tcpos*x^hc + p*tbpos*x^(he*hc) + 
+  (1-p)*(1-tc)*x  + (1-p)*tc*x^hc - So
+  }
+Sb.early <- uniroot(f, lower=0.5, upper=early5yr, tol = 0.0001)
+early.mrate.co = cumsurv_to_exprate(Sb.early$root, year=5)
+round(100*Sb.early$root)
+```
+
+** ADVANCED STAGE ** Baseline survival (in %) is:
+```{r, echo=FALSE}
+# Advanced stage 
+f = function(x, p=propERpos, tepos=0.10, tcpos=0.38, tbpos=0.59, tc=0.95, he=0.7, hc=0.775, So=adv5yr) { 
+  p*(1-tepos-tcpos-tbpos)*x + p*tepos*x^he + p*tcpos*x^hc + p*tbpos*x^(he*hc) + 
+  (1-p)*(1-tc)*x  + (1-p)*tc*x^hc - So
+  }
+Sb.adv <- uniroot(f, lower=0.2, upper=adv5yr, tol = 0.0001)
+adv.mrate.co = cumsurv_to_exprate(Sb.adv$root, year=5)
+round(100*Sb.adv$root)
+```
+
+
+Converting from survival to mortality rate gives us:
+```{r}
+colomb$nh <- compile_naturalhist(prop_adv=propAdv, 
+                 mortrates=c(Early=early.mrate.co, Advanced=adv.mrate.co),
+                 subgroup_probs=c(`ER+`=propERpos, `ER-`=1-propERpos))
+kable(colomb$nh[,c('stage', 'subgroup', 'mortrate', 'prop')])
+```
+
+```{r}
+#-------------------------------------------------------------------------------
+# Silently define the stageshift mapping
+#-------------------------------------------------------------------------------
+eafr$map <- create_stageshift_map(eafr$nh)
+colomb$map <- create_stageshift_map(colomb$nh)
+```
+
+## Treatment
+
+### East Africa
+```{r}
+#-------------------------------------------------------------------------------
+# Silently translate policies into treatment matrix: EAST AFRICA
+#-------------------------------------------------------------------------------
+eafr$tx <- data.frame(expand.grid(txSSid=c('None', 'Tamoxifen', 'Chemo',
+                                           'Tamoxifen+Chemo'),
+                                     SSno=1:nrow(eafr$nh)),
+                      stringsAsFactors=FALSE)
+ntreat <- nrow(eafr$tx)
+ntx <- length(unique(eafr$tx$txSSid))
+
+# Proportions sum to 1 within stage-subgroup groups
+eafr$tx <- transform(eafr$tx, 
+                     SSid=c(rep('Early.ER+', ntx), rep('Early.ER-', ntx), 
+                            rep('Advanced.ER+', ntx), rep('Advanced.ER-', ntx)), 
+                     txSSno=1:ntreat)
+eafr$tx <- transform(eafr$tx,
+                        txHR=c(1, 0.7, 0.775, 0.775*0.7, 
+                               1, 1, 0.775, 0.775,
+                               1, 0.7,  0.775, 0.775*0.7,
+                               1, 1, 0.775, 0.775))
+adv78 <- adv78.tam <- rep(0, ntreat)
+txSSid <- as.character(eafr$tx$txSSid)
+SSid <- as.character(eafr$tx$SSid)
+adv78[txSSid=='None'] <- 1 
+adv78.tam[txSSid=='Tamoxifen' & (SSid=='Early.ER+' | SSid=='Advanced.ER+')] <- 1
+adv78.tamchemo <- adv78.tam
+adv78.tam[txSSid=='None' & (SSid=='Early.ER-' | SSid=='Advanced.ER-')] <- 1
+adv78.tamchemo[txSSid=='Chemo' & (SSid=='Early.ER-' | SSid=='Advanced.ER-')] <- 1
+adv78.tamchemoERpos <- adv78.tamchemo
+adv78.tamchemoERpos[txSSid=='Tamoxifen' & SSid=='Advanced.ER+'] <- 0
+adv78.tamchemoERpos[txSSid=='Tamoxifen+Chemo' & SSid=='Advanced.ER+'] <- 1
+
+props <- data.frame(adv78, 
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos,
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos,
+               adv78.tam, adv78.tamchemo, adv78.tamchemoERpos)
+colnames(props) <- eafr$pol$id
+props2 <- props
+colnames(props2) <- eafr$pol$name
+
+toprint <- data.frame(eafr$tx, props2, stringsAsFactors=FALSE, check.names=FALSE)
+
+eafr$tx <- data.frame(eafr$tx, props, stringsAsFactors=FALSE)
+
+eafr$tx <- data.frame(eafr$tx, stringsAsFactors=FALSE)
+
+kable(toprint, caption='Treatment proportions for each policy (should sum to 1 within stage-ER groups)')
+```
+
+### Colombia
+In Colombia, when we move from
+
+Move | SSid affected | Change in treatment for that SSid
+---- | ----- | -------------------------
+A -> B (endocrine for all ER+) | all ER pos | None --> Endocrine; Chemo --> Both
+B -> C (chemo for all ER-) | all ER neg | None --> Chemo; Endocrine --> Chemo; Both --> Chemo
+C -> D (chemo for adv ER+) | advanced ER pos | Endocrine --> Both
+
+```{r}
+#-------------------------------------------------------------------------------
+# Silently translate policies into treatment matrix: COLOMBIA
+#-------------------------------------------------------------------------------
+colomb$tx <- data.frame(expand.grid(txSSid=c('None', 'Tamoxifen', 'Chemo',
+                                           'Tamoxifen+Chemo'),
+                                     SSno=1:nrow(colomb$nh)),
+                      stringsAsFactors=FALSE)
+ntreat <- nrow(colomb$tx)
+ntx <- length(unique(colomb$tx$txSSid))
+
+# Proportions sum to 1 within stage-subgroup groups
+colomb$tx <- transform(colomb$tx, 
+                     SSid=c(rep('Early.ER+', ntx), rep('Early.ER-', ntx), 
+                            rep('Advanced.ER+', ntx), rep('Advanced.ER-', ntx)), 
+                     txSSno=1:ntreat)
+colomb$tx <- transform(colomb$tx,
+                        txHR=c(1, 0.7, 0.775, 0.775*0.7, 
+                               1, 1, 0.775, 0.775,
+                               1, 0.7,  0.775, 0.775*0.7,
+                               1, 1, 0.775, 0.775))
+adv45A <- vector('list', length=length(unique(colomb$tx$SSid)))
+# Order of SSid: Early.ER+   Early.ER-    Advanced.ER+   Advanced.ER-
+# Order of treatments: None, Endocrine, Chemo, Both
+adv45A[[1]] <- c(0.24, 0.58, 0.08, .10)
+adv45A[[2]] <- c(0.25, 0.20, 0.50, 0.05)
+adv45A[[3]] <- c(0.02, 0.10, 0.38, 0.50)
+adv45A[[4]] <- c(0.02, 0.03, 0.85, 0.10)
+# lapply(adv45A, sum)
+
+# For B, all ER pos move None --> Endocrine; Chemo --> Both
+adv45B <- adv45A
+adv45B[[1]] <- c(0, 0.24+0.58, 0, 0.08+0.10)
+adv45B[[3]] <- c(0, 0.02+0.10, 0, 0.38+0.50)
+
+# For C, all ER neg move None --> Chemo; Endocrine --> Chemo; Both --> Chemo
+adv45C <- adv45B
+adv45C[[2]] <- c(0, 0, 1, 0)
+adv45C[[4]] <- c(0, 0, 1, 0)
+
+# For D, advanced ER pos FROM B move Endocrine --> Both
+adv45D <- adv45C
+adv45D[[3]] <- c(0, 0, 0, 1)
+
+# Put together complete vectors
+adv45A.v <- do.call('c', adv45A)
+adv45B.v <- do.call('c', adv45B)
+adv45C.v <- do.call('c', adv45C)
+adv45D.v <- do.call('c', adv45D)
+
+props <- data.frame(adv45A.v,
+               adv45B.v, adv45C.v, adv45D.v,
+               adv45B.v, adv45C.v, adv45D.v,
+               adv45B.v, adv45C.v, adv45D.v
+               )
+# colSums(props) 
+colnames(props) <- colomb$pol$id
+
+props2 <- props
+colnames(props2) <- colomb$pol$name
+
+toprint <- data.frame(colomb$tx, props2, stringsAsFactors=FALSE, check.names=FALSE)
+
+colomb$tx <- data.frame(colomb$tx, props, stringsAsFactors=FALSE)
+
+colomb$tx <- data.frame(colomb$tx, stringsAsFactors=FALSE)
+
+kable(toprint, caption='Treatment proportions for each policy (should sum to 1 within stage-ER groups)')
+
+# kable(colomb$tx)
+```
+
+# Results 
+
+## Legends and Footnotes
+### Tables
+Legend: Breast cancer outcomes after 10 years, for 100,000 women ages [insert] at the time of intervention. Results are the average across 100 simulations.
+Footnote: The ARR for a given strategy is equivalent to the decrease in cumulative BC mortality compared to the P0 policy. Small discrepancies reflect rounding error.
+
+## East Africa, ages 30-49, 100 sims
+
+```{r, message=FALSE}
+#-------------------------------------------------------------------------------
+# Silently run model, ages 30-49
+#-------------------------------------------------------------------------------
+
+if (runNow) {
+    # Model
+    startclock <- proc.time()
+    manuscript_eastafrica <- parsimpolicies(eafr$pol, eafr$nh, eafr$tx, 
+                                          incsource='Uganda',
+                                          mortsource='Uganda', 
+                                          returnstats=c('mean', 'lower', 
+                                                        'upper'), 
+                                          futimes=c(5,10,20), 
+                                          minage=30, maxage=49, sims=nsims)
+    # Runtime in minutes
+    runtime_minutes <- (proc.time()-startclock)/60
+    # Format and save results
+    finaltab <- format_bounds_list(manuscript_eastafrica, 
+                                   paren=TRUE, includemean=TRUE, 
+                                   digits=c(0,0,1,2,0,0),
+                                   compileall=TRUE)
+    write.csv(finaltab, file=paste0('eastafrica_', nsims, 'sims.csv'),
+                                    row.names=FALSE)
+}
+```
+
+```{r}
+if (runNow) {
+    kable(finaltab)
+}
+```
+
+```{r, fig.height=8}
+if (runNow) {
+    rlong <- compile_long(manuscript_eastafrica)
+    rplot <- plot_results(rlong, type='line')
+    rplot    
+}
+
+```
+
+```{r, fig.height=8}
+if (runNow) {
+    rplot <- plot_results(rlong, type='bar')
+    rplot 
+}
+
+```
+
+## Colombia, ages 50-69, 100 sims
+```{r, message=FALSE, echo=FALSE}
+#-------------------------------------------------------------------------------
+# Ages 50-69
+#-------------------------------------------------------------------------------
+
+if (runNow) {
+    # Model
+    startclock <- proc.time()
+    manuscript_colombia <- parsimpolicies(colomb$pol, colomb$nh, colomb$tx, 
+                                          incsource='Colombia (Cali)',
+                                          mortsource='Colombia', 
+                                          returnstats=c('mean', 'lower', 
+                                                        'upper'), 
+                                          futimes=c(5,10,20),
+                                          minage=50, maxage=69, sims=nsims)
+    # Runtime
+    runtime_minutes <- (proc.time()-startclock)/60
+    # Format and save results
+    finaltab2 <- format_bounds_list(manuscript_colombia, 
+                                   paren=TRUE, includemean=TRUE, 
+                                   digits=c(0,0,1,2,0,0),
+                                   compileall=TRUE)
+    write.csv(finaltab2, file=paste0('colombia_', nsims, 'sims.csv'), 
+              row.names=FALSE)
+}
+```
+
+
+```{r}
+if (runNow) kable(finaltab2)
+```
+
+```{r, fig.height=8}
+if (runNow) {
+    rlong <- compile_long(manuscript_colombia)
+    rplot <- plot_results(rlong, type='line')
+    rplot
+}
+```
+
+```{r, fig.height=8, fig.width=7}
+if (runNow) {
+    rplot <- plot_results(rlong, type='bar')
+    rplot + theme(legend.position='bottom')
+}
+```
+
+# Combined Results
+
+```{r, fig.width=7, fig.height=3.5, dpi=300}
+if (runNow) {
+    rlong <- rbind(transform(compile_long(manuscript_eastafrica), 
+                             Location='East Africa'),
+                   transform(compile_long(manuscript_colombia),
+                             Location='Colombia'))
+    
+    rlong <- subset(rlong, Year==10)
+    
+    # plot_results(rlong, measure='ARR', type='bar') 
+    
+    rlong1 <- subset(rlong, Measure=='ARR' & Location=='East Africa' &
+                     Scenario!='E0: Surgery only')
+    rlong1 <- within(rlong1, {
+                         Treatment <- as.character(Scenario)
+                         Treatment[grep('E1', Scenario)] <- 'B: Endocrine for ER+'
+                         Treatment[grep('E2', Scenario)] <- 'C: B + Chemo for ER-'
+                         Treatment[grep('E3', Scenario)] <- 'D: C + Chemo for Advanced ER+'
+                         
+                         AdvStage <- NA
+                         AdvStage[grep('downstaging', Scenario, invert=TRUE)] <- '78% Advanced'
+                         AdvStage[grep('60% advanced', Scenario)] <- '60% Advanced'
+                         AdvStage[grep('35% advanced', Scenario)] <- '35% Advanced'
+                         AdvStage <- factor(AdvStage,
+                                            levels=c('78% Advanced', '60% Advanced',
+                                                     '35% Advanced'),
+                                            labels=c('78% Advanced', '60% Advanced',
+                                                     '35% Advanced'))
+    
+                   })
+    rlong1$TreatShort <- rep(c('B', 'C', 'D'), 3)
+    
+          g <- ggplot(rlong1, aes(x = TreatShort, y = mean, fill = Treatment)) + 
+                geom_bar(position = position_dodge(), stat = "identity", 
+                    colour = "black", size = 0.3) + geom_errorbar(aes(ymin = lower, 
+                ymax = upper), size = 0.3, width = 0.2, position = position_dodge(0.9)) + 
+                xlab("Treatment") + ylab("") + theme_bw() +
+                theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+                scale_fill_manual(values=c('#e5f5f9','#99d8c9','#2ca25f')) + 
+                facet_grid(.~AdvStage) 
+    g    
+}
+
+```
+
+```{r, fig.width=7, fig.height=3.5, dpi=300}
+if (runNow) {
+    rlong2 <- subset(rlong, Measure=='ARR' & Location=='Colombia' &
+                     Scenario!='C0: Surgery and Endocrine for some ER+')
+    rlong2 <- within(rlong2, {
+                         Treatment <- as.character(Scenario)
+                         Treatment[grep('C1', Scenario)] <- 'B: Endocrine for ER+'
+                         Treatment[grep('C2', Scenario)] <- 'C: B + Chemo for ER-'
+                         Treatment[grep('C3', Scenario)] <- 'D: C + Chemo for Advanced ER+'
+                         
+                         TreatShort <- substr(Treatment, 1, 1)
+                         AdvStage <- NA
+                         AdvStage[grep('downstaging', Scenario, invert=TRUE)] <- '45% Advanced'
+                         AdvStage[grep('35% advanced', Scenario)] <- '35% Advanced'
+                         AdvStage[grep('30% advanced', Scenario)] <- '30% Advanced'
+                         AdvStage <- factor(AdvStage,
+                                            levels=c('45% Advanced', '35% Advanced',
+                                                     '30% Advanced'),
+                                            labels=c('45% Advanced', '35% Advanced',
+                                                     '30% Advanced'))
+    
+                   })
+    
+          g <- ggplot(rlong2, aes(x = TreatShort, y = mean, fill = Treatment)) + 
+                geom_bar(position = position_dodge(), stat = "identity", 
+                    colour = "black", size = 0.3) + geom_errorbar(aes(ymin = lower, 
+                ymax = upper), size = 0.3, width = 0.2, position = position_dodge(0.9)) + 
+                xlab("Treatment") + ylab("") + theme_bw() +
+                theme(axis.text.x = element_text(angle=45, hjust=1)) + 
+                scale_fill_manual(values=c('#e5f5f9','#99d8c9','#2ca25f')) +
+                facet_grid(.~AdvStage) 
+
+    g    
+}
+
+```
+# Comments
+
+
