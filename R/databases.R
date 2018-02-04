@@ -193,7 +193,7 @@ running_product <- function(x) sapply(1:length(x), FUN=function(y) prod(x[1:y]))
 #-------------------------------------------------------------------------------
 #' Given event rates, compute cumulative survival
 #' @param x Vector of event rates (interpreted as discrete rates, not instantaneous hazards)
-#' @return Vector of cumulative survivals
+#' @return Vector of cumulative survival
 #'
 #' @export
 rate_to_cumsurv <- function(x) {
@@ -213,15 +213,17 @@ rate_to_cumsurv <- function(x) {
 #' @param ratevar Name of rate variable
 #' @param country Country to select from the data frame
 #' @param maxage Maximum age desired. If data are incomplete, the 
-#' rate for the oldest age will be held constant until maxage
+#' rate for the oldest age will be held constant until maxage. Leave NULL to have the data determine the max age.
 #' @return Data frame of cumulative survival probability by single-year ages
 #' @examples
 #' data(incratesf)
 #' data(allmortratesf)
 #' 
+#' # Example with breast cancer incidence
 #' inc <- interpolate_cumsurv(incratesf, 
 #'                          ratevar='Female.Rate.Per.100K',
 #'                          country='Uganda')
+#' # Example with all-cause mortality
 #' mort <- interpolate_cumsurv(allmortratesf, 
 #'                          ratevar='Rate.Per.100K',
 #'                          country='Uganda')
@@ -274,7 +276,7 @@ interpolate_cumsurv <- function(binnedrates, ratevar, maxage=NULL,
 #' @param maxAge Optional upper age limit for the population
 #' @param format Does the input need to be formatted? If so, 
 #' age_data can be a .csv file
-#' @note See data-raw/agestructure.R
+#' @note See bcimodel/data-raw/agestructure.R
 #' 
 #' @export
 

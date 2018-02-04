@@ -4,34 +4,54 @@
 
 # The plan for this file is to delete functions as they get migrated
 
-############################################################
-## sim_multinom
-############################################################
-
 
 ############################################################
 ## sim_clinical_incidence
 ############################################################
 
-sim_clinical_incidence = function# Use sim_KM to efficiently simulate ages at clinical incidence for nsim populations
+#' Use sim_KM to efficiently simulate ages at clinical incidence for nsim populations
+#' 
+#' Given a population with a clinical incidence survival curve and ages, returns random draws of their ages at incidence
+#' @param popdata Data frame where individuals are rows, with columns birth_year, age, and male, OR a list of data frames that allow build_simpop() to construct this
+#' @param bootrows Matrix or data frame of row indicators that can be applied to the data to recover different bootstraps of the data. Each column is a different bootstrap of thedata. OR, list of data frames with these row indicators for use with build_simpop()
+#' @param incidence Matrix/df with columns 'age' and 'cumsurv'
+#' @param results_as_matrix Convert the results from a data frame to a matrix?
+#'
+#' @return Data frame or matrix of ages at clinical incidence, capped at age 121. Age at incidence will always be after age at entry.
+#' 
+#' @examples
+#' # Prepare incidence data
+#' library(bcimodel)
+#' data(incratesf)
+#' inc <- interpolate_cumsurv(incratesf, 
+#'                           ratevar='Female.Rate.Per.100K',
+#'                           country='Uganda',
+#'                           maxage=100)
+#' # Example 1: use the list approach
+#' # Simple age distribution
+#' ages <- data.frame(age=c(20,30,40), prop=c(0.2, 0.5, 0.3))
+#' # Simulate a population of size 10 twice, using these proportions and the row IDs
+#' sim.age.rows <- sim_multinom(nsims=10, 2, ages$prop, names=1:nrow(ages))
+#' # Now specify they're all female
+#' sex <- data.frame(male=0, prop=1)
+#' sim.sex.rows <- matrix(1, nrow=10, ncol=2)
+#' # Create the lists
+#' poplist <- list(sex, ages)
+#' rowlist <- list(sim.sex.rows, sim.age.rows)
+#' # Get ages at clinical incidence
+#' incage <- sim_clinical_incidence(poplist, rowlist, inc)
+#' 
+#' # Example 2
+#' # Alternatively, pass a population in data frame form and just use its normal rows
+#' # Use build_simpop and the 2nd simulation's row IDs
+#' pop <- build_simpop(poplist, rowlist, sim=2)[,c('male', 'age')]
+#' poprows <- replicate(2, 1:nrow(pop))
+#' incage <- sim_clinical_incidence(pop, poprows, inc)
+#' 
+#' @export
 
-##description<< Given a population with a clinical incidence-free  
-## curve and ages, returns random draws of their ages at incidence
-
-(popdata, 
-    ### Data frame where individuals are rows, with columns 
-    ### birth_year, age, and male
-bootrows,
-    ### Matrix/df of row indicators that can be applied to
-    ### the data to recover different bootstraps of the
-    ### data. Each column is a different bootstrap of the
-    ### data
-incidence,
-    ### Matrix/df with columns 'age' and 'incidencefree_survival'
-results_as_matrix=FALSE
-    ### Convert the results from a data frame to a matrix?
-) {
-
+sim_clinical_incidence = function(popdata, bootrows, 
+                                  incidence, results_as_matrix=FALSE) { 
     # Determine number of simulations
     nsim = ncol(bootrows)
     if (is.null(nsim)) nsim = ncol(bootrows[[1]])

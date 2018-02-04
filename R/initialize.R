@@ -26,6 +26,7 @@
 #'                      incsource='Uganda', 
 #'                      mortsource='Uganda')
 #'
+#' @return List of three matrices of dimenion pop_size by nsim specifying simulated characteristics for each individual in each simulation: age at entry, age at other-cause death, and age at clinical incidence of cancer (capped at 121, i.e. after death from other caues).
 #' @export
 
 initialize_pop <- function(pop_size, nsim,
@@ -54,42 +55,50 @@ initialize_pop <- function(pop_size, nsim,
     # Code compatibility tweaks
     mort <- transform(mort, Age=age, Survival=cumsurv, Male=0)
 
-    # Add age to pop_chars using parameter choices
-    pop_chars[['age']] <- format_age(subset(agestructure, Country==agesource,
-                                            select=c('age', 'pop', 'prop')), 
-                                     minAge=minage, maxAge=maxage)
+    # The following section is an artefact of the Cantrance structure; could
+    # surely be streamlined. Basically it's just simulating ages 
+    # at entry and using those as lower bounds for simulating ages
+    # at other-cause death, and then age at clinical incidence.
 
-    # First, simulate the indepenent characteristics given in
-    # pop_chars. Right now it assumes that each element in the list
-    # refers to a single variable rather than a joint distribution
-    # of variables. Very easy to generalize to return the row #
-    # of the original dataset rather than the value of a single
-    # variable. It would be easy to instead use Leslie's 
-    # create_pop_list() function, and that would work with
-    # a more complex age pattern, too
-    pop_chars_rows <- lapply(pop_chars, function(x, Npop, Nsim) {
-                            sim_multinom(nsims=Npop, 
-                                         nreps=Nsim,
-                                         probs=x$prop,
-                                         names=1:nrow(x))
-                            }, pop_size, nsim)
+        # Add age to pop_chars using parameter choices
+        pop_chars[['age']] <- format_age(subset(agestructure, Country==agesource,
+                                                select=c('age', 'pop', 'prop')), 
+                                         minAge=minage, maxAge=maxage)
 
-    # Ages at entry 
-    ageentry <- return_value_from_id(ids=pop_chars_rows[['age']],
-                                     df=pop_chars[['age']],
-                                     value='age')
-    
-    # Ages at other-cause death (load alternative life table if desired)
-    ageOC <- calc_ac_lifespan_pop(popdata=pop_chars,
-                                    bootrows=pop_chars_rows,
-                                    life_table=mort,
-                                    results_as_matrix=TRUE)
+        # First, simulate the indepenent characteristics given in
+        # pop_chars. Right now it assumes that each element in the list
+        # refers to a single variable rather than a joint distribution
+        # of variables. Very easy to generalize to return the row #
+        # of the original dataset rather than the value of a single
+        # variable. It would be easy to instead use Leslie's 
+        # create_pop_list() function, and that would work with
+        # a more complex age pattern, too
 
-    # Ages at cancer incidence
-    ageclin <- sim_clinical_incidence(popdata=pop_chars,
-                               bootrows=pop_chars_rows,
-                               incidence=inc,
-                               results_as_matrix=TRUE)
+        # In other words, the following 
+        pop_chars_rows <- lapply(pop_chars, function(x, Npop, Nsim) {
+                                sim_multinom(nsims=Npop, 
+                                             nreps=Nsim,
+                                             probs=x$prop,
+                                             names=1:nrow(x))
+                                }, pop_size, nsim)
+
+        browser()
+        # Ages at entry 
+        ageentry <- return_value_from_id(ids=pop_chars_rows[['age']],
+                                         df=pop_chars[['age']],
+                                         value='age')
+        
+        # Ages at other-cause death (load alternative life table if desired)
+        ageOC <- calc_ac_lifespan_pop(popdata=pop_chars,
+                                        bootrows=pop_chars_rows,
+                                        life_table=mort,
+                                        results_as_matrix=TRUE)
+
+        # Ages at cancer incidence
+        ageclin <- sim_clinical_incidence(popdata=pop_chars,
+                                   bootrows=pop_chars_rows,
+                                   incidence=inc,
+                                   results_as_matrix=TRUE)
 
     return(list(ageentry=ageentry, ageOC=ageOC, ageclin=ageclin))
 }

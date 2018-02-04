@@ -24,6 +24,6 @@ Takes population counts by age group and returns the population proportions
 for single-year age groups
 }
 \note{
-See data-raw/agestructure.R
+See bcimodel/data-raw/agestructure.R
 }
 

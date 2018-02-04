@@ -7,12 +7,12 @@
 shift_stages(indicator, original, map)
 }
 \arguments{
-\item{indicator}{Matrix of 1s and 0s, 1=shift stage}
+\item{indicator}{Matrix of 1s and 0s, 1=shift stage (see stageshift_indicator)}
 
 \item{original}{Matrix of numeric stage-subgroup id's. Rows=population size, 
 columns=nsim.}
 
-\item{map}{Matrix with rows Early and Advanced, columns indicdating subgroups,
+\item{map}{Matrix with rows Early and Advanced, columns indicating subgroups,
 and cells with stage-subgroup id's (see create_stageshift_map)}
 
 \item{Matrix}{of new stage-subgroup id's after shift}
@@ -21,9 +21,14 @@ and cells with stage-subgroup id's (see create_stageshift_map)}
 Use indicator of stage shift to change Advanced to Early stage
 }
 \examples{
-mapn <- matrix(1:4, ncol=2, dimnames=list(c('Early', 'Advanced'), c('ER+', 'ER-')))
+# Stageshift map; stage-shifting will preserve subgroup status
+(mapn <- matrix(1:4, ncol=2, dimnames=list(c('Early', 'Advanced'), c('ER+', 'ER-'))))
+# Original stage-subgroup indicators
 orig <- sim_multinom(10000, 2, c(0.25, 0.25, 0.25, 0.25), 1:4)
+# Determine who gets stage-shifted
 shifti <- stageshift_indicator(0.85, 10000, 2)
+# Shift stages only for those with stageshift_indicator==1, preserving their
+# subgroup
 new <- shift_stages(shifti, orig, mapn)
 table(new)/table(orig)
 

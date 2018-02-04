@@ -7,20 +7,37 @@
 shifttreatment_indicator(x, type, shifts, basecase, map)
 }
 \arguments{
-\item{x}{Numeric ID}
+\item{x}{Numeric ID indicating which scenario}
 
-\item{type}{Vector of either NA or numeric ID referring to scenario number that is}
+\item{type}{Vector, one element for each scenario. NA indicates no early detection. Numeric ID implies early detection, and the number refers to the scenario number that has the same treatment but NO early detection}
 
-\item{shifts}{List of shift matrices}
+\item{shifts}{List of shift matrices (see shifttreatment_indicator)}
 
 \item{basecase}{Base case matrix of stage-subgroup indicators}
 
 \item{map}{Map indicating stage-subgroup pairs}
 }
+\value{
+Matrix of either NAs if no early detection-induced treatment-shifting, or matrix of TRUE/FALSE where TRUE indicates a need for treatment shifting
+}
 \description{
-Determines TRUE or FALSE indicator based on scenario settings.
+After treatment has been simulated for a base scenario, this function determines whether treatment should be re-simulated due to early detection. Only stage-shifted cases need a new treatment simulated.
 }
 \examples{
+# Use ex1. ex1$pol shows two scenarios with no early detection (1 and 2), but the 3rd has a 30\% stageshift (see earlydetHR). The "pairnum" variable indicators that #3 has the same treatments as #2.
+library(bcimodel)
+data(ex1)
+# Create stageshift indicator matrices for all 3 scenarios: no stage shifts for #1 and #2, but 30\% stageshift for #3. Use a small population of size 20, and 2 sims
+stageshifts <- list(base=matrix(0, nrow=20, ncol=2),
+                    tam=matrix(0, nrow=20, ncol=2), 
+                    tamshift=stageshift_indicator(0.85, 20, 2))
+# ex1$nh shows that there are 4 stage-subgroups. Use a fake random distribution of groups 1:4 for the population before stage-shifting.
+popdistr <- matrix(sample.int(4, size=40, replace=TRUE), nrow=20, ncol=2)
+# Now create shifttreatment_indicators for each scenario. We expect no treatment 
+# shifting for 1-2, since there's no early detection.
+shifttreatment_indicator(1, ex1$pol$pairnum, stageshifts, popdistr, ex1$map)
+shifttreatment_indicator(2, ex1$pol$pairnum, stageshifts, popdistr, ex1$map)
+shifttreatment_indicator(3, ex1$pol$pairnum, stageshifts, popdistr, ex1$map)
 
 }
 

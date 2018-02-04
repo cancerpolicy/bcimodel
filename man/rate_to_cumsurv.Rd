@@ -10,7 +10,7 @@ rate_to_cumsurv(x)
 \item{x}{Vector of event rates (interpreted as discrete rates, not instantaneous hazards)}
 }
 \value{
-Vector of cumulative survivals
+Vector of cumulative survival
 }
 \description{
 Given event rates, compute cumulative survival

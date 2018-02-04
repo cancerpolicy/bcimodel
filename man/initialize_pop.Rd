@@ -23,6 +23,9 @@ initialize_pop(pop_size, nsim, agesource, minage, maxage, incsource, mortsource,
 to simulate in the population. Defaults to giving the whole population
 male=0, i.e. all female sex.}
 }
+\value{
+List of three matrices of dimenion pop_size by nsim specifying simulated characteristics for each individual in each simulation: age at entry, age at other-cause death, and age at clinical incidence of cancer (capped at 121, i.e. after death from other caues).
+}
 \description{
 Initialize a FEMALE population with an age structure, dates of cancer 
 incidence, and dates of all-cause mortality

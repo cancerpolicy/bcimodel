@@ -6,8 +6,18 @@
 \usage{
 rexp_matrix(ratematrix)
 }
+\arguments{
+\item{ratematrix}{Matrix of exponential rates to simulate from}
+}
 \description{
 This is simple code but it's a separate function to confirm that
 it performs as expected
+}
+\examples{
+# Cell-specific rates: two columns of 0.05, two columns of 0.2
+m <- cbind(matrix(0.05, nrow=100, ncol=2),
+         matrix(0.2, nrow=100, ncol=2))
+# Sims reflect cell-specific rates
+round(1/colMeans(rexp_matrix(m)), 2)
 }
 

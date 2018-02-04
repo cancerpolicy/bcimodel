@@ -64,15 +64,15 @@ test_that('treatments_by_policy and update_treat_stageshift work',
               b <- matrix(sample.int(4, size=popsize*sims, replace=TRUE), 
                           nrow=popsize, ncol=sims) 
               # Map of 1:4 onto stage and ER status 
-              m <- ex1[[3]] 
+              m <- ex1$map
               # Shifts
-              s <- lapply(ex1[[1]]$earlydetHR, 
+              s <- lapply(ex1$pol$earlydetHR, 
                           stageshift_indicator, pop_size=popsize, nsim=sims) 
               # Get new stages (advanced cases only)
               n <- lapply(s, shift_stages, original=b, map=m)
               # Create indicator for shifting treatment (advanced cases only)
-              st <- lapply(ex1[[1]]$num, shifttreatment_indicator, 
-                           type=ex1[[1]]$pairnum, shifts=s, basecase=b, map=m)
+              st <- lapply(ex1$pol$num, shifttreatment_indicator, 
+                           type=ex1$pol$pairnum, shifts=s, basecase=b, map=m)
 
               # Simulate treatment (for early detection scenarios, candidate
               # early-stage treatments for shifted cases)

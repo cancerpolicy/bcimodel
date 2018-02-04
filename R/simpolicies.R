@@ -8,6 +8,7 @@
 # simpolicies
 #-------------------------------------------------------------------------------
 #' Run the model for a series of policies and compare outcomes to the base case
+#' Wrapper function for the whole model
 #' 
 #' @param scenarios Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.
 #' @param naturalhist Data frame with natural history parameters (see compile_naturalhist)
@@ -18,19 +19,21 @@
 #' @param mortsource Country to use for life table (see data(allmortratesf) )
 #' @param popsize Size of population to simulate 
 #' @param sims Number of simulations
-#' @param futimes Follow-up times at which to tally outcomes
-#' @param returnstats Defaults to means across sims, but you can also ask for c('mean', 'lower', upper')
-#' @param Denominator by which to report outcomes
-#' male=0, i.e. all female sex. 
+#' @param futimes Follow-up times at which to tally outcomes, in years
+#' @param returnstats Defaults to simulation means, but you can also ask for c('mean', 'lower', upper'). Lower and upper report the 2.5% and 97.5% quantiles respectively.
+#' @param Denominator/population size by which to report outcomes; default is 100,000
+#'
 #' @examples
-#' # Use example input data
+#' # Use example input data loaded in package, object name "ex1"
+#' data(ex1) 
+#' ex1
+#' # Element "pol" shows the 3 scenarios being modeled; "nh" contains the natural history information, "map" contains numeric indicators for the stage-subgroups, and "tx" shows treatment hazard ratios and, for each scenario, the treatment distribution. See vignette('example-model') for more details.
+# # Run a model using ex1 inputs and the defaults
 #' uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
 #'
-#' @return
-#' Table if returnstats='mean', or list of tables of length(returnstats)
+#' @return Data frame if returnstats='mean', or list of data frames of length(returnstats)
 #' 
 #' @export
-
 simpolicies <- function(scenarios, naturalhist, treatinfo, 
                         agesource='Standard', minage=0, maxage=100,
                         incsource='Uganda', mortsource='Uganda',

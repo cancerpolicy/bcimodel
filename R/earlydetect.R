@@ -44,7 +44,8 @@ create_stageshift_map <- function(x) {
 #' @return Matrix of 1s and 0s
 #' 
 #' @examples
-#' #
+#' # Hazard = 0.85, e.g. 15% probability of being stage-shifted
+#' round(mean(stageshift_indicator(0.85, 1000, 1)),2)
 #'
 #' @export
 
@@ -57,17 +58,22 @@ stageshift_indicator <- function(x, pop_size, nsim) {
 #-------------------------------------------------------------------------------
 #' Use indicator of stage shift to change Advanced to Early stage
 #' 
-#' @param indicator Matrix of 1s and 0s, 1=shift stage
+#' @param indicator Matrix of 1s and 0s, 1=shift stage (see stageshift_indicator)
 #' @param original Matrix of numeric stage-subgroup id's. Rows=population size, 
 #' columns=nsim.
-#' @param map Matrix with rows Early and Advanced, columns indicdating subgroups,
+#' @param map Matrix with rows Early and Advanced, columns indicating subgroups,
 #' and cells with stage-subgroup id's (see create_stageshift_map)
 #' @param Matrix of new stage-subgroup id's after shift
 #' 
 #' @examples
-#' mapn <- matrix(1:4, ncol=2, dimnames=list(c('Early', 'Advanced'), c('ER+', 'ER-')))
+#' # Stageshift map; stage-shifting will preserve subgroup status
+#' (mapn <- matrix(1:4, ncol=2, dimnames=list(c('Early', 'Advanced'), c('ER+', 'ER-'))))
+#' # Original stage-subgroup indicators
 #' orig <- sim_multinom(10000, 2, c(0.25, 0.25, 0.25, 0.25), 1:4)
+#' # Determine who gets stage-shifted
 #' shifti <- stageshift_indicator(0.85, 10000, 2)
+#' # Shift stages only for those with stageshift_indicator==1, preserving their
+#' # subgroup
 #' new <- shift_stages(shifti, orig, mapn)
 #' table(new)/table(orig)
 #'

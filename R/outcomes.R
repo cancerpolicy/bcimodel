@@ -11,6 +11,14 @@
 #' This is simple code but it's a separate function to confirm that
 #' it performs as expected
 #'
+#' @param ratematrix Matrix of exponential rates to simulate from
+#' 
+#' @examples
+#' # Cell-specific rates: two columns of 0.05, two columns of 0.2
+#' m <- cbind(matrix(0.05, nrow=100, ncol=2),
+#'          matrix(0.2, nrow=100, ncol=2))
+#' # Sims reflect cell-specific rates
+#' round(1/colMeans(rexp_matrix(m)), 2)
 #' @export
 
 rexp_matrix <- function(ratematrix) {
@@ -31,7 +39,13 @@ rexp_matrix <- function(ratematrix) {
 #'
 #' @param policies A "scenarios" data frame containing an 'id' for the policies
 #' and a 'pairnum' column indicating either NA or the paired policy, for
-#  strategies with early detection
+#'  strategies with early detection
+#' @param A matrix of pop_size by nsim; cells are treatment-specific mortality rates for each individual in each sim
+#' @param pop_size Population size
+#' @param nsim Number of sims
+#'
+#' @examples
+#' See simpolicies.R
 #'
 #' @export
 
@@ -59,11 +73,17 @@ timetocancerdeath_by_policy <- function(policies, rates, pop_size, nsim) {
 #-------------------------------------------------------------------------------
 # update_time_stageshift
 #-------------------------------------------------------------------------------
-#' For stage-shifted cases in an early detection scenario, update treatment
+#' For stage-shifted cases in an early detection scenario, update time to cancer death
 #'
 #' Takes treatments from a paired scenario with no early detection and
-#' updates treatments only for those advanced-stage cases who were
-#' stage-shifted in the early detection scenario
+#' updates times to cancer death only for those advanced-stage cases who were
+#' stage-shifted in the early detection scenario. Updated times are quantile-
+#' correlated to the previous times
+#' 
+#' @param policies Data frame specifying policies - see ex1$pol. If 'pairnum' = NA, no treatments are updated. If 'pairnum' is numeric, treatments from that number scenario will be the starting point, with early-detected cases shifted according to the next input
+#' @param shifts List of treatment-shift indicators (see shifttreatment_indicator)
+#' @param rates Matrix of treatment-specific rates, size popsize by nsim
+#' @param rates Matrix of times to cancer death under no stage-shifts, size popsize by nsim
 #'
 #' @export
 
@@ -91,19 +111,77 @@ update_time_stageshift <- function(policies, shifts, rates, times) {
 #-------------------------------------------------------------------------------
 # Summary functions
 #-------------------------------------------------------------------------------
+#' Tally cumulative incidence of cancer
+#'
+#' Count incident cancer cases within a follow-up period
+#' 
+#' @param futimes Vector of follow-up times to assess
+#' @param times Matrix of times to cancer incidence
+#'
+#' @return Matrix where rows tally incident cases for each sim; columns represent the various follow-up times
+#' @examples
+#' # Assess 5- and 10-year follow-ups
+#' fu <- c(5, 10)
+#' times <- matrix(rexp(n=25, rate=1/5), nrow=5, ncol=5)
+#' # Rows are simulations, columns are 5- and 10-year follow-up times, 
+#' # and cells are incidence counts within the periods
+#' cuminc(fu, times)
+#' 
+#' @return Matrix of incidence counts for sims (rows) and follow-up times (columns)
+#' @export
 
 cuminc <- function(futimes, times) {
     sapply(futimes, function(x) colSums(times<=x))
 }
 
+#' Tally cumulative incidence of cancer mortality
+#'
+#' Count cancer mortality within a follow-up period
+#' 
+#' @param futimes Vector of follow-up times to assess
+#' @param times Matrix of times to cancer mortality
+#' @param cancerdeath Logical matrix indicating death from cancer
+#'
+#' @examples
+#' 
+#' @return Matrix of mortality counts for sims (rows) and follow-up times (columns)
+#' @export
 cummort <- function(futimes, times, cancerdeath) {
     sapply(futimes, function(x) colSums(times<=x & cancerdeath))
 }
 
+#' Tally years lived within a follow-up period
+#'
+#' Count years alive within a follow-up period, summed over all individuals per sim
+#' 
+#' @param futimes Vector of follow-up times to assess
+#' @param times Matrix of times to cancer mortality
+#'
+#' @examples
+#' # Assess 5- and 10-year follow-ups
+#' fu <- c(5, 10)
+#' times <- matrix(rexp(n=25, rate=1/5), nrow=5, ncol=5)
+#' cumyears(fu, times)
+#' 
+#' @return Matrix of cumulative years lived within the follow-up period for sims (rows) and follow-up times (columns)
+#' @export
 cumyears <- function(futimes, times) {
     sapply(futimes, function(x) colSums(ifelse(times<=x, times, x)))
 }
 
+#' Calculate mortality rate ratios
+#'
+#' For a list of scenarios, calculate mortality rate ratios (MRRs) compared to the control scenario
+#' 
+#' @param cummortlist List of cummort() outputs
+#' @param controlindex Number indicating which cummortlist element is the control scenario
+#' @param reverse Set to TRUE to return 1-MRR
+#' @param perc Set to TRUE to report a percent, instead of a ratio
+#'
+#' @examples
+#' 
+#' @return Matrix of MRRs for each scenario/cummortlist element
+#' @export
 calcmrr <- function(cummortlist, controlindex, reverse=FALSE, perc=FALSE) {
     return(
            lapply(1:length(cummortlist),
@@ -116,6 +194,18 @@ calcmrr <- function(cummortlist, controlindex, reverse=FALSE, perc=FALSE) {
     )
 }
 
+#' Calculate absolute risk reduction
+#'
+#' For a list of scenarios, calculate absolute risk reductions (ARRs) compared to the control scenario
+#' 
+#' @param cummortlist List of cummort() outputs
+#' @param controlindex Number indicating which cummortlist element is the control scenario
+#' @param reverse Set to TRUE to return -1*ARR
+#'
+#' @examples
+#' 
+#' @return Matrix of ARRs for each scenario/cummortlist element
+#' @export
 calcarr <- function(cummortlist, controlindex, reverse=FALSE) {
     return(
            lapply(1:length(cummortlist),
@@ -126,9 +216,13 @@ calcarr <- function(cummortlist, controlindex, reverse=FALSE) {
     )
 }
 
-# Small function to return mean, lower, or upper quantile
-# Default quantile type is 7, which gives a continuous result
-# Choose type
+#' Compute mean and/or quantiles
+#' Return mean, lower, or upper quantile. Default quantile type is 7, which gives a continuous result
+#' @param matrix Matrix of values to summarize
+#' @param stat Statistic to return: 'mean', 'lower' or 'upper'
+#' @param quanttype Quantile type - see R help page for quantile()
+#' 
+#' @export
 returnstat4matrix <- function(matrix, stat, quanttype=7) {
     if (!quanttype%in%c(1,7)) stop('Choose quantile type 1 or 7')
     if (!stat%in%c('mean', 'lower', 'upper')) stop('stat not supported')
@@ -226,10 +320,8 @@ round_matrix <- function(mat, digbyrow) {
     return(newmat)
 }
 
-# Lower and upper are tables of the same dimensions with rownames
-# For including a meanmat, the line break \n between mean and uncertainty
-# works for exporting as csv (it will get stripped) or for printing 
-# with pander but NOT printing with kable.
+#' Format bounds for reporting
+#' Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break \n between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.
 #' @export
 format_bounds <- function(lower, upper, digits=NULL, paren=FALSE,
                           meanmat=NULL) {
@@ -259,11 +351,8 @@ format_bounds <- function(lower, upper, digits=NULL, paren=FALSE,
     return(bounds)
 }
 
-# Return bounds for each element of the list
-# Options are:
-# lower, upper
-# (lower, upper)
-# mean (lower, upper)
+#' Return bounds for each element of the list
+#' Options are: lower, upper; (lower, upper); mean (lower, upper)
 #' @export
 format_bounds_list <- function(thislist, digits=NULL, paren=FALSE,
                                includemean=FALSE, compileall=FALSE) {
@@ -314,8 +403,7 @@ compile_long <- function(thislist) {
 }
 
 #' Plot results
-#' Select on measures and panel them
-#' Group on f-u year?
+#' Select on measures and panel them. Group on f-u year?
 #' @export
 plot_results <- function(rlong, measures=NULL, type='bar',
                          rotate_xlab=TRUE) {
@@ -358,8 +446,4 @@ plot_results <- function(rlong, measures=NULL, type='bar',
     })
 return(g)
 }
-
-#-------------------------------------------------------------------------------
-# Save 
-#-------------------------------------------------------------------------------
 

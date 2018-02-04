@@ -6,9 +6,56 @@
 \usage{
 update_treat_stageshift(policies, shifts, treats)
 }
+\arguments{
+\item{policies}{Data frame specifying policies - see ex1$pol. If 'pairnum' = NA, no treatments are updated. If 'pairnum' is numeric, treatments from that number scenario will be the starting point, with early-detected cases shifted according to the next input}
+
+\item{shifts}{List of treatment-shift indicators (see shifttreatment_indicator)}
+
+\item{treats}{List of original treatment matrices (see treatments_by_policy)}
+}
+\value{
+List of updated treatment matrices
+}
 \description{
 Takes treatments from a paired scenario with no early detection and 
 updates treatments only for those advanced-stage cases who were
 stage-shifted in the early detection scenario
+}
+\examples{
+library(bcimodel)
+data(ex1) 
+# ex1$nh shows that there are 4 stage-subgroups. Use a fake random distribution of groups 1:4 for the population before stage-shifting.
+popdistr <- matrix(sample.int(4, size=40, replace=TRUE), nrow=20, ncol=2)
+
+# Create stageshift indicator matrices for all 3 scenarios: no stage shifts for #1 and #2, but 30\% stageshift for #3. Use a small population of size 20, and 2 sims
+stageshifts <- list(base=matrix(0, nrow=20, ncol=2),
+                    tam=matrix(0, nrow=20, ncol=2), 
+                    tamshift=stageshift_indicator(0.85, 20, 2))
+
+# Get the actual stages - only policy #3 has stage-shifting
+stages <- lapply(stageshifts, shift_stages, original=popdistr, map=ex1$map)
+
+# First 2 scenarios have no shifting, same treatment. Randomly distribute treatment
+# Scenario 3 has shifting. NAs indicate that treatments will be same as the scenario
+# with no early detection but same treatments
+treats <- treatments_by_policy(policies=ex1$pol, 
+                          treat_chars=ex1$tx, 
+                          stagegroups=stages, 
+                          map=ex1$map, 
+                          pop_size=20, nsim=2)
+
+# Indicators of treatment shifting
+treatshifts <- lapply(ex1$pol$num,
+                          shifttreatment_indicator,
+                          type=ex1$pol$pairnum,
+                          shifts=stageshifts, 
+                          basecase=popdistr, 
+                          map=ex1$map)
+
+newtreat <- update_treat_stageshift(ex1$pol, treatshifts, treats) 
+# Two cases have been shifted in #3 compared to #2 
+lapply(treatshifts, table)
+lapply(newtreat, table)
+
 }
 

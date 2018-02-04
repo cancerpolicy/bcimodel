@@ -8,19 +8,30 @@
 ############################################################
 ## build_simpop
 ############################################################
+#' Build a simulated population by bootstrapping from a list
+#'
+#' Cantrance remnant; use row IDs to reconstruct a single bootstrap of data
+#'
+#' @param datalist List of data frames containing the data to be bootstrapped then combined into a single data frame. Each data frame should refer to a different characterisic of individuals in the population, e.g. 1st data frame is sex, 2nd data frame is age
+#' @param rowlist List of data frames containing row numbers for bootstrapping the data in datalist. Row numbers of rowlist[[i]] refer to datalist[[i]]
+#' @param sim Simulation number, i.e. which column of rowlist elements to use
+#'
+#' @return Data frame with characteristics from datalist in proportion to their appearance in rowlist[[sim]]
+#'
+#' @examples
+#' # Possible characteristics
+#' pop <- list(data.frame(male=0),
+#'             data.frame(age=c(20,30,40)))
+#' # Actual characteristics for each of 2 sims, specified by rows, for pop size = 10
+#' rows <- list(matrix(1, nrow=10, ncol=2),
+#'              matrix(sample.int(3, 20, replace=TRUE), nrow=10, ncol=2))
+#' # Population using sim 1
+#' build_simpop(pop, rows, 1)
+#' build_simpop(pop, rows, 2)
+#' 
+#' @export
 
-build_simpop = function# Build a simulated population by bootstrapping from a list
-
-(datalist, 
-    ### List of data frames containing the data to be 
-    ### bootstrapped then combined into a single data frame
- rowlist,
-    ### List of data frames containing row numbers for 
-    ### bootstrapping the data in datalist
- sim
-    ### Simulation number. Indicates which column of rowlist
-    ### to use
- ) {
+build_simpop = function(datalist, rowlist, sim) {
     do.call('cbind',
             lapply(1:length(datalist),
                    function(i) {
@@ -32,36 +43,24 @@ build_simpop = function# Build a simulated population by bootstrapping from a li
 ############################################################
 ## sim_KM
 ############################################################
+#'Returns random deviates from a survival curve
+#'
+#'Takes in event times and corresponding survival probs (as from a KM curve) and returns n random deviates
+#'
+#'@param survival Vector of survival probabilities, as from a KM curve
+#'@param time Vector of event times corresponding to the survival probabilities
+#'@param smalltimes Value to be returned if survival is higher/time is smaller than any observed. Suggestions: 0, min(times), NA
+#'@param bigtimes Value to be returned if survival is lower/time is higher than any observed. Suggestions: Inf, max(times), NA
+#'@param nsims Number of deviates to return
+#'@param mindraw Minimum draw allowed on the survival scale
+#'@param maxdraw Maximum draw allowed on the survival scale
+#'@param draws If draws on the survival scale have already been made, specify as a vector here
+#'
+#'@return Times to event representative of the input curve
+#'@export
 
-sim_KM = function# Returns random deviates from a survival curve
-
-##description<< Takes in event times and corresponding
-## survival probs (as from a KM curve) and returns n random
-## deviates
-
-(survival, 
-    ### Vector of survival probabilities, as from a KM curve
-time, 
-    ### Vector of event times corresponding to the survival
-    ### probabilities
-smalltimes, 
-    ### Value to be returned if survival is higher/time is
-    ### smaller than any observed. Suggestions: o,
-    ### min(times), NA
-bigtimes, 
-    ### Value to be returned if survival is lower/time is
-    ### higher than any observed. Suggestions: Inf,
-    ### max(times), NA
-nsims,
-    ### Number of deviates to return
-mindraw=0, 
-    ### Minimum draw allowed on the survival scale
-maxdraw=1, 
-    ### Maximum draw allowed on the survival scale
-draws=NULL
-    ### If draws on the survival scale have already been
-    ### made, specify as a vector here
-) {
+sim_KM = function(survival, time, smalltimes, bigtimes, nsims, mindraw=0, 
+                  maxdraw=1, draws=NULL) {
 
     # Take n_sim random draws between mindraw and maxdraw
     if (is.null(draws))
@@ -76,7 +75,6 @@ draws=NULL
                   yleft=bigtimes,
                   yright=smalltimes)[["y"]]
     return(ttrs)
-### Times to event representative of the input curve
 }
 
 
@@ -122,31 +120,36 @@ sim_same_qexp = function# Simulate new time to event using quantile from old tim
 ## calc_ac_lifespan
 ############################################################
 
-calc_ac_lifespan = function# Generates an age at other-cause death from US lifetables
+#' Generate an age at other-cause death from a lifetable
+#' 
+#' Given a year of birth and current age, draws a random age at other-cause death from a lifetable
+#' 
+#' @param ageentry An integer age
+#' @param male Sex indicator: 1 for male, 0 for female
+#' @param lifetable Data frame with columns Survival, BirthCohort, Age, and Male
+#' @param n_sim Number of random draws to return
+#' @param time Set to TRUE to return time between ageentry and death, instead of age at death
+#' @param haz Hazard to apply to the life table survival
+#' @param max100 If TRUE, interpolate out to 100 as the max survival age
+#' 
+#' @return A vector of length n_sim containing ages at other-cause death (or times to other-cause death, if time=TRUE)
+#' 
+#' @examples
+# Use a Ugandan life table
+#' library(bcimodel)
+#' data(allmortratesf)
+#' surv <- interpolate_cumsurv(allmortratesf, 
+#'                           ratevar='Rate.Per.100K',
+#'                           country='Uganda')
+#' # Code compatibility tweaks for life table
+#' surv <- transform(surv, Age=age, Survival=cumsurv, Male=0)
+#' # Generate 5 death times for a female of age 30
+#' calc <- ac <- lifespan(30, 0, surv, 5)
+#'
+#' @export
 
-##description<< Given a year of birth and current age, draws 
-## a random age at other-cause death from US cohort
-## lifetables. 
-
-(ageentry, 
-    ### Current age
-male, 
-    ### Sex: male=1 for male, male=0 for female
-lifetable,
-    ### Life table dataframe with columns Survival,
-    ### BirthCohort, Age, and Male
-n_sim=100, 
-    ### Number of random draws to return
-time=FALSE,
-    ### Return age at other-cause death, or time from
-    ### current age to other-cause death?
-haz=1,
-    ### Should the US lifetables be modified by a hazard
-    ### ratio before drawing from them? If so, the cohort
-    ### survival will be raised to this number. 
-max100=TRUE
-    ### Interpolate out to 100 as the max
-) {
+calc_ac_lifespan = function(ageentry, male, lifetable, n_sim=100, time=FALSE, 
+                            haz=1, max100=TRUE) {
 
     # Check that sort is as expected
     if (lifetable$Survival[nrow(lifetable)]>
@@ -197,8 +200,6 @@ max100=TRUE
         browser("In calc_ac_lifespan(), death values equal NA or O")
     return(death)
 
-### A vector of length n_sim containing ages at other-cause
-### death (or times to other-cause death, if time=TRUE)
 }
 
 
@@ -206,30 +207,53 @@ max100=TRUE
 # calc_ac_lifespan_pop
 ############################################################
 
-calc_ac_lifespan_pop = function# Use the individual calc_ac_lifespan function to estimate lifespans of a population
+#' Use the individual calc_ac_lifespan function to estimate lifespans of a population
+#' 
+#' Given a population with birth years and ages, returns random draws of their ages at other-cause death
+#'
+#' @param popdata Data frame where individuals are rows, with columns birth_year, age, and male, OR a list of data frames that allow build_simpop() to construct this
+#' @param bootrows Matrix or data frame of row indicators that can be applied to the data to recover different bootstraps of the data. Each column is a different bootstrap of thedata. OR, list of data frames with these row indicators for use with build_simpop()
+#' @param life_table Data frame with columns Survival, BirthCohort, Age, and Male
+#' @param results_as_matrix Set to TRUE to convert results from matrix to data frame
+#' @param survHR Hazard to apply to the life table survival
+#' @param max100_topass If TRUE, interpolate out to 100 as the max survival age
+#' 
+#' @return A data frame or matrix with nsim columns of randomly drawn ages at other-cause death for individuals (rows)
+#' @examples 
+# Use a Ugandan life table
+#' library(bcimodel)
+#' data(allmortratesf)
+#' surv <- interpolate_cumsurv(allmortratesf, 
+#'                           ratevar='Rate.Per.100K',
+#'                           country='Uganda')
+#' # Code compatibility tweaks for life table
+#' surv <- transform(surv, Age=age, Survival=cumsurv, Male=0)
+#' 
+#' # Example 1: use the list approach
+#' # Simple age distribution
+#' ages <- data.frame(age=c(20,30,40), prop=c(0.2, 0.5, 0.3))
+#' # Simulate a population of size 10 twice, using these proportions and the row IDs
+#' sim.age.rows <- sim_multinom(nsims=10, 2, ages$prop, names=1:nrow(ages))
+#' # Now specify they're all female
+#' sex <- data.frame(male=0, prop=1)
+#' sim.sex.rows <- matrix(1, nrow=10, ncol=2)
+#' # Create the lists
+#' poplist <- list(sex, ages)
+#' rowlist <- list(sim.sex.rows, sim.age.rows)
+#' # Get ages at OC death
+#' oc <- calc_ac_lifespan_pop(poplist, rowlist, surv)
+#' 
+#' # Example 2
+#' # Alternatively, pass a population in data frame form and just use its normal rows
+#' # Use build_simpop and the 2nd simulation's row IDs
+#' pop <- build_simpop(poplist, rowlist, sim=2)[,c('male', 'age')]
+#' poprows <- replicate(2, 1:nrow(pop))
+#' oc <- calc_ac_lifespan_pop(pop, poprows, surv)
+#' 
+#' @export
 
-##description<< Given a population with birth years and
-## ages, returns random draws of their ages at other-cause
-## death
-
-(popdata, 
-    ### Data frame where individuals are rows, with columns 
-    ### birth_year, age, and male
-bootrows,
-    ### Matrix/df of row indicators that can be applied to
-    ### the data to recover different bootstraps of the
-    ### data. Each column is a different bootstrap of the
-    ### data
-life_table,
-results_as_matrix=FALSE,
-    ### Convert the results from a data frame to a matrix?
-survHR=1,
-    ### Hazard ratio for survival as a modification of the
-    ### life table in use
-max100_topass=TRUE
-    ### Interpolate out to max age of 100? TRUE/FALSE pass on to 
-    ### calc_ac_lifespan
-) {
+calc_ac_lifespan_pop = function(popdata, bootrows, life_table, results_as_matrix=FALSE, 
+                                survHR=1, max100_topass=TRUE) {
     # Determine number of simulations
     nsim = ncol(bootrows)
     if (is.null(nsim)) nsim = ncol(bootrows[[1]])
@@ -239,6 +263,7 @@ max100_topass=TRUE
         function(y) {
             # Construct the dataset
             if (!is.data.frame(popdata)) {
+                # This was the cantrance way of getting one bootstrap of the data
                 thisboot = subset(build_simpop(datalist=popdata,
                                                rowlist=bootrows,
                                                sim=y),
@@ -286,6 +311,4 @@ max100_topass=TRUE
 
     return(newpop)
 
-### A data frame or matrix with nsim columns of randomly
-### drawn ages at other-cause death for individuals (rows)
 }

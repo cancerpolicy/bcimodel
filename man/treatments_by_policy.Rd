@@ -8,9 +8,40 @@ treatments_by_policy(policies, treat_chars, stagegroups, map, pop_size, nsim)
 }
 \arguments{
 \item{policies}{A "scenarios" data frame containing an 'id' for the policies
-and a 'pairnum' column indicating either NA or the paired policy, for}
+and a 'pairnum' column indicating either NA or the paired policy ID, for strategies with early detection. See ex1$pol}
+
+\item{treat_chars}{Data frame with "txSSno" column indicating treatment numbers and subsequent columns with treatment proportions WITHIN stage-subgroups. Each of these columns should correspond to a row in the "policies" data frame, with their names taken fro policies$id. See ex1$tx}
+
+\item{stagegroups}{List of stage-subgroup matrices, one for each policy/row in the "scenarios" data frame}
+
+\item{map}{Stage-subgroup map indicating allowed stage-shifts. See ex1$map.}
+
+\item{pop_size}{Population size (number of rows)}
+
+\item{nsim}{Number of sims (number of columns)}
+}
+\value{
+List of treatment matrices, one for each policy in the "scenarios" data frame. Each matrix contains treatment IDs corresponding to treat_chars$txSSno. Early detection scenarios will have NAs for advanced-stage cases who aren't stage-shifted.
 }
 \description{
 Simulate treatments according to specified policy rules
+}
+\examples{
+library(bcimodel)
+data(ex1) 
+# ex1$nh shows that there are 4 stage-subgroups. Use a fake random distribution of groups 1:4 for the population before stage-shifting.
+popdistr <- matrix(sample.int(4, size=40, replace=TRUE), nrow=20, ncol=2)
+# Create stageshift indicator matrices for all 3 scenarios: no stage shifts for #1 and #2, but 30\% stageshift for #3. Use a small population of size 20, and 2 sims
+stageshifts <- list(base=matrix(0, nrow=20, ncol=2),
+                    tam=matrix(0, nrow=20, ncol=2), 
+                    tamshift=stageshift_indicator(0.85, 20, 2))
+# Get the actual stages - only policy #3 has stage-shifting
+stages <- lapply(stageshifts, shift_stages, original=popdistr, map=ex1$map)
+lapply(stages, table)
+t <- treatments_by_policy(policies=ex1$pol, 
+                          treat_chars=ex1$tx, 
+                          stagegroups=stages, 
+                          map=ex1$map, 
+                          pop_size=20, nsim=2)
 }
 

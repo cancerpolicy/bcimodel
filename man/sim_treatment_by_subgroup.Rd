@@ -11,13 +11,12 @@ sim_treatment_by_subgroup(treat_chars, stage_subgroup_rows, thisprop, pop_size,
 \arguments{
 \item{treat_chars}{Data frame indicating stage-subgroup #s in the SSno 
 variable and stage-subgroup-treatment #s in txSSno, and 
-prop_* columns where * is the trial name.}
+prop_* columns where * is the trial name. See ex1$tx}
 
 \item{stage_subgroup_rows}{Matrix indicating, for each person-sim, 
-which stage-subgroup
-they are in (using the SSid from treat_chars)}
+which stage-subgroup they are in (corresponding to the SSid from treat_chars)}
 
-\item{thisprop}{Character indicating the prop_* column name from which
+\item{thisprop}{Character indicating the column name from which
 to take treatment proportions}
 
 \item{pop_size}{Population size}
@@ -27,5 +26,14 @@ to take treatment proportions}
 \description{
 Simulate treatment by subgroups
 Given the proportions of treatments by subgroups, simulate treatment
+}
+\examples{
+# ex1$nh shows that there are 4 stage-subgroups. Use a fake random distribution of groups 1:4 for the population before stage-shifting. Use population of size 20 and 2 sims
+popdistr <- matrix(sample.int(4, size=40, replace=TRUE), nrow=20, ncol=2)
+# Simulate treatments for the 'base' scenario of ex1
+treats <- sim_treatment_by_subgroup(ex1$tx, popdistr, 'base', 20, 2)
+# Proportions reflect the treatment distribution and the stage-subgroup distribution
+prop.table(table(treats))
+
 }
 

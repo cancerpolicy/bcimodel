@@ -8,10 +8,21 @@ timetocancerdeath_by_policy(policies, rates, pop_size, nsim)
 }
 \arguments{
 \item{policies}{A "scenarios" data frame containing an 'id' for the policies
-and a 'pairnum' column indicating either NA or the paired policy, for}
+and a 'pairnum' column indicating either NA or the paired policy, for
+ strategies with early detection}
+
+\item{pop_size}{Population size}
+
+\item{nsim}{Number of sims}
+
+\item{A}{matrix of pop_size by nsim; cells are treatment-specific mortality rates for each individual in each sim}
 }
 \description{
 Sim non-stage-shifted times, to be updated for shifted cases using the
 update_time_stageshift function
+}
+\examples{
+See simpolicies.R
+
 }
 

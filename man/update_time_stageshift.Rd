@@ -2,13 +2,23 @@
 % Please edit documentation in R/outcomes.R
 \name{update_time_stageshift}
 \alias{update_time_stageshift}
-\title{For stage-shifted cases in an early detection scenario, update treatment}
+\title{For stage-shifted cases in an early detection scenario, update time to cancer death}
 \usage{
 update_time_stageshift(policies, shifts, rates, times)
 }
+\arguments{
+\item{policies}{Data frame specifying policies - see ex1$pol. If 'pairnum' = NA, no treatments are updated. If 'pairnum' is numeric, treatments from that number scenario will be the starting point, with early-detected cases shifted according to the next input}
+
+\item{shifts}{List of treatment-shift indicators (see shifttreatment_indicator)}
+
+\item{rates}{Matrix of treatment-specific rates, size popsize by nsim}
+
+\item{rates}{Matrix of times to cancer death under no stage-shifts, size popsize by nsim}
+}
 \description{
 Takes treatments from a paired scenario with no early detection and
-updates treatments only for those advanced-stage cases who were
-stage-shifted in the early detection scenario
+updates times to cancer death only for those advanced-stage cases who were
+stage-shifted in the early detection scenario. Updated times are quantile-
+correlated to the previous times
 }
 

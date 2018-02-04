@@ -12,7 +12,7 @@ interpolate_cumsurv(binnedrates, ratevar, maxage = NULL, country = NULL)
 \item{ratevar}{Name of rate variable}
 
 \item{maxage}{Maximum age desired. If data are incomplete, the 
-rate for the oldest age will be held constant until maxage}
+rate for the oldest age will be held constant until maxage. Leave NULL to have the data determine the max age.}
 
 \item{country}{Country to select from the data frame}
 }
@@ -27,9 +27,11 @@ cumulative event-free survival for single years
 data(incratesf)
 data(allmortratesf)
 
+# Example with breast cancer incidence
 inc <- interpolate_cumsurv(incratesf, 
                          ratevar='Female.Rate.Per.100K',
                          country='Uganda')
+# Example with all-cause mortality
 mort <- interpolate_cumsurv(allmortratesf, 
                          ratevar='Rate.Per.100K',
                          country='Uganda')

@@ -20,7 +20,8 @@ Matrix of 1s and 0s
 Sim indicator of stageshift from binomial
 }
 \examples{
-#
+# Hazard = 0.85, e.g. 15\% probability of being stage-shifted
+round(mean(stageshift_indicator(0.85, 1000, 1)),2)
 
 }
 

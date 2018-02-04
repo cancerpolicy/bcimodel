@@ -15,6 +15,9 @@ sim_multinom(nsims, nreps, probs, names)
 
 \item{names}{Vector of names associated with each of the categories. Must be of same length as probs. Can be character or numeric. Use numeric row IDs if you're referring to a group defined by multiple variables whose groupings are defined in a separate data frame}
 }
+\value{
+Matrix of multinomial draws
+}
 \description{
 Simulate a category assignment using a multinomial distribution
 }
