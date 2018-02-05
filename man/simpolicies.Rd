@@ -31,12 +31,12 @@ simpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
 
 \item{futimes}{Follow-up times at which to tally outcomes, in years}
 
-\item{returnstats}{Defaults to simulation means, but you can also ask for c('mean', 'lower', upper'). Lower and upper report the 2.5% and 97.5% quantiles respectively.}
+\item{returnstats}{Defaults to simulation means, but you can also ask for c("mean", "lower", "upper"). Lower and upper report the 2.5\% and 97.5\% quantiles respectively.}
 
 \item{Denominator/population}{size by which to report outcomes; default is 100,000}
 }
 \value{
-Data frame if returnstats='mean', or list of data frames of length(returnstats)
+Data frame if returnstats="mean", or list of data frames of length(returnstats)
 }
 \description{
 Run the model for a series of policies and compare outcomes to the base case
@@ -46,7 +46,13 @@ Wrapper function for the whole model
 # Use example input data loaded in package, object name "ex1"
 data(ex1) 
 ex1
-# Element "pol" shows the 3 scenarios being modeled; "nh" contains the natural history information, "map" contains numeric indicators for the stage-subgroups, and "tx" shows treatment hazard ratios and, for each scenario, the treatment distribution. See vignette('example-model') for more details.
+
+# Element "pol" shows the 3 scenarios being modeled
+"nh" contains the natural history information
+"map" contains numeric indicators for the stage-subgroups
+"tx" shows treatment hazard ratios and, for each scenario, the treatment distribution. See vignette for more details
+
+# Run a model using ex1 inputs and the defaults
 uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
 
 }

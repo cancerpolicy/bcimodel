@@ -9,10 +9,13 @@ parsimpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
   popsize = 1e+05, sims = 5, futimes = c(5, 10),
   returnstats = c("mean"), denom = 1e+05, ncores = 4)
 }
-\value{
-Table if returnstats='mean', or list of tables of length(returnstats)
+\arguments{
+\item{ncores}{Number of cores to use}
 }
 \description{
 Same as simpolicies but calling parallelized sub-functions
+}
+\note{
+See help file for simpolicies
 }
 
