@@ -321,7 +321,8 @@ round_matrix <- function(mat, digbyrow) {
 }
 
 #' Format bounds for reporting
-#' Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break \n between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.
+#'
+#' Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break "\\n" between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.
 #' @export
 format_bounds <- function(lower, upper, digits=NULL, paren=FALSE,
                           meanmat=NULL) {
