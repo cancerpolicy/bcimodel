@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<meta name="author" content="Jeanette Birnbaum" />
+
+<meta name="date" content="2018-02-05" />
+
+<title>Introduction to bcimodel</title>
+
+
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+div.sourceCode { overflow-x: auto; }
+table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
+  margin: 0; padding: 0; vertical-align: baseline; border: none; }
+table.sourceCode { width: 100%; line-height: 100%; }
+td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
+td.sourceCode { padding-left: 5px; }
+code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code > span.dt { color: #902000; } /* DataType */
+code > span.dv { color: #40a070; } /* DecVal */
+code > span.bn { color: #40a070; } /* BaseN */
+code > span.fl { color: #40a070; } /* Float */
+code > span.ch { color: #4070a0; } /* Char */
+code > span.st { color: #4070a0; } /* String */
+code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code > span.ot { color: #007020; } /* Other */
+code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code > span.fu { color: #06287e; } /* Function */
+code > span.er { color: #ff0000; font-weight: bold; } /* Error */
+code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+code > span.cn { color: #880000; } /* Constant */
+code > span.sc { color: #4070a0; } /* SpecialChar */
+code > span.vs { color: #4070a0; } /* VerbatimString */
+code > span.ss { color: #bb6688; } /* SpecialString */
+code > span.im { } /* Import */
+code > span.va { color: #19177c; } /* Variable */
+code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code > span.op { color: #666666; } /* Operator */
+code > span.bu { } /* BuiltIn */
+code > span.ex { } /* Extension */
+code > span.pp { color: #bc7a00; } /* Preprocessor */
+code > span.at { color: #7d9029; } /* Attribute */
+code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+</style>
+
+
+
+<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23header%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%20code%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Introduction to bcimodel</h1>
+<h4 class="author"><em>Jeanette Birnbaum</em></h4>
+<h4 class="date"><em>2018-02-05</em></h4>
+
+
+
+<div id="overview" class="section level2">
+<h2>Overview</h2>
+<p>The <a href>bcimodel</a> package is an extension of the <a href>screentreat</a> package, detailed in <a href="https://www.ncbi.nlm.nih.gov/pubmed/26756332">The Effect of Treatment Advances on the Mortality Results of Breast Cancer Screening Trials: A Microsimulation Model</a>. The packages contain the same breast cancer microsimulation model allows the investigation of the impact of various breast cancer treatment and screening interventions on a virtual cohort of women.</p>
+<p><a href>bcimodel</a> has an improved code structure that allows for relatively fast computation of (in theory) an unlimited number of intervention scenarios, whereas <a href>screentreat</a> can accommodate only one intervention scenario. <a href>bcimodel</a> also has embedded data sets of cancer incidence and all-cause mortality from global agencies as well as the United States.</p>
+<p>This vignette will walk through an example analysis of breast cancer in Uganda.</p>
+</div>
+<div id="input-data" class="section level2">
+<h2>Input data</h2>
+<p>The input data for the example are pre-loaded into the package in an object called <code>ex1</code>, a list with four elements: <code>$pol</code>, <code>$nh</code>, <code>map</code>, and <code>$tx</code>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bcimodel)
+<span class="kw">data</span>(ex1)</code></pre></div>
+<div id="policies-to-model" class="section level3">
+<h3>Policies to model</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ex1$pol
+<span class="co">#&gt;   num          id                                  name pairnum earlydetHR</span>
+<span class="co">#&gt; 1   1        base                             Base Case      NA        1.0</span>
+<span class="co">#&gt; 2   2         tam                     Tamoxifen for ER+      NA        1.0</span>
+<span class="co">#&gt; 3   3 tamandshift Tamoxifen for ER+ and 30% stage shift       2        0.7</span></code></pre></div>
+<p>“pol” stands for “policy”, i.e. the scenario being modeled. This element of <code>ex1</code> shows how to specify a series of policies to investigate. It is a data frame with the following columns:</p>
+<ol style="list-style-type: decimal">
+<li><strong>num</strong>: The policy number</li>
+<li><strong>id</strong>: A short string ID’ing the policy</li>
+<li><strong>name</strong>: Longer description of the policy</li>
+<li><strong>pairnum</strong>: For policiess with no early detection, NA. For policies with early detection, the policy number of the “paired” policy that has the same treatments but does not have early detection. In the example, policies 1 &amp; 2 do not have early detection. Policy 3 has early detection and its policy pair is #2.</li>
+<li><strong>earlydetHR</strong>: For policies with no early detection, 1.0. For policies with early detection, the hazard ratio (HR) on advanced-stage incidence. In policy 3, the HR of 0.7 indicates a 30% reduction in advanced-stage incidence, or a 30% stage shift.</li>
+</ol>
+<p>Note that policy 1 should always be the “base case”, the scenario that most closely matches the status quo/standard of care.</p>
+<p>Policies can differ from each other on the degree of early detection and/or the treatment distribution. Treatment for each policy is specified later, in the <code>ex1$tx</code> object.</p>
+</div>
+<div id="natural-history-parameters" class="section level3">
+<h3>Natural history parameters</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ex1$nh
+<span class="co">#&gt;    prop    stage subgroup mortrate</span>
+<span class="co">#&gt; 1 0.045    Early      ER+   0.0446</span>
+<span class="co">#&gt; 2 0.105    Early      ER-   0.0446</span>
+<span class="co">#&gt; 3 0.255 Advanced      ER+   0.2100</span>
+<span class="co">#&gt; 4 0.595 Advanced      ER-   0.2100</span></code></pre></div>
+<p>“nh” stands for “natural history.” This data frame of class <em>naturalhist</em> specifies the key natural history parameters of the model: population proportion and the mortality rate of each “stage-subgroup”.</p>
+<p>Two stages are allowed: “Early” or “Advanced.” There is no limit on the number of subgroups or expectations for their names. They just need to be specified for each stage. In the example, there are two subgroups: “ER+” and “ER-”, for a total of four stage-subgroups.</p>
+<p>If subgroup and stage are uncorrelated and mortality rates vary only by stage, use the <code>compile_naturalhist</code> function to create this data frame:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 85% are advanced stage</span>
+<span class="co"># Mortality rates are .05 for Early and 0.21 for Advanced</span>
+<span class="co"># 50% are ER+</span>
+(nh1 &lt;-<span class="st"> </span><span class="kw">compile_naturalhist</span>(<span class="dt">prop_adv=</span><span class="fl">0.85</span>, 
+                            <span class="dt">mortrates=</span><span class="kw">c</span>(<span class="dt">Early=</span><span class="fl">0.05</span>, <span class="dt">Advanced=</span><span class="fl">0.21</span>), 
+                            <span class="dt">subgroup_probs=</span><span class="kw">c</span>(<span class="st">`</span><span class="dt">ER+</span><span class="st">`</span>=<span class="fl">0.5</span>, <span class="st">`</span><span class="dt">ER-</span><span class="st">`</span>=<span class="fl">0.5</span>)))
+<span class="co">#&gt;    prop    stage subgroup mortrate</span>
+<span class="co">#&gt; 1 0.075    Early      ER+     0.05</span>
+<span class="co">#&gt; 2 0.075    Early      ER-     0.05</span>
+<span class="co">#&gt; 3 0.425 Advanced      ER+     0.21</span>
+<span class="co">#&gt; 4 0.425 Advanced      ER-     0.21</span></code></pre></div>
+<p>If you have about 15% HER2+, you could similarly specify that:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># 85% are advanced stage</span>
+<span class="co"># Mortality rates are .05 for Early and 0.21 for Advanced</span>
+<span class="co"># 50% are ER+, 15% are HER2+, so uncorrelated gives 0.5*0.15 = .075 ER+HER2+</span>
+(nh2 &lt;-<span class="st"> </span><span class="kw">compile_naturalhist</span>(<span class="dt">prop_adv=</span><span class="fl">0.85</span>, 
+                            <span class="dt">mortrates=</span><span class="kw">c</span>(<span class="dt">Early=</span><span class="fl">0.05</span>, <span class="dt">Advanced=</span><span class="fl">0.21</span>),
+                            <span class="dt">subgroup_probs=</span><span class="kw">c</span>(<span class="st">`</span><span class="dt">ER+HER2+</span><span class="st">`</span>=<span class="fl">0.075</span>,
+                                             <span class="st">`</span><span class="dt">ER-HER2+</span><span class="st">`</span>=<span class="fl">0.075</span>,
+                                             <span class="st">`</span><span class="dt">ER+HER2-</span><span class="st">`</span>=<span class="fl">0.425</span>,
+                                             <span class="st">`</span><span class="dt">ER-HER2-</span><span class="st">`</span>=<span class="fl">0.425</span>)))
+<span class="co">#&gt;      prop    stage subgroup mortrate</span>
+<span class="co">#&gt; 1 0.01125    Early ER+HER2+     0.05</span>
+<span class="co">#&gt; 2 0.01125    Early ER-HER2+     0.05</span>
+<span class="co">#&gt; 3 0.06375    Early ER+HER2-     0.05</span>
+<span class="co">#&gt; 4 0.06375    Early ER-HER2-     0.05</span>
+<span class="co">#&gt; 5 0.06375 Advanced ER+HER2+     0.21</span>
+<span class="co">#&gt; 6 0.06375 Advanced ER-HER2+     0.21</span>
+<span class="co">#&gt; 7 0.36125 Advanced ER+HER2-     0.21</span>
+<span class="co">#&gt; 8 0.36125 Advanced ER-HER2-     0.21</span></code></pre></div>
+<p>If you do not use <code>compile_naturalhist</code>, you’ll need to append the class <em>naturalhist</em> to the natural history data frame:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">class</span>(your_nh_data_frame) &lt;-<span class="st"> </span><span class="kw">append</span>(<span class="kw">class</span>(your_nh_data_frame), <span class="st">&quot;naturalhist&quot;</span>)</code></pre></div>
+<p>I probably had good intentions for making a separate class for these data, but I can’t remember them now!</p>
+</div>
+<div id="stage-shift-map" class="section level3">
+<h3>Stage-shift map</h3>
+<p>The purpose of the stage-shift map, e.g. <code>ex1$map</code>, is to keep the subgroup constant when stage is shifted due to early detection. It arranges the numeric IDs of the stage-subgroups, i.e. their row numbers in the natural history data frame (<code>ex1$nh</code>), in a matrix that constrains the stage-shifting.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ex1$map
+<span class="co">#&gt;          ER+ ER-</span>
+<span class="co">#&gt; Early      1   2</span>
+<span class="co">#&gt; Advanced   3   4</span></code></pre></div>
+<p>In the example, advanced ER+ is stage-group 3. The <em>shift_stages</em> function in <em>bcimodel</em> (see <code>?bcimodel::shift_stages</code>) will use the map to ensure that stage-shifted advanced ER+ get shifted to group 1, e.g. early ER+. Advanced ER-, group 4, will get shifted to early ER-, group 2.</p>
+<p>The function <em>create_stageshift_map</em> can create a stageshift map from a natural history data frame of class naturalhist. For example, using the natural history example above where there is 15% HER2+:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">create_stageshift_map</span>(nh2)
+<span class="co">#&gt;          ER+HER2+ ER-HER2+ ER+HER2- ER-HER2-</span>
+<span class="co">#&gt; Early           1        2        3        4</span>
+<span class="co">#&gt; Advanced        5        6        7        8</span></code></pre></div>
+</div>
+<div id="treatment" class="section level3">
+<h3>Treatment</h3>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">ex1$tx
+<span class="co">#&gt;   SSno         SSid txSSno    txSSid txHR base tam tamandshift</span>
+<span class="co">#&gt; 1    1    Early.ER+      1      None  1.0  0.8   0           0</span>
+<span class="co">#&gt; 2    1    Early.ER+      2 Tamoxifen  0.7  0.2   1           1</span>
+<span class="co">#&gt; 3    2    Early.ER-      3      None  1.0  0.8   1           1</span>
+<span class="co">#&gt; 4    2    Early.ER-      4 Tamoxifen  1.0  0.2   0           0</span>
+<span class="co">#&gt; 5    3 Advanced.ER+      5      None  1.0  0.8   0           0</span>
+<span class="co">#&gt; 6    3 Advanced.ER+      6 Tamoxifen  0.7  0.2   1           1</span>
+<span class="co">#&gt; 7    4 Advanced.ER-      7      None  1.0  0.8   1           1</span>
+<span class="co">#&gt; 8    4 Advanced.ER-      8 Tamoxifen  1.0  0.2   0           0</span></code></pre></div>
+<p>The treatment data frame is the most complicated input, as you can see in <code>ex1$tx</code>. Each row represents a different stage-subgroup-specific treatment. Columns are</p>
+<ul>
+<li><strong>SSno</strong>: Stage-subgroup number. Should correspond to the stage-subgroups as they are listed in the natural history data frame, e.g. <code>ex1$nh</code>.</li>
+<li><strong>SSid</strong>: Text ID of the stage-subgroup</li>
+<li><strong>txSSno</strong>: Numeric ID for the treatment. Every treatment within a stage-subgroup should have a unique row and ID, e.g. “None” for early-stage ER+ is different from “None” for early-stage ER- or advanced-stage ER+.</li>
+<li><strong>txSSid</strong>: Text ID for the treatment.</li>
+<li><strong>txHR</strong>: Hazard ratio on baseline survival for the treatment. This should take into account the stage-subgroup, e.g Tamoxifen in ER- has a hazard ratio of 1.0, but in ER+ it has a hazard ratio of 0.7.</li>
+<li><strong>Subsequent columns</strong>: One for each of the scenarios in the policy data frame, e.g. <code>ex1$pol</code>, with column names corresponding to the policy “id” column (<code>ex1$pol$id</code>). For each policy/column, specify the proportion receiving each treatment <em>within each stage-subgroup</em>. So proportions sum to 1 within stage-subgroups. For example, in <code>ex1$tx</code>, for all stage-subgroups in the “base” scenario, 20% receive Tamoxifen and 80% receive none.</li>
+</ul>
+<div id="a-note-about-baseline-survival-and-treatment-hazard-ratios" class="section level4">
+<h4>A note about “baseline” survival and treatment hazard ratios</h4>
+<p>In the “tam” scenario in <code>ex1$tx</code>, tamoxifen is exclusively targeted to the ER+ (100%), whereas the ER- receive no treatment. This intervention could represent two different scenarios, depending on the baseline survival parameter entered in the natural history (<code>ex1$nh</code>):</p>
+<ol style="list-style-type: decimal">
+<li><p><strong>Baseline survival = no adjuvant treatment at all</strong>. The “tam” scenario will thus reflect a shift to useful treatment for ER+ and a shift back to no treatment at all for ER-.</p></li>
+<li><p><strong>Baseline survival = fully treated with chemo</strong>. Because the EBCTCG’s meta-analyses of adjuvant treatment indicate that adjuvant treatment hazard ratios are multiplicative (see references in the <a href="https://www.ncbi.nlm.nih.gov/pubmed/26756332">Annals paper</a>), your baseline survival could represent survival in the presence of chemo for all. In this case, the “tam” scenario would reflect a shift to chemo+Tamoxifen for ER+ and a shift back to chemo only for all ER-.</p></li>
+</ol>
+<p>Note that you CANNOT have baseline survival represent survival when only some fraction of cases are treated. If those are the data available, you must use an estimate of the proportion treated to back-out untreated survival. Then, explicitly represent the % treated with chemo in the base scenario, and add tamoxifen and/or tamoxifen+chemo in the intervention.</p>
+</div>
+</div>
+</div>
+<div id="running-the-model" class="section level2">
+<h2>Running the model</h2>
+<p>To run the example, see <code>?bcimodel::simpolicies</code>. The default number of simulations is 5, for speed, and let’s decrease the default pop size of 100,000 to 10,000 to make it even faster:</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">set.seed</span>(<span class="dv">98103</span>)
+uganda_stdpop &lt;-<span class="st"> </span>bcimodel::<span class="kw">simpolicies</span>(ex1$pol, ex1$nh, ex1$tx, <span class="dt">popsize=</span><span class="dv">10000</span>)
+<span class="co">#&gt; </span>
+<span class="co">#&gt; Initializing population...</span>
+<span class="co">#&gt; Simulating base case stage and subgroup...</span>
+<span class="co">#&gt; Determining stage shifts...</span>
+<span class="co">#&gt; Simulating treatment received...</span>
+<span class="co">#&gt; Simulating cancer mortality...</span>
+<span class="co">#&gt; Tabulating time to and cause of death...</span>
+<span class="co">#&gt; Summarizing outcomes...</span></code></pre></div>
+<div id="view-5-year-outcomes" class="section level3">
+<h3>View 5-year outcomes</h3>
+<p>Default follow-up times are 5 and 10 years. Using <em>knitr::kable</em> for nice HTML viewing,</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">knitr::<span class="kw">kable</span>(uganda_stdpop[[<span class="st">'5'</span>]]) <span class="co"># could also specify using uganda_stdpop$`5`</span></code></pre></div>
+<table class="kable_wrapper">
+<tbody>
+<tr>
+<td>
+<table>
+<thead>
+<tr class="header">
+<th align="left"></th>
+<th align="right">Base Case</th>
+<th align="right">Tamoxifen for ER+</th>
+<th align="right">Tamoxifen for ER+ and 30% stage shift</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td align="left">Cumulative BC Incidence</td>
+<td align="right">220.0</td>
+<td align="right">NA</td>
+<td align="right">NA</td>
+</tr>
+<tr class="even">
+<td align="left">Cumulative BC Mortality</td>
+<td align="right">72.0</td>
+<td align="right">58.00</td>
+<td align="right">54.00</td>
+</tr>
+<tr class="odd">
+<td align="left">% Incident Surviving</td>
+<td align="right">67.1</td>
+<td align="right">73.98</td>
+<td align="right">75.93</td>
+</tr>
+<tr class="even">
+<td align="left">MRR</td>
+<td align="right">1.0</td>
+<td align="right">0.92</td>
+<td align="right">0.85</td>
+</tr>
+<tr class="odd">
+<td align="left">ARR</td>
+<td align="right">0.0</td>
+<td align="right">14.00</td>
+<td align="right">18.00</td>
+</tr>
+<tr class="even">
+<td align="left">Years of Life Saved</td>
+<td align="right">0.0</td>
+<td align="right">19.11</td>
+<td align="right">32.73</td>
+</tr>
+</tbody>
+</table>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="parallelized-version" class="section level2">
+<h2>Parallelized version</h2>
+<p>There is a parallelized version of <em>simpolicies()</em> called <em>parsimpolicies</em> in which you specify the number of cores available. It’s not worth using for a small number of sims, but it makes running 100 sims considerably faster.</p>
+<p>However, starting the worker processes uses memory, and I think that’s why I wasn’t able to get parsimpolicies to work on the <a href="http://cancerpolicy.github.io">web app</a>.</p>
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># Not run in vignette - three policies, 100 sims, with pop size 100,000</span>
+<span class="kw">set.seed</span>(<span class="dv">98103</span>)
+uganda_stdpop &lt;-<span class="st"> </span>bcimodel::<span class="kw">simpolicies</span>(ex1$pol, ex1$nh, ex1$tx, <span class="dt">ncores=</span><span class="dv">4</span>)</code></pre></div>
+</div>
+<div id="the-app" class="section level2">
+<h2>The app</h2>
+<p>The app is linked from the <a href="http://cancerpolicy.github.io">cancerpolicy.github.io site</a> and the code is in <a href="https://github.com/cancerpolicy/bciapp">cancerpolicy’s “bciapp” github repository</a>.</p>
+</div>
+
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
