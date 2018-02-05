@@ -2,13 +2,11 @@
 % Please edit documentation in R/outcomes.R
 \name{format_bounds}
 \alias{format_bounds}
-\title{Format bounds for reporting
-Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break \n between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.}
+\title{Format bounds for reporting}
 \usage{
 format_bounds(lower, upper, digits = NULL, paren = FALSE, meanmat = NULL)
 }
 \description{
-Format bounds for reporting
-Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break \n between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.
+Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break "\\n" between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.
 }
 
