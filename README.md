@@ -13,4 +13,17 @@ data-raw | Scripts that convert data in __inst/extdata__ to formatted data in __
 data | Formatted data that can be loaded via the package
 R | Functions to support analyses
 man | Help files for functions in __R__
-vignettes | Analyses
+analyses | Analyses
+vignettes | Example vignette
+
+## Install instructions
+```r
+devtools::install_github('cancerpolicy/bcimodel', build_vignettes=TRUE)
+```
+
+## Start here
+Please see the Introduction vignette after loading the package:
+```r
+vignette('introduction', 'bcimodel')
+```
+

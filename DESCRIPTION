@@ -1,8 +1,8 @@
 Package: bcimodel
-Title: What the Package Does (one line, title case)
+Title: Model the impact of early detection and treatment interventions for breast cancer
 Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Authors@R: person("Jeanette", "Birnbaum", email = "kurian@uw.edu", role = c("aut", "cre"))
+Description: Poor breast-cancer survival in low- and middle income countries (LMICs) can be attributed to late stage presentation and lack of access to systemic therapy.  This package contains a modeling system to project the outcomes of different early detection strategies in combination with systemic chemotherapy and endocrine therapy in LMICs.
 Depends:
     R (>= 3.3.0)
 Imports:
@@ -14,5 +14,8 @@ License: What license is it under?
 Encoding: UTF-8
 LazyData: true
 Suggests:
-    testthat
+    testthat,
+    knitr,
+    rmarkdown
 RoxygenNote: 5.0.1
+VignetteBuilder: knitr
