@@ -73,7 +73,7 @@ sim_clinical_incidence = function(popdata, bootrows,
             thisboot$tempid = 1:nrow(thisboot)
             
             # Simulate ages at incidence
-            inc = ddply(thisboot,
+            inc = plyr::ddply(thisboot,
                         .(age),
                         function(x) {
                             # Extract age

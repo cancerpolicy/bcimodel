@@ -82,7 +82,6 @@ initialize_pop <- function(pop_size, nsim,
                                              names=1:nrow(x))
                                 }, pop_size, nsim)
 
-        browser()
         # Ages at entry 
         ageentry <- return_value_from_id(ids=pop_chars_rows[['age']],
                                          df=pop_chars[['age']],
@@ -140,7 +139,7 @@ compile_naturalhist <- function(prop_adv, mortrates, subgroup_probs) {
                                               stringsAsFactors=FALSE))
                         })
     
-    df <- ldply(df)
+    df <- plyr::ldply(df)
     if (round(sum(df$prop),1)!=1) stop('Check that subgroup_probs sum to 1')
     class(df) <- append(class(df), 'naturalhist')
     return(df)

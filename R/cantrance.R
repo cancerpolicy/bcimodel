@@ -251,6 +251,8 @@ calc_ac_lifespan = function(ageentry, male, lifetable, n_sim=100, time=FALSE,
 #' oc <- calc_ac_lifespan_pop(pop, poprows, surv)
 #' 
 #' @export
+#' @importFrom plyr ddply
+#' @importFrom plyr .
 
 calc_ac_lifespan_pop = function(popdata, bootrows, life_table, results_as_matrix=FALSE, 
                                 survHR=1, max100_topass=TRUE) {
@@ -276,8 +278,7 @@ calc_ac_lifespan_pop = function(popdata, bootrows, life_table, results_as_matrix
             thisboot$tempid = 1:nrow(thisboot)
             
             # Simulate ages at other-cause death
-            ocs = ddply(thisboot,
-                        .(age, male),
+            ocs = ddply(thisboot, .(age, male),
                         function(x) {
                             # Extract age, birth year, and 
                             # male specifications
