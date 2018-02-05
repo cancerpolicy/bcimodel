@@ -27,5 +27,5 @@ Please see the Introduction vignette after loading the package:
 vignette('introduction', 'bcimodel')
 ```
 
-Alternatively, [view via Git](https://github.com/cancerpolicy/bcimodel/blob/master/vignettes/introduction.Rmd) with slightly worse formatting.
+Alternatively, [view online](https://htmlpreview.github.io/?https://github.com/cancerpolicy/bcimodel/blob/master/inst/doc/introduction.html).
 
