@@ -34,7 +34,7 @@
 
 check_scenarios <- function(scenarios, treatinfo) {
     # Check for earlydetection, i.e. any earlydetHR!=1
-    warn <- c()
+    warn <- list(message='The following have mismatched treatments distributions:')
     check_these <- scenarios$id[scenarios$earlydetHR!=1]
     # For each scenario to check, the pairnum
     if (!is.null(check_these)) {
@@ -44,9 +44,7 @@ check_scenarios <- function(scenarios, treatinfo) {
             # Check if treatments are the same
             check_tx  <- treatinfo[,s]==treatinfo[,pairnum]
             if (sum(!check_tx)!=0) {
-                warn <- c(warn,
-                          paste(s, "and", pairnum, 
-                                "DO NOT have the same treatment distribution"))
+                warn[[s]] <- c(s, pairnum)
             }
         }
     }
