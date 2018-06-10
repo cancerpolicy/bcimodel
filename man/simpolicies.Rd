@@ -15,6 +15,8 @@ simpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
 
 \item{naturalhist}{Data frame with natural history parameters (see compile_naturalhist)}
 
+\item{treatinfo}{Data frame with treatment hazard ratios, and for each scenario, treatment proportions, by stage-subgroups. See the example and the vignette}
+
 \item{agesource}{Country to use for age structure (see data(agestructure) )}
 
 \item{minage}{Lower age limit for population at sim start}

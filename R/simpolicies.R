@@ -5,6 +5,54 @@
 ################################################################################
 
 #-------------------------------------------------------------------------------
+# check_scenarios
+#-------------------------------------------------------------------------------
+#' Check accurate specification of 'scenarios' parameter to simpolicies()
+#' 
+#' The 'scenarios' parameter must contain paired policies, i.e. if one scenario has early detection, a scenario must exist that has the same treatments but no early detection. This function checks for the correct pairing
+#' 
+#' @param scenarios Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.
+#' @param treatinfo Data frame with treatment hazard ratios, and for each scenario, treatment proportions, by stage-subgroups. See the example and the vignette
+#' @return NULL if scenarios are paired properly, or vector listing the problematic pairs
+#' @examples
+#' data(ex1)
+#' # See scenarios
+#' ex1$pol
+#' # See treatment
+#' ex1$tx
+#' # Create version that have the "tam" scenario deleted and specify
+#' # "base" and "tamandshift" scenarios as paired. This should fail.
+#' fail <- ex1
+#' fail$pol <- fail$pol[-2,]
+#' fail$pol$num[2] <- 2
+#' fail$pol$pairnum[2] <- 1
+#' fail$tx$tam <- NULL
+#' 
+#' check_scenarios(ex1$pol, ex1$tx)
+#' check_scenarios(fail$pol, fail$tx)
+
+check_scenarios <- function(scenarios, treatinfo) {
+    # Check for earlydetection, i.e. any earlydetHR!=1
+    warn <- c()
+    check_these <- scenarios$id[scenarios$earlydetHR!=1]
+    # For each scenario to check, the pairnum
+    if (!is.null(check_these)) {
+        for (s in check_these) {
+            pairnum <- 
+                  scenarios$id[scenarios$pairnum[which(scenarios$id==s)]]
+            # Check if treatments are the same
+            check_tx  <- treatinfo[,s]==treatinfo[,pairnum]
+            if (sum(!check_tx)!=0) {
+                warn <- c(warn,
+                          paste(s, "and", pairnum, 
+                                "DO NOT have the same treatment distribution"))
+            }
+        }
+    }
+    return(warn)
+}
+
+#-------------------------------------------------------------------------------
 # simpolicies
 #-------------------------------------------------------------------------------
 #' Run the model for a series of policies and compare outcomes to the base case
@@ -12,6 +60,7 @@
 #' 
 #' @param scenarios Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.
 #' @param naturalhist Data frame with natural history parameters (see compile_naturalhist)
+#' @param treatinfo Data frame with treatment hazard ratios, and for each scenario, treatment proportions, by stage-subgroups. See the example and the vignette
 #' @param agesource Country to use for age structure (see data(agestructure) )
 #' @param minage Lower age limit for population at sim start
 #' @param maxage Upper age limit for population at sim start
@@ -47,6 +96,12 @@ simpolicies <- function(scenarios, naturalhist, treatinfo,
                         denom=100000) {
 
 set.seed(98103)
+#-------------------------------------------------------------------------------
+# Check that scenarios have been specified correctly
+#-------------------------------------------------------------------------------
+warn <- check_scenarios(scenarios, treatinfo)
+if (!is.null(warn)) stop('Error in simpolicies: ', warn)
+
 #-------------------------------------------------------------------------------
 # Initialize population
 #-------------------------------------------------------------------------------
@@ -256,6 +311,12 @@ parsimpolicies <- function(scenarios, naturalhist, treatinfo,
                         denom=100000, ncores=4) {
 
 set.seed(98103)
+#-------------------------------------------------------------------------------
+# Check that scenarios have been specified correctly
+#-------------------------------------------------------------------------------
+warn <- check_scenarios(scenarios, treatinfo)
+if (!is.null(warn)) stop('Error in parsimpolicies: ', warn)
+
 #-------------------------------------------------------------------------------
 # Initialize population
 #-------------------------------------------------------------------------------
