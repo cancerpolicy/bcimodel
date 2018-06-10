@@ -30,6 +30,7 @@
 #' 
 #' check_scenarios(ex1$pol, ex1$tx)
 #' check_scenarios(fail$pol, fail$tx)
+#' @export
 
 check_scenarios <- function(scenarios, treatinfo) {
     # Check for earlydetection, i.e. any earlydetHR!=1
