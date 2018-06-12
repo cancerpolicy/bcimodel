@@ -99,7 +99,7 @@ set.seed(98103)
 # Check that scenarios have been specified correctly
 #-------------------------------------------------------------------------------
 warn <- check_scenarios(scenarios, treatinfo)
-if (!is.null(warn)) stop('Error in simpolicies: ', warn)
+if (length(warn)>1) stop('Error in parsimpolicies: ', warn)
 
 #-------------------------------------------------------------------------------
 # Initialize population
@@ -314,7 +314,7 @@ set.seed(98103)
 # Check that scenarios have been specified correctly
 #-------------------------------------------------------------------------------
 warn <- check_scenarios(scenarios, treatinfo)
-if (!is.null(warn)) stop('Error in parsimpolicies: ', warn)
+if (length(warn)>1) stop('Error in parsimpolicies: ', warn)
 
 #-------------------------------------------------------------------------------
 # Initialize population

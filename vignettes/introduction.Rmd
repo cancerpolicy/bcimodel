@@ -148,7 +148,10 @@ However, starting the worker processes uses memory, and I think that's why I was
 ```{r, eval=FALSE}
 # Not run in vignette - three policies, 100 sims, with pop size 100,000
 set.seed(98103)
-uganda_stdpop <- bcimodel::simpolicies(ex1$pol, ex1$nh, ex1$tx, ncores=4)
+library(parallel)
+uganda_stdpop <- bcimodel::parsimpolicies(ex1$pol, ex1$nh, ex1$tx, 
+                                          sims=100,
+                                          ncores=4)
 ```
 
 ## The app
