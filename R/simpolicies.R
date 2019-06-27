@@ -11,7 +11,7 @@
 #' 
 #' The 'scenarios' parameter must contain paired policies, i.e. if one scenario has early detection, a scenario must exist that has the same treatments but no early detection. This function checks for the correct pairing
 #' 
-#' @param scenarios Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.
+#' @param scenarios Data frame of scenarios to simulate (see example below). First scenario should be the base case.
 #' @param treatinfo Data frame with treatment hazard ratios, and for each scenario, treatment proportions, by stage-subgroups. See the example and the vignette
 #' @return NULL if scenarios are paired properly, or vector listing the problematic pairs
 #' @examples
@@ -57,7 +57,7 @@ check_scenarios <- function(scenarios, treatinfo) {
 #' Run the model for a series of policies and compare outcomes to the base case
 #' Wrapper function for the whole model
 #' 
-#' @param scenarios Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.
+#' @param scenarios Data frame of scenarios to simulate (see example below as well as the \code{\link{check_scenarios}} function). First scenario should be the base case.
 #' @param naturalhist Data frame with natural history parameters (see compile_naturalhist)
 #' @param treatinfo Data frame with treatment hazard ratios, and for each scenario, treatment proportions, by stage-subgroups. See the example and the vignette
 #' @param agesource Country to use for age structure (see data(agestructure) )
