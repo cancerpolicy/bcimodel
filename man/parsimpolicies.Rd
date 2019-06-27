@@ -5,9 +5,9 @@
 \title{Same as simpolicies but calling parallelized sub-functions}
 \usage{
 parsimpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
-  minage = 0, maxage = 100, incsource = "Uganda", mortsource = "Uganda",
-  popsize = 1e+05, sims = 5, futimes = c(5, 10),
-  returnstats = c("mean"), denom = 1e+05, ncores = 4)
+  minage = 0, maxage = 100, incsource = "Uganda",
+  mortsource = "Uganda", popsize = 1e+05, sims = 5, futimes = c(5,
+  10), returnstats = c("mean"), denom = 1e+05, ncores = 4)
 }
 \arguments{
 \item{ncores}{Number of cores to use}
@@ -18,4 +18,3 @@ Same as simpolicies but calling parallelized sub-functions
 \note{
 See help file for simpolicies
 }
-

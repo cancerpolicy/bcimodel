@@ -4,7 +4,8 @@
 \alias{interpolate_cumsurv}
 \title{Compute cumulative event-free survival curve for single-year ages}
 \usage{
-interpolate_cumsurv(binnedrates, ratevar, maxage = NULL, country = NULL)
+interpolate_cumsurv(binnedrates, ratevar, maxage = NULL,
+  country = NULL)
 }
 \arguments{
 \item{binnedrates}{Data frame with Age for age groups}
@@ -37,4 +38,3 @@ mort <- interpolate_cumsurv(allmortratesf,
                          country='Uganda')
 
 }
-

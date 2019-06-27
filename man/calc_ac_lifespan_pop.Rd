@@ -4,8 +4,8 @@
 \alias{calc_ac_lifespan_pop}
 \title{Use the individual calc_ac_lifespan function to estimate lifespans of a population}
 \usage{
-calc_ac_lifespan_pop(popdata, bootrows, life_table, results_as_matrix = FALSE,
-  survHR = 1, max100_topass = TRUE)
+calc_ac_lifespan_pop(popdata, bootrows, life_table,
+  results_as_matrix = FALSE, survHR = 1, max100_topass = TRUE)
 }
 \arguments{
 \item{popdata}{Data frame where individuals are rows, with columns birth_year, age, and male, OR a list of data frames that allow build_simpop() to construct this}
@@ -57,4 +57,3 @@ poprows <- replicate(2, 1:nrow(pop))
 oc <- calc_ac_lifespan_pop(pop, poprows, surv)
 
 }
-

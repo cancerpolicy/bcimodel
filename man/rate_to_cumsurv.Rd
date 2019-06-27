@@ -15,4 +15,3 @@ Vector of cumulative survival
 \description{
 Given event rates, compute cumulative survival
 }
-

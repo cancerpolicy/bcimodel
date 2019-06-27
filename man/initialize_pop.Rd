@@ -5,8 +5,9 @@
 \title{Initialize a FEMALE population with an age structure, dates of cancer 
 incidence, and dates of all-cause mortality}
 \usage{
-initialize_pop(pop_size, nsim, agesource, minage, maxage, incsource, mortsource,
-  pop_chars = list(male = data.frame(male = c(0), prop = c(1))))
+initialize_pop(pop_size, nsim, agesource, minage, maxage, incsource,
+  mortsource, pop_chars = list(male = data.frame(male = c(0), prop =
+  c(1))))
 }
 \arguments{
 \item{agesource}{Country to use for age structure (see data(agestructure) )}
@@ -39,4 +40,3 @@ pop <- initialize_pop(pop_size=100000,
                      mortsource='Uganda')
 
 }
-

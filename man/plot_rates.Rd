@@ -35,4 +35,3 @@ df <- subset(allmortratesf,
 plot_rates(df$Age, df$Rate.Per.100K, psize=NULL, group=df$Country)
 
 }
-

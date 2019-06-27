@@ -26,4 +26,3 @@ sim_multinom(10, 5, c(0.1, 0.3, 0.6), names=c('a', 'b', 'c'))
 sim_multinom(5, 10, c(0.1, 0.3, 0.6), names=c('a', 'b', 'c'))
 
 }
-

@@ -22,4 +22,3 @@ Count cancer mortality within a follow-up period
 \examples{
 
 }
-

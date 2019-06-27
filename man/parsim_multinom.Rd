@@ -18,4 +18,3 @@ parsim_multinom(nsims, nreps, probs, names, ncores = 4)
 \description{
 Simulate matrix of draws from multinomial
 }
-

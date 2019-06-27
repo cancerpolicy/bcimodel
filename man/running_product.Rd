@@ -15,4 +15,3 @@ Vector of running products
 \description{
 Return running product of a vector, for computing cumulative survival
 }
-

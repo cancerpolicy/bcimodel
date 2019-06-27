@@ -30,4 +30,3 @@ Times to event representative of the input curve
 \description{
 Takes in event times and corresponding survival probs (as from a KM curve) and returns n random deviates
 }
-

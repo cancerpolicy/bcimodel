@@ -32,4 +32,3 @@ bcirates(system.file('extdata',
         source='globocan')
 
 }
-

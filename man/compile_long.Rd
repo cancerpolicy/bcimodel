@@ -9,4 +9,3 @@ compile_long(thislist)
 \description{
 Compile results long
 }
-

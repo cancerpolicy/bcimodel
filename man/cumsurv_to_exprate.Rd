@@ -16,4 +16,3 @@ cumsurv_to_exprate(cum.surv, year = 10, haz = 1)
 \description{
 Convert survivals to rates
 }
-

@@ -7,7 +7,7 @@
 check_scenarios(scenarios, treatinfo)
 }
 \arguments{
-\item{scenarios}{Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.}
+\item{scenarios}{Data frame of scenarios to simulate (see example below). First scenario should be the base case.}
 
 \item{treatinfo}{Data frame with treatment hazard ratios, and for each scenario, treatment proportions, by stage-subgroups. See the example and the vignette}
 }
@@ -34,4 +34,3 @@ fail$tx$tam <- NULL
 check_scenarios(ex1$pol, ex1$tx)
 check_scenarios(fail$pol, fail$tx)
 }
-

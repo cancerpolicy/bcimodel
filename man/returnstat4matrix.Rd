@@ -18,4 +18,3 @@ returnstat4matrix(matrix, stat, quanttype = 7)
 Compute mean and/or quantiles
 Return mean, lower, or upper quantile. Default quantile type is 7, which gives a continuous result
 }
-

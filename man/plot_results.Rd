@@ -5,10 +5,10 @@
 \title{Plot results
 Select on measures and panel them. Group on f-u year?}
 \usage{
-plot_results(rlong, measures = NULL, type = "bar", rotate_xlab = TRUE)
+plot_results(rlong, measures = NULL, type = "bar",
+  rotate_xlab = TRUE)
 }
 \description{
 Plot results
 Select on measures and panel them. Group on f-u year?
 }
-

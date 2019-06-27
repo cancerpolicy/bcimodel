@@ -31,4 +31,3 @@ build_simpop(pop, rows, 1)
 build_simpop(pop, rows, 2)
 
 }
-

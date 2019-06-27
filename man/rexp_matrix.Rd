@@ -20,4 +20,3 @@ m <- cbind(matrix(0.05, nrow=100, ncol=2),
 # Sims reflect cell-specific rates
 round(1/colMeans(rexp_matrix(m)), 2)
 }
-

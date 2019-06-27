@@ -5,8 +5,8 @@
 \title{Simulate treatment by subgroups
 Given the proportions of treatments by subgroups, simulate treatment}
 \usage{
-sim_treatment_by_subgroup(treat_chars, stage_subgroup_rows, thisprop, pop_size,
-  nsim)
+sim_treatment_by_subgroup(treat_chars, stage_subgroup_rows, thisprop,
+  pop_size, nsim)
 }
 \arguments{
 \item{treat_chars}{Data frame indicating stage-subgroup #s in the SSno 
@@ -36,4 +36,3 @@ treats <- sim_treatment_by_subgroup(ex1$tx, popdistr, 'base', 20, 2)
 prop.table(table(treats))
 
 }
-

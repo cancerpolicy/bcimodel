@@ -6,12 +6,12 @@
 Wrapper function for the whole model}
 \usage{
 simpolicies(scenarios, naturalhist, treatinfo, agesource = "Standard",
-  minage = 0, maxage = 100, incsource = "Uganda", mortsource = "Uganda",
-  popsize = 1e+05, sims = 5, futimes = c(5, 10),
-  returnstats = c("mean"), denom = 1e+05)
+  minage = 0, maxage = 100, incsource = "Uganda",
+  mortsource = "Uganda", popsize = 1e+05, sims = 5, futimes = c(5,
+  10), returnstats = c("mean"), denom = 1e+05)
 }
 \arguments{
-\item{scenarios}{Data frame of scenarios to simulate (see define_scenarios). First scenario should be the base case.}
+\item{scenarios}{Data frame of scenarios to simulate (see example below as well as the \code{\link{check_scenarios}} function). First scenario should be the base case.}
 
 \item{naturalhist}{Data frame with natural history parameters (see compile_naturalhist)}
 
@@ -58,4 +58,3 @@ ex1
 uganda_stdpop <- simpolicies(ex1$pol, ex1$nh, ex1$tx)
 
 }
-

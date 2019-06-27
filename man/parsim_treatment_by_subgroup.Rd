@@ -30,4 +30,3 @@ to take treatment proportions}
 Simulate treatment by subgroups - parallelized
 Given the proportions of treatments by subgroups, simulate treatment
 }
-

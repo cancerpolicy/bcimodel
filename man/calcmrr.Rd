@@ -24,4 +24,3 @@ For a list of scenarios, calculate mortality rate ratios (MRRs) compared to the 
 \examples{
 
 }
-

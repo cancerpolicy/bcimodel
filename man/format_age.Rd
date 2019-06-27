@@ -26,4 +26,3 @@ for single-year age groups
 \note{
 See bcimodel/data-raw/agestructure.R
 }
-

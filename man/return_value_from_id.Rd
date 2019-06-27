@@ -30,4 +30,3 @@ sim.ages <- return_value_from_id(sims, df=ages, value='age')
 round(prop.table(table(sim.ages)), 2)
 
 }
-

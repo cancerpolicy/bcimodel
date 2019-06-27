@@ -6,8 +6,8 @@
 incidence, and dates of all-cause mortality - parallelized version}
 \usage{
 parinitialize_pop(pop_size, nsim, agesource, minage, maxage, incsource,
-  mortsource, pop_chars = list(male = data.frame(male = c(0), prop = c(1))),
-  ncores = 4)
+  mortsource, pop_chars = list(male = data.frame(male = c(0), prop =
+  c(1))), ncores = 4)
 }
 \arguments{
 \item{agesource}{Country to use for age structure (see data(agestructure) )}
@@ -37,4 +37,3 @@ pop <- initialize_pop(pop_size=100000,
                      incsource='Uganda', 
                      mortsource='Uganda')
 }
-

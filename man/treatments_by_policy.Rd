@@ -4,7 +4,8 @@
 \alias{treatments_by_policy}
 \title{Use sim_treatment_by_subgroup to simulate treatments}
 \usage{
-treatments_by_policy(policies, treat_chars, stagegroups, map, pop_size, nsim)
+treatments_by_policy(policies, treat_chars, stagegroups, map, pop_size,
+  nsim)
 }
 \arguments{
 \item{policies}{A "scenarios" data frame containing an 'id' for the policies
@@ -44,4 +45,3 @@ t <- treatments_by_policy(policies=ex1$pol,
                           map=ex1$map, 
                           pop_size=20, nsim=2)
 }
-

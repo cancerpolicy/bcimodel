@@ -40,4 +40,3 @@ surv <- transform(surv, Age=age, Survival=cumsurv, Male=0)
 calc <- ac <- lifespan(30, 0, surv, 5)
 
 }
-

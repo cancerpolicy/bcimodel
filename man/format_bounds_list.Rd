@@ -12,4 +12,3 @@ format_bounds_list(thislist, digits = NULL, paren = FALSE,
 Return bounds for each element of the list
 Options are: lower, upper; (lower, upper); mean (lower, upper)
 }
-

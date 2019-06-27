@@ -21,4 +21,3 @@ updates times to cancer death only for those advanced-stage cases who were
 stage-shifted in the early detection scenario. Updated times are quantile-
 correlated to the previous times
 }
-

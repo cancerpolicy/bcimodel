@@ -40,4 +40,3 @@ shifttreatment_indicator(2, ex1$pol$pairnum, stageshifts, popdistr, ex1$map)
 shifttreatment_indicator(3, ex1$pol$pairnum, stageshifts, popdistr, ex1$map)
 
 }
-

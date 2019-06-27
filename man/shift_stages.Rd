@@ -33,4 +33,3 @@ new <- shift_stages(shifti, orig, mapn)
 table(new)/table(orig)
 
 }
-

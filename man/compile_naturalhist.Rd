@@ -31,4 +31,3 @@ compile_naturalhist(prop_adv=0.85, mortrates=c(Early=0.05, Advanced=0.21),
                    subgroup_probs=c(`ER+`=0.5, `ER-`=0.5))
 
 }
-

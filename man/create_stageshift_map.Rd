@@ -23,4 +23,3 @@ nh <- compile_naturalhist(prop_adv=0.85, mortrates=c(Early=0.05, Advanced=0.21),
 create_stageshift_map(nh)
 
 }
-

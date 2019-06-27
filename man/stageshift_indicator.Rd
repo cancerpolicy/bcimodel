@@ -24,4 +24,3 @@ Sim indicator of stageshift from binomial
 round(mean(stageshift_indicator(0.85, 1000, 1)),2)
 
 }
-

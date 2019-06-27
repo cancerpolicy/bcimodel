@@ -58,4 +58,3 @@ lapply(treatshifts, table)
 lapply(newtreat, table)
 
 }
-

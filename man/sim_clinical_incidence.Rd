@@ -52,4 +52,3 @@ poprows <- replicate(2, 1:nrow(pop))
 incage <- sim_clinical_incidence(pop, poprows, inc)
 
 }
-

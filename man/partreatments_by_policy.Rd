@@ -4,8 +4,8 @@
 \alias{partreatments_by_policy}
 \title{Use sim_treatment_by_subgroup to simulate treatments, parallelized}
 \usage{
-partreatments_by_policy(policies, treat_chars, stagegroups, map, pop_size, nsim,
-  ncores = 4, method = "inner")
+partreatments_by_policy(policies, treat_chars, stagegroups, map, pop_size,
+  nsim, ncores = 4, method = "inner")
 }
 \arguments{
 \item{policies}{A "scenarios" data frame containing an 'id' for the policies
@@ -17,4 +17,3 @@ lapply. If inner, will parallelize repeated calls to sim_multinom}
 \description{
 Simulate treatments according to specified policy rules
 }
-

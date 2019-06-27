@@ -4,9 +4,9 @@
 \alias{format_bounds}
 \title{Format bounds for reporting}
 \usage{
-format_bounds(lower, upper, digits = NULL, paren = FALSE, meanmat = NULL)
+format_bounds(lower, upper, digits = NULL, paren = FALSE,
+  meanmat = NULL)
 }
 \description{
 Lower and upper are tables of the same dimensions with rownames. For including a meanmat, the line break "\\n" between mean and uncertainty works for exporting as csv (it will get stripped) or for printing with pander but NOT printing with kable.
 }
-

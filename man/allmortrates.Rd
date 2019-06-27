@@ -17,4 +17,3 @@ Formatted all-cause mortality rates by age
 \description{
 Format life table data from IHME or other source
 }
-

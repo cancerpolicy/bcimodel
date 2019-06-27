@@ -22,4 +22,3 @@ For a list of scenarios, calculate absolute risk reductions (ARRs) compared to t
 \examples{
 
 }
-

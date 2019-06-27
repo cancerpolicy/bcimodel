@@ -33,4 +33,3 @@ add_features(matrix(1, nrow=20, ncol=2), probs=c(0.25, 0.25, 0.25, 0.25),
              names=c('EarlyER+', 'EarlyER-', 'AdvancedER+', 'AdvancedER-'))
 
 }
-

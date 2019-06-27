@@ -28,4 +28,3 @@ times <- matrix(rexp(n=25, rate=1/5), nrow=5, ncol=5)
 cuminc(fu, times)
 
 }
-
